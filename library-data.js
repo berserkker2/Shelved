@@ -1,10 +1,10 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T12:31:29.397Z
+ * Generated on 2026-08-30T14:56:56.746Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T12:31:29.397Z",
+  "updatedAt": "2026-08-30T14:56:56.746Z",
   "libraryMode": "individual",
   "libraryMembers": [
     "João"
@@ -56,7 +56,18 @@ window.SHELVED_DATABASE = {
       "isbn": "9789984056265",
       "pageCount": 450,
       "dateAdded": "2026-08-30T12:31:27.710Z",
-      "readingProgress": 0
+      "readingProgress": 0,
+      "memberProgress": {
+        "João": {
+          "status": "Want to Read",
+          "readingProgress": 0,
+          "currentPage": 0,
+          "isFavorite": false,
+          "lastOpened": null
+        }
+      },
+      "currentPage": 0,
+      "lastOpened": null
     },
     {
       "id": "book-1788093012277",
