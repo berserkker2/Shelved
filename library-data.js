@@ -1,14 +1,14 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T11:51:52.213Z
+ * This file contains your books, custom shelves, reader profiles, and reading progress.
+ * It is automatically loaded when you open index.html locally (offline) or on GitHub Pages.
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T11:51:52.213Z",
-  "libraryMode": "shared",
+  "updatedAt": "2026-08-30T10:50:00.000Z",
+  "libraryMode": "individual",
   "libraryMembers": [
-    "João",
-    "Ines"
+    "João"
   ],
   "activeMember": "João",
   "customLocations": [
@@ -32,46 +32,6 @@ window.SHELVED_DATABASE = {
     "Online / Cloud": "cloud"
   },
   "books": [
-    {
-      "id": "book-1788090705200",
-      "title": "Nod",
-      "authors": [
-        "Adrian Barnes"
-      ],
-      "year": 2012,
-      "format": "Physical & Digital",
-      "digitalUrl": "https://play.google.com/books/reader?id=T27-NAAAAEAJ&pg=GBS.PA8",
-      "ageGroup": "Adult",
-      "language": "English",
-      "location": "Living Room - Shelf A",
-      "categories": [
-        "Dystopian",
-        "Sleep Deprivation",
-        "Dreams",
-        "Fiction",
-        "General"
-      ],
-      "status": "Currently Reading",
-      "rating": 0,
-      "coverUrl": "https://covers.openlibrary.org/b/id/10317035-L.jpg",
-      "description": "Dawn breaks over Vancouver and no one in the world has slept the night before, or almost no one. A few people, perhaps one in ten thousand, can still sleep, and theyve all shared the same golden dream.",
-      "isFavorite": false,
-      "isbn": "9781785655814",
-      "pageCount": 199,
-      "dateAdded": "2026-08-30T11:51:45.200Z",
-      "readingProgress": 5,
-      "currentPage": 10,
-      "lastOpened": "2026-08-30T11:51:48.289Z",
-      "memberProgress": {
-        "João": {
-          "status": "Currently Reading",
-          "readingProgress": 5,
-          "currentPage": 10,
-          "isFavorite": false,
-          "lastOpened": "2026-08-30T11:51:48.289Z"
-        }
-      }
-    },
     {
       "id": "book-1",
       "title": "The Name of the Rose",
@@ -226,8 +186,7 @@ window.SHELVED_DATABASE = {
           "isFavorite": true,
           "lastOpened": null
         }
-      },
-      "currentPage": 0
+      }
     },
     {
       "id": "book-5",
@@ -265,8 +224,7 @@ window.SHELVED_DATABASE = {
           "isFavorite": false,
           "lastOpened": null
         }
-      },
-      "currentPage": 0
+      }
     },
     {
       "id": "book-6",
@@ -305,8 +263,7 @@ window.SHELVED_DATABASE = {
           "isFavorite": false,
           "lastOpened": null
         }
-      },
-      "currentPage": 0
+      }
     }
   ]
 };

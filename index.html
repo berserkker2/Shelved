@@ -208,6 +208,17 @@
             </div>
           </div>
 
+          <!-- Cloud Sync Quick Status Pill -->
+          <button 
+            id="nav-cloud-sync-btn"
+            onclick="handleHeaderSyncClick()" 
+            title="Cloud Sync Status (Click to sync now)" 
+            class="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate hover:bg-oxford border border-[#3d3835] hover:border-gold text-[#9E9382] transition-all cursor-pointer"
+          >
+            <span id="nav-cloud-sync-dot" class="w-2 h-2 rounded-full bg-[#7d7467]"></span>
+            <span id="nav-cloud-sync-text" class="text-[11px] font-mono hidden md:inline">Sync</span>
+          </button>
+
           <!-- Add Book Button -->
           <button onclick="openAddBookModal()" class="flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl font-semibold text-sm bg-gradient-to-r from-gold via-gold-hover to-gold text-ebony hover:brightness-110 shadow-lg shadow-gold/25 transition-all duration-200 active:scale-95 cursor-pointer">
             <i data-lucide="plus" class="w-4 h-4 stroke-[3]"></i>
@@ -1938,14 +1949,16 @@
       }
     }
 
-    function saveStorage(triggerSync = true) {
+    function saveStorage(triggerSync = true, isUserEdit = true) {
       localStorage.setItem('shelved_books_v1', JSON.stringify(books));
       localStorage.setItem('shelved_custom_locations_v1', JSON.stringify(customLocations));
       localStorage.setItem('shelved_location_icons_v1', JSON.stringify(locationIcons));
       localStorage.setItem('shelved_library_mode_v1', libraryMode);
       localStorage.setItem('shelved_library_members_v1', JSON.stringify(libraryMembers));
       localStorage.setItem('shelved_active_member_v1', activeMember);
-      localStorage.setItem('shelved_last_modified_v1', new Date().toISOString());
+      if (isUserEdit) {
+        localStorage.setItem('shelved_last_modified_v1', new Date().toISOString());
+      }
 
       if (triggerSync) {
         triggerAutoSyncIfEnabled();
@@ -5807,10 +5820,7 @@
         }
       } else if (checkRepoRes.ok) {
         try {
-          const pulled = await githubPull(true);
-          if (!pulled) {
-            await githubPush();
-          }
+          await githubPull(true);
         } catch (e) {
           await githubPush();
         }
@@ -5820,6 +5830,44 @@
       localStorage.setItem('shelved_gh_autosync_v1', 'true');
       githubSyncState.lastSynced = new Date().toISOString();
       localStorage.setItem('shelved_gh_last_synced_v1', githubSyncState.lastSynced);
+      updateGithubSyncUI();
+      updateHeaderSyncBadge('synced', 'Synced');
+    }
+
+    function updateHeaderSyncBadge(status, text) {
+      const btn = document.getElementById('nav-cloud-sync-btn');
+      const dot = document.getElementById('nav-cloud-sync-dot');
+      const label = document.getElementById('nav-cloud-sync-text');
+      if (!btn || !dot || !label) return;
+
+      if (!githubSyncState.token || !githubSyncState.repo) {
+        dot.className = 'w-2 h-2 rounded-full bg-[#7d7467]';
+        label.textContent = 'Sync';
+        btn.title = 'GitHub Sync Not Connected (Click to set up)';
+        return;
+      }
+
+      if (status === 'syncing') {
+        dot.className = 'w-2 h-2 rounded-full bg-gold animate-ping';
+        label.textContent = text || 'Syncing...';
+        btn.title = 'Syncing library with GitHub Cloud...';
+      } else if (status === 'synced') {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        label.textContent = text || 'Synced';
+        btn.title = `Connected to ${githubSyncState.repo} (Last synced: ${githubSyncState.lastSynced ? formatTimeAgo(new Date(githubSyncState.lastSynced)) : 'recently'})`;
+      } else if (status === 'error') {
+        dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+        label.textContent = 'Sync Error';
+        btn.title = text || 'Sync Error (Click to retry)';
+      }
+    }
+
+    function handleHeaderSyncClick() {
+      if (!githubSyncState.token || !githubSyncState.repo) {
+        openSettingsModal();
+      } else {
+        saveGithubSettingsAndSync('both');
+      }
     }
 
     function signOutGitHub() {
@@ -5832,11 +5880,13 @@
         localStorage.removeItem('shelved_gh_user_v1');
         localStorage.removeItem('shelved_gh_last_synced_v1');
         updateGithubSyncUI();
+        updateHeaderSyncBadge('offline', 'Sync');
         showToast('Signed out of GitHub sync.');
       }
     }
 
     function formatTimeAgo(date) {
+      if (!date || isNaN(date.getTime())) return 'Just now';
       const seconds = Math.floor((new Date() - date) / 1000);
       if (seconds < 60) return 'Just now';
       const minutes = Math.floor(seconds / 60);
@@ -5854,16 +5904,17 @@
       }
       const spinner = document.getElementById('github-sync-spinner');
       if (spinner) spinner.classList.add('animate-spin');
+      updateHeaderSyncBadge('syncing', 'Syncing...');
 
       try {
         if (direction === 'pull') {
-          await githubPull();
+          await githubPull(true);
           showToast('✓ Successfully pulled latest library from GitHub!');
         } else if (direction === 'push') {
           await githubPush();
           showToast('✓ Successfully pushed library to GitHub!');
         } else {
-          const pulled = await githubPull(true);
+          const pulled = await githubPull(false);
           if (!pulled) {
             await githubPush();
           }
@@ -5872,8 +5923,10 @@
         githubSyncState.lastSynced = new Date().toISOString();
         localStorage.setItem('shelved_gh_last_synced_v1', githubSyncState.lastSynced);
         updateGithubSyncUI();
+        updateHeaderSyncBadge('synced', 'Synced');
       } catch (err) {
         console.error('GitHub Sync Error:', err);
+        updateHeaderSyncBadge('error', 'Sync Failed');
         alert(`GitHub Sync failed: ${err.message || 'Check your repository name and token permissions.'}`);
       } finally {
         if (spinner) spinner.classList.remove('animate-spin');
@@ -5913,24 +5966,20 @@
       if (!rawStr || typeof rawStr !== 'string') return null;
       const trimmed = rawStr.trim();
 
-      // 1. Direct JSON parse
       try {
         return JSON.parse(trimmed);
       } catch (e) {}
 
-      // 2. Extract assignment if wrapped in window.SHELVED_DATABASE = ... or const SHELVED_DATABASE = ...
       let candidate = trimmed;
       const match = trimmed.match(/(?:window\.)?SHELVED_DATABASE\s*=\s*([\s\S]+?);?\s*$/);
       if (match && match[1]) {
         candidate = match[1].trim().replace(/;$/, '');
       }
 
-      // 3. Try JSON.parse on candidate
       try {
         return JSON.parse(candidate);
       } catch (e) {}
 
-      // 4. Safe JavaScript evaluation fallback (handles unquoted keys, trailing commas, comments)
       try {
         const fn = new Function(`
           "use strict";
@@ -5950,9 +5999,10 @@
     }
 
     // Pull from GitHub
-    async function githubPull(isBiDirectional = false) {
+    async function githubPull(forcePull = true) {
+      if (!githubSyncState.token || !githubSyncState.repo) return false;
       const cleanRepo = githubSyncState.repo.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '');
-      const url = `https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?ref=${githubSyncState.branch}`;
+      const url = `https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?ref=${githubSyncState.branch}&t=${Date.now()}`;
       
       const res = await fetch(url, {
         headers: {
@@ -5962,8 +6012,8 @@
       });
 
       if (res.status === 404) {
-        if (isBiDirectional) return false;
-        throw new Error(`File "${githubSyncState.path}" not found in branch "${githubSyncState.branch}". You can use "Push to Cloud" to create it.`);
+        if (!forcePull) return false;
+        throw new Error(`File "${githubSyncState.path}" not found in branch "${githubSyncState.branch}".`);
       }
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -5971,7 +6021,13 @@
       }
 
       const fileData = await res.json();
-      githubSyncState.lastSha = fileData.sha;
+      const newSha = fileData.sha;
+
+      if (!forcePull && githubSyncState.lastSha && githubSyncState.lastSha === newSha) {
+        return false;
+      }
+
+      githubSyncState.lastSha = newSha;
 
       const decodedRaw = decodeBase64Utf8(fileData.content);
       const parsed = safeParseDatabase(decodedRaw);
@@ -5984,7 +6040,7 @@
       const remoteUpdatedAt = parsed.updatedAt ? new Date(parsed.updatedAt).getTime() : 0;
       const localUpdatedAt = localStorage.getItem('shelved_last_modified_v1') ? new Date(localStorage.getItem('shelved_last_modified_v1')).getTime() : 0;
 
-      if (isBiDirectional && localUpdatedAt > remoteUpdatedAt && remoteUpdatedAt > 0) {
+      if (!forcePull && localUpdatedAt > remoteUpdatedAt && remoteUpdatedAt > 0) {
         return false;
       }
 
@@ -5998,30 +6054,35 @@
       }
 
       syncActiveMemberToAllBooks();
-      saveStorage(false);
+      saveStorage(false, false);
       renderAll();
+      renderSettingsModalContent();
+      renderHeaderProfileDropdown();
       return true;
     }
 
     // Push to GitHub
     async function githubPush() {
+      if (!githubSyncState.token || !githubSyncState.repo) return;
       const cleanRepo = githubSyncState.repo.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '');
       const url = `https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}`;
 
-      if (!githubSyncState.lastSha) {
-        try {
-          const getRes = await fetch(`${url}?ref=${githubSyncState.branch}`, {
-            headers: {
-              'Authorization': `Bearer ${githubSyncState.token}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          });
-          if (getRes.ok) {
-            const getData = await getRes.json();
-            githubSyncState.lastSha = getData.sha;
+      updateHeaderSyncBadge('syncing', 'Saving...');
+
+      let latestSha = githubSyncState.lastSha;
+      try {
+        const getRes = await fetch(`${url}?ref=${githubSyncState.branch}&t=${Date.now()}`, {
+          headers: {
+            'Authorization': `Bearer ${githubSyncState.token}`,
+            'Accept': 'application/vnd.github.v3+json'
           }
-        } catch (e) {}
-      }
+        });
+        if (getRes.ok) {
+          const getData = await getRes.json();
+          latestSha = getData.sha;
+          githubSyncState.lastSha = getData.sha;
+        }
+      } catch (e) {}
 
       const isJson = githubSyncState.path.endsWith('.json');
       const contentStr = isJson ? JSON.stringify(buildDatabaseObject(), null, 2) : buildDatabaseJsFileString();
@@ -6032,8 +6093,8 @@
         content: contentBase64,
         branch: githubSyncState.branch
       };
-      if (githubSyncState.lastSha) {
-        bodyPayload.sha = githubSyncState.lastSha;
+      if (latestSha) {
+        bodyPayload.sha = latestSha;
       }
 
       const putRes = await fetch(url, {
@@ -6048,6 +6109,7 @@
 
       if (!putRes.ok) {
         const errData = await putRes.json().catch(() => ({}));
+        updateHeaderSyncBadge('error', 'Push Failed');
         throw new Error(errData.message || `Push failed with status ${putRes.status}`);
       }
 
@@ -6055,6 +6117,10 @@
       if (putData && putData.content && putData.content.sha) {
         githubSyncState.lastSha = putData.content.sha;
       }
+      githubSyncState.lastSynced = new Date().toISOString();
+      localStorage.setItem('shelved_gh_last_synced_v1', githubSyncState.lastSynced);
+      updateGithubSyncUI();
+      updateHeaderSyncBadge('synced', 'Synced');
     }
 
     // Debounced Auto-Sync Trigger
@@ -6063,13 +6129,35 @@
       saveToLinkedLocalFile();
       if (!githubSyncState.autoSync || !githubSyncState.repo || !githubSyncState.token) return;
       clearTimeout(autoSyncTimer);
+      updateHeaderSyncBadge('syncing', 'Saving...');
       autoSyncTimer = setTimeout(() => {
         githubPush().then(() => {
-          githubSyncState.lastSynced = new Date().toISOString();
-          localStorage.setItem('shelved_gh_last_synced_v1', githubSyncState.lastSynced);
-          updateGithubSyncUI();
-        }).catch(err => console.warn('Background auto-sync failed:', err));
-      }, 2500);
+          updateHeaderSyncBadge('synced', 'Synced');
+        }).catch(err => {
+          console.warn('Background auto-sync failed:', err);
+          updateHeaderSyncBadge('error', 'Sync Failed');
+        });
+      }, 1200);
+    }
+
+    let isSyncingInProgress = false;
+    async function backgroundSyncCheck() {
+      if (isSyncingInProgress || !githubSyncState.token || !githubSyncState.repo) return;
+      try {
+        isSyncingInProgress = true;
+        const pulled = await githubPull(false);
+        if (pulled) {
+          updateHeaderSyncBadge('synced', 'Updated!');
+          showToast('☁️ Library updated with latest cloud sync!');
+          setTimeout(() => updateHeaderSyncBadge('synced', 'Synced'), 3000);
+        } else {
+          updateHeaderSyncBadge('synced', 'Synced');
+        }
+      } catch (err) {
+        console.warn('Background sync check error:', err);
+      } finally {
+        isSyncingInProgress = false;
+      }
     }
 
     function exportBooksJson() {
@@ -6146,13 +6234,31 @@
       return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
 
-    // App Initialization, Hash Pairing & OAuth Callback Listener
+    // App Initialization, Auto-Sync & Lifecycle Listeners
     window.addEventListener('DOMContentLoaded', async () => {
       loadStorage();
       renderAll();
+      updateHeaderSyncBadge('synced', 'Synced');
       handleSyncHashLink();
       await handleOAuthCallback();
+      await backgroundSyncCheck();
     });
+
+    // Real-Time Sync on Tab Switch & App Resume
+    window.addEventListener('focus', () => {
+      backgroundSyncCheck();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        backgroundSyncCheck();
+      }
+    });
+
+    // Background Heartbeat every 25 seconds
+    setInterval(() => {
+      backgroundSyncCheck();
+    }, 25000);
 
     window.addEventListener('hashchange', () => {
       handleSyncHashLink();
