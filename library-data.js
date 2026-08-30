@@ -1,14 +1,14 @@
 /**
  * Shelved — Standalone Library Database File
- * This file contains your books, custom shelves, reader profiles, and reading progress.
- * It is automatically loaded when you open index.html locally (offline) or on GitHub Pages.
+ * Generated on 2026-08-30T11:49:06.886Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T10:50:00.000Z",
-  "libraryMode": "individual",
+  "updatedAt": "2026-08-30T11:49:06.886Z",
+  "libraryMode": "shared",
   "libraryMembers": [
-    "João"
+    "João",
+    "Ines"
   ],
   "activeMember": "João",
   "customLocations": [
@@ -186,7 +186,8 @@ window.SHELVED_DATABASE = {
           "isFavorite": true,
           "lastOpened": null
         }
-      }
+      },
+      "currentPage": 0
     },
     {
       "id": "book-5",
@@ -224,7 +225,8 @@ window.SHELVED_DATABASE = {
           "isFavorite": false,
           "lastOpened": null
         }
-      }
+      },
+      "currentPage": 0
     },
     {
       "id": "book-6",
@@ -263,7 +265,8 @@ window.SHELVED_DATABASE = {
           "isFavorite": false,
           "lastOpened": null
         }
-      }
+      },
+      "currentPage": 0
     }
   ]
 };
