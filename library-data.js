@@ -1,11 +1,10 @@
 /**
  * Shelved — Standalone Library Database File
- * This file contains your books, custom shelves, reader profiles, and reading progress.
- * It is automatically loaded when you open index.html locally (offline) or on GitHub Pages.
+ * Generated on 2026-08-30T12:17:33.672Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T10:50:00.000Z",
+  "updatedAt": "2026-08-30T12:17:33.672Z",
   "libraryMode": "individual",
   "libraryMembers": [
     "João"
@@ -32,6 +31,34 @@ window.SHELVED_DATABASE = {
     "Online / Cloud": "cloud"
   },
   "books": [
+    {
+      "id": "book-1788092252083",
+      "title": "Nod",
+      "authors": [
+        "Adrian Barnes"
+      ],
+      "year": 2012,
+      "format": "Physical & Digital",
+      "ageGroup": "Adult",
+      "language": "English",
+      "location": "Living Room - Shelf A",
+      "categories": [
+        "Dystopian",
+        "Sleep Deprivation",
+        "Dreams",
+        "Fiction",
+        "General"
+      ],
+      "status": "Want to Read",
+      "rating": 0,
+      "coverUrl": "https://covers.openlibrary.org/b/id/10317035-L.jpg",
+      "description": "Dawn breaks over Vancouver and no one in the world has slept the night before, or almost no one. A few people, perhaps one in ten thousand, can still sleep, and theyve all shared the same golden dream.",
+      "isFavorite": false,
+      "isbn": "9781785655814",
+      "pageCount": 199,
+      "dateAdded": "2026-08-30T12:17:32.083Z",
+      "readingProgress": 0
+    },
     {
       "id": "book-1",
       "title": "The Name of the Rose",
@@ -186,7 +213,8 @@ window.SHELVED_DATABASE = {
           "isFavorite": true,
           "lastOpened": null
         }
-      }
+      },
+      "currentPage": 0
     },
     {
       "id": "book-5",
@@ -224,7 +252,8 @@ window.SHELVED_DATABASE = {
           "isFavorite": false,
           "lastOpened": null
         }
-      }
+      },
+      "currentPage": 0
     },
     {
       "id": "book-6",
@@ -263,7 +292,8 @@ window.SHELVED_DATABASE = {
           "isFavorite": false,
           "lastOpened": null
         }
-      }
+      },
+      "currentPage": 0
     }
   ]
 };
