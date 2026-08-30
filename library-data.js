@@ -1,10 +1,10 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T12:28:13.839Z
+ * Generated on 2026-08-30T12:30:14.006Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T12:28:13.839Z",
+  "updatedAt": "2026-08-30T12:30:14.006Z",
   "libraryMode": "individual",
   "libraryMembers": [
     "João"
@@ -31,6 +31,33 @@ window.SHELVED_DATABASE = {
     "Online / Cloud": "cloud"
   },
   "books": [
+    {
+      "id": "book-1788093012277",
+      "title": "The Lord of the Rings",
+      "titlePt": "The Lord of the Rings",
+      "authors": [
+        "J.R.R. Tolkien"
+      ],
+      "year": 1954,
+      "format": "Physical",
+      "ageGroup": "Adult",
+      "language": "Portuguese",
+      "location": "",
+      "categories": [
+        "Fantasy",
+        "Adventure",
+        "Classics"
+      ],
+      "status": "Want to Read",
+      "rating": 0,
+      "coverUrl": "https://covers.openlibrary.org/b/id/14625765-L.jpg",
+      "description": "Originally published from 1954 through 1956, J.R.R. Tolkien's richly complex series ushered in a new age of epic adventure storytelling. A philologist and illustrator who took inspiration from his work, Tolkien invented the modern heroic quest novel from the ground up, creating not just a world, but a domain, not just a lexicon, but a language, that would spawn countless imitators and lead to the inception of the epic fantasy genre. Today, THE LORD OF THE RINGS is considered \"the most influential fantasy novel ever written.\" (THE ENCYCLOPEDIA OF FANTASY)\n\nDuring his travels across Middle-earth, the hobbit Bilbo Baggins had found the Ring. But the simple band of gold was far from ordinary; it was in fact the One Ring - the greatest of the ancient Rings of Power. Sauron, the Dark Lord, had infused it with his own evil magic, and when it was lost, he was forced to flee into hiding.\n\nBut now Sauron's exile has ended and his power is spreading anew, fueled by the knowledge that his treasure has been found. He has gathered all the Great Rings to him, and will stop at nothing to reclaim the One that will complete his dominion. The only way to stop him is to cast the Ruling Ring deep into the Fire-Mountain at the heart of the land of Mordor--Sauron's dark realm.\n\nFate has placed the burden in the hands of Frodo Baggins, Bilbo's heir...and he is resolved to bear it to its end. Or his own.\n\n---\n\n**Contains**\n\n- [The Fellowship of the Ring](https://openlibrary.org/works/OL14933414W/The_Fellowship_of_the_Ring)\n- [The Two Towers](https://openlibrary.org/works/OL27479W/The_Two_Towers)\n- [The Return of the King](https://openlibrary.org/works/OL27516W/The_Return_of_the_King)\n- [The Lord of the Rings \\[2/2\\]](https://openlibrary.org/works/OL27306128W)\n- [The Lord of the Rings \\[1/6\\]](https://openlibrary.org/works/OL24170898W)\n- [The Lord of the Rings \\[1/9\\]](https://openlibrary.org/works/OL27305953W)\n- [The Lord of the Rings \\[2/9\\]](https://openlibrary.org/works/OL27305892W)\n- [The Lord of the Rings \\[3/9\\]](https://openlibrary.org/works/OL27306048W)",
+      "isFavorite": false,
+      "isbn": "978-8830119000",
+      "pageCount": 1376,
+      "dateAdded": "2026-08-30T12:30:12.277Z",
+      "readingProgress": 0
+    },
     {
       "id": "book-1788092886515",
       "title": "Nod",
