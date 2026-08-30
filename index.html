@@ -6037,12 +6037,6 @@
       }
 
       const remoteBooks = Array.isArray(parsed) ? parsed : (parsed.books || []);
-      const remoteUpdatedAt = parsed.updatedAt ? new Date(parsed.updatedAt).getTime() : 0;
-      const localUpdatedAt = localStorage.getItem('shelved_last_modified_v1') ? new Date(localStorage.getItem('shelved_last_modified_v1')).getTime() : 0;
-
-      if (!forcePull && localUpdatedAt > remoteUpdatedAt && remoteUpdatedAt > 0) {
-        return false;
-      }
 
       books = remoteBooks;
       if (parsed.libraryMode) libraryMode = parsed.libraryMode;
