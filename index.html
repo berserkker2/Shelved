@@ -1181,6 +1181,17 @@
             </button>
           </div>
 
+          <!-- Cloud Sync Live Activity Console Log -->
+          <div class="p-3 rounded-xl bg-ebony/95 border border-[#3d3835] text-[11px] font-mono shadow-inner">
+            <div class="flex items-center justify-between text-[#9E9382] mb-1.5 pb-1 border-b border-[#3d3835]">
+              <span class="flex items-center gap-1.5 font-semibold text-parchment"><i data-lucide="terminal" class="w-3 h-3 text-gold"></i> Live Cloud Activity Console</span>
+              <button type="button" onclick="clearSyncLogs()" class="text-[10px] text-gold hover:underline cursor-pointer">Clear</button>
+            </div>
+            <div id="github-sync-live-log" class="max-h-28 overflow-y-auto space-y-1 text-[#C7BCAC] select-text">
+              <div class="text-[#7d7467]">Ready. Click "Push to Cloud" or "Pull from Cloud" to see live responses.</div>
+            </div>
+          </div>
+
           <!-- Advanced / Manual Token & Repo Configuration Collapsible -->
           <details class="text-xs text-[#9E9382] border-t border-[#3d3835] pt-2" id="github-advanced-details">
             <summary class="cursor-pointer font-semibold text-gold hover:underline py-1 flex items-center justify-between">
@@ -5941,6 +5952,28 @@
       return `${Math.floor(hours / 24)}d ago`;
     }
 
+    function addSyncLog(type, msg) {
+      const logBox = document.getElementById('github-sync-live-log');
+      if (!logBox) return;
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      let colorClass = 'text-[#C7BCAC]';
+      if (type === 'success') colorClass = 'text-emerald-400 font-semibold';
+      else if (type === 'error') colorClass = 'text-rose-400 font-semibold';
+      else if (type === 'info') colorClass = 'text-gold';
+      else if (type === 'warn') colorClass = 'text-amber-400';
+
+      const entry = document.createElement('div');
+      entry.className = `${colorClass} flex items-start gap-1.5`;
+      entry.innerHTML = `<span class="text-[#7d7467] select-none shrink-0">[${timeStr}]</span> <span>${escapeHtml(msg)}</span>`;
+      logBox.appendChild(entry);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function clearSyncLogs() {
+      const logBox = document.getElementById('github-sync-live-log');
+      if (logBox) logBox.innerHTML = '<div class="text-[#7d7467]">Console cleared. Ready to sync.</div>';
+    }
+
     async function saveGithubSettingsAndSync(direction = 'both') {
       saveGithubSettings();
       const cleanRepo = getFullRepositorySlug();
@@ -5954,12 +5987,15 @@
 
       try {
         if (direction === 'pull') {
+          addSyncLog('info', `Manual Pull triggered for ${cleanRepo}...`);
           await githubPull(true);
           showToast('✓ Successfully pulled latest library from GitHub!');
         } else if (direction === 'push') {
+          addSyncLog('info', `Manual Push triggered for ${cleanRepo}...`);
           await githubPush();
           showToast('✓ Successfully pushed library to GitHub!');
         } else {
+          addSyncLog('info', `Sync triggered for ${cleanRepo}...`);
           const pulled = await githubPull(false);
           if (!pulled) {
             await githubPush();
@@ -5972,6 +6008,7 @@
         updateHeaderSyncBadge('synced', 'Synced');
       } catch (err) {
         console.error('GitHub Sync Error:', err);
+        addSyncLog('error', `Sync failed: ${err.message}`);
         updateHeaderSyncBadge('error', 'Sync Failed');
         alert(`GitHub Sync failed: ${err.message || 'Check your repository name and token permissions.'}`);
       } finally {
@@ -6044,34 +6081,43 @@
       return null;
     }
 
-    // Pull from GitHub
+    // Pull from GitHub (with strict anti-cache)
     async function githubPull(forcePull = true) {
       if (!githubSyncState.token) return false;
       const cleanRepo = getFullRepositorySlug();
       if (!cleanRepo || !cleanRepo.includes('/')) return false;
 
-      const url = `https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?ref=${githubSyncState.branch}&t=${Date.now()}`;
+      const cacheBust = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const url = `https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?ref=${githubSyncState.branch}&nocache=${cacheBust}`;
       
+      addSyncLog('info', `📡 Pulling ${cleanRepo}/${githubSyncState.path}...`);
+
       const res = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${githubSyncState.token}`,
-          'Accept': 'application/vnd.github.v3+json'
+          'Accept': 'application/vnd.github.v3+json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
         }
       });
 
       if (res.status === 404) {
+        addSyncLog('warn', `⚠️ File "${githubSyncState.path}" not found on GitHub branch "${githubSyncState.branch}".`);
         if (!forcePull) return false;
         throw new Error(`File "${githubSyncState.path}" not found in branch "${githubSyncState.branch}".`);
       }
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || `GitHub error (Status ${res.status})`);
+        const msg = errorData.message || `GitHub error (Status ${res.status})`;
+        addSyncLog('error', `❌ GitHub API error: ${msg}`);
+        throw new Error(msg);
       }
 
       const fileData = await res.json();
       const newSha = fileData.sha;
 
       if (!forcePull && githubSyncState.lastSha && githubSyncState.lastSha === newSha) {
+        addSyncLog('info', `ℹ️ Remote file SHA matches (${newSha.substring(0, 7)}). Library already up to date.`);
         return false;
       }
 
@@ -6081,6 +6127,7 @@
       const parsed = safeParseDatabase(decodedRaw);
 
       if (!parsed) {
+        addSyncLog('error', '❌ Could not parse database JSON from repository file.');
         throw new Error('Could not parse database content from repository file.');
       }
 
@@ -6100,25 +6147,28 @@
       renderAll();
       renderSettingsModalContent();
       renderHeaderProfileDropdown();
+      addSyncLog('success', `✅ Successfully loaded ${books.length} volumes from GitHub (SHA: ${newSha.substring(0, 7)})!`);
       return true;
     }
 
-    // Push to GitHub
+    // Push to GitHub (with auto-SHA refresh)
     async function githubPush() {
       if (!githubSyncState.token) return;
       const cleanRepo = getFullRepositorySlug();
       if (!cleanRepo || !cleanRepo.includes('/')) return;
 
       const url = `https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}`;
-
       updateHeaderSyncBadge('syncing', 'Saving...');
+      addSyncLog('info', `📡 Pushing ${books.length} volumes to ${cleanRepo}/${githubSyncState.path}...`);
 
       let latestSha = githubSyncState.lastSha;
       try {
-        const getRes = await fetch(`${url}?ref=${githubSyncState.branch}&t=${Date.now()}`, {
+        const getRes = await fetch(`${url}?ref=${githubSyncState.branch}&nocache=${Date.now()}`, {
           headers: {
             'Authorization': `Bearer ${githubSyncState.token}`,
-            'Accept': 'application/vnd.github.v3+json'
+            'Accept': 'application/vnd.github.v3+json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
           }
         });
         if (getRes.ok) {
@@ -6135,7 +6185,7 @@
       const bodyPayload = {
         message: `Update library catalog via Shelved [${books.length} volumes]`,
         content: contentBase64,
-        branch: githubSyncState.branch
+        branch: githubSyncState.branch || 'main'
       };
       if (latestSha) {
         bodyPayload.sha = latestSha;
@@ -6153,8 +6203,10 @@
 
       if (!putRes.ok) {
         const errData = await putRes.json().catch(() => ({}));
+        const errMsg = errData.message || `Push failed with status ${putRes.status}`;
+        addSyncLog('error', `❌ GitHub push failed: ${errMsg}`);
         updateHeaderSyncBadge('error', 'Push Failed');
-        throw new Error(errData.message || `Push failed with status ${putRes.status}`);
+        throw new Error(errMsg);
       }
 
       const putData = await putRes.json();
@@ -6165,6 +6217,7 @@
       localStorage.setItem('shelved_gh_last_synced_v1', githubSyncState.lastSynced);
       updateGithubSyncUI();
       updateHeaderSyncBadge('synced', 'Synced');
+      addSyncLog('success', `✅ Push confirmed by GitHub! (${books.length} volumes saved, SHA: ${(githubSyncState.lastSha || '').substring(0, 7)})`);
     }
 
     // Debounced Auto-Sync Trigger
