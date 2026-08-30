@@ -2189,7 +2189,18 @@
       // Sorting Calculation
       const isAsc = filters.sortOrder === 'asc';
       list.sort((a, b) => {
+        const isBookReadOrReading = (book) => {
+          let st = book.status;
+          if (book.memberProgress && activeMember && book.memberProgress[activeMember] && book.memberProgress[activeMember].status) {
+            st = book.memberProgress[activeMember].status;
+          }
+          return st === 'Currently Reading' || st === 'Reading' || st === 'Completed' || st === 'Finished';
+        };
+
         const getBookLastReadTime = (book) => {
+          if (!isBookReadOrReading(book)) {
+            return 0; // Only books currently reading or completed count as read
+          }
           if (book.memberProgress && activeMember && book.memberProgress[activeMember] && book.memberProgress[activeMember].lastOpened) {
             return new Date(book.memberProgress[activeMember].lastOpened).getTime();
           }
