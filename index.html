@@ -5759,7 +5759,19 @@
       }
     }
 
+    function getFullRepositorySlug() {
+      let r = (githubSyncState.repo || '').trim().replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '');
+      const login = githubSyncState.user ? githubSyncState.user.login : '';
+      if (!r || r.includes('username/')) {
+        r = login ? `${login}/shelved-library-data` : 'shelved-library-data';
+      } else if (!r.includes('/') && login) {
+        r = `${login}/${r}`;
+      }
+      return r;
+    }
+
     async function setupGitHubUserAndRepo(token) {
+      updateHeaderSyncBadge('syncing', 'Connecting...');
       try {
         const userRes = await fetch('https://api.github.com/user', {
           headers: {
@@ -5782,12 +5794,12 @@
 
       const login = githubSyncState.user ? githubSyncState.user.login : '';
       const repoName = 'shelved-library-data';
-      if (!githubSyncState.repo || githubSyncState.repo.includes('username/')) {
+      if (!githubSyncState.repo || githubSyncState.repo.includes('username/') || !githubSyncState.repo.includes('/')) {
         githubSyncState.repo = login ? `${login}/${repoName}` : repoName;
         localStorage.setItem('shelved_gh_repo_v1', githubSyncState.repo);
       }
 
-      const cleanRepo = githubSyncState.repo.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '');
+      const cleanRepo = getFullRepositorySlug();
       const checkRepoRes = await fetch(`https://api.github.com/repos/${cleanRepo}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -5820,9 +5832,19 @@
         }
       } else if (checkRepoRes.ok) {
         try {
-          await githubPull(true);
+          const fileCheckRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?ref=${githubSyncState.branch}&t=${Date.now()}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          });
+          if (fileCheckRes.ok) {
+            await githubPull(true);
+          } else if (fileCheckRes.status === 404) {
+            await githubPush();
+          }
         } catch (e) {
-          await githubPush();
+          await githubPull(true);
         }
       }
 
