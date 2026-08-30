@@ -5778,7 +5778,7 @@
     function getFullRepositorySlug() {
       let r = (githubSyncState.repo || '').trim().replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '');
       const login = githubSyncState.user ? githubSyncState.user.login : '';
-      if (!r || r.includes('username/')) {
+      if (!r || r.includes('username/') || r.endsWith('/Shelved')) {
         r = login ? `${login}/shelved-library-data` : 'shelved-library-data';
       } else if (!r.includes('/') && login) {
         r = `${login}/${r}`;
@@ -5810,7 +5810,7 @@
 
       const login = githubSyncState.user ? githubSyncState.user.login : '';
       const repoName = 'shelved-library-data';
-      if (!githubSyncState.repo || githubSyncState.repo.includes('username/') || !githubSyncState.repo.includes('/')) {
+      if (!githubSyncState.repo || githubSyncState.repo.includes('username/') || !githubSyncState.repo.includes('/') || githubSyncState.repo.endsWith('/Shelved')) {
         githubSyncState.repo = login ? `${login}/${repoName}` : repoName;
         localStorage.setItem('shelved_gh_repo_v1', githubSyncState.repo);
       }
@@ -5842,21 +5842,6 @@
           if (createRes.ok) {
             await new Promise(r => setTimeout(r, 1200));
             await githubPush();
-          } else {
-            // Fallback: Check if website repo exists
-            const fallbackRepo = `${login}/Shelved`;
-            const checkFallback = await fetch(`https://api.github.com/repos/${fallbackRepo}`, {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/vnd.github.v3+json'
-              }
-            });
-            if (checkFallback.ok) {
-              githubSyncState.repo = fallbackRepo;
-              localStorage.setItem('shelved_gh_repo_v1', fallbackRepo);
-              cleanRepo = fallbackRepo;
-              checkRepoRes = checkFallback;
-            }
           }
         } catch (e) {
           console.warn('Could not create private repo automatically:', e);
@@ -5865,7 +5850,7 @@
 
       if (checkRepoRes.ok) {
         try {
-          const fileCheckRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?ref=${githubSyncState.branch}&t=${Date.now()}`, {
+          const fileCheckRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?nocache=${Date.now()}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Accept': 'application/vnd.github.v3+json'
