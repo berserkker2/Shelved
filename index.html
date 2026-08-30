@@ -5367,7 +5367,7 @@
     // GITHUB CLOUD & MULTI-DEVICE SYNC ENGINE
     // ==========================================
     const DEFAULT_OAUTH_CLIENT_ID = 'Ov23livmgToroxhdqlyZ';
-    const DEFAULT_GATEKEEPER_URL = 'https://shelved-auth.berserkker.workers.dev';
+    const DEFAULT_GATEKEEPER_URL = 'https://shelved-auth.joao-aalves89.workers.dev';
 
     let githubSyncState = {
       repo: '',
@@ -5390,8 +5390,12 @@
         githubSyncState.path = localStorage.getItem('shelved_gh_path_v1') || 'library-data.js';
         githubSyncState.autoSync = localStorage.getItem('shelved_gh_autosync_v1') === 'true';
         githubSyncState.lastSynced = localStorage.getItem('shelved_gh_last_synced_v1') || null;
-        githubSyncState.oauthClientId = localStorage.getItem('shelved_gh_oauth_client_id_v1') || '';
-        githubSyncState.oauthGatekeeper = localStorage.getItem('shelved_gh_oauth_gatekeeper_v1') || '';
+        githubSyncState.oauthClientId = localStorage.getItem('shelved_gh_oauth_client_id_v1') || DEFAULT_OAUTH_CLIENT_ID;
+        githubSyncState.oauthGatekeeper = localStorage.getItem('shelved_gh_oauth_gatekeeper_v1') || DEFAULT_GATEKEEPER_URL;
+        if (!githubSyncState.oauthGatekeeper || githubSyncState.oauthGatekeeper.includes('berserkker.workers.dev')) {
+          githubSyncState.oauthGatekeeper = DEFAULT_GATEKEEPER_URL;
+          localStorage.setItem('shelved_gh_oauth_gatekeeper_v1', DEFAULT_GATEKEEPER_URL);
+        }
         const savedUser = localStorage.getItem('shelved_gh_user_v1');
         if (savedUser) githubSyncState.user = JSON.parse(savedUser);
       } catch (e) {}
