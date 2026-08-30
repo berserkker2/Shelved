@@ -1296,6 +1296,48 @@
     </div>
   </div>
 
+  <!-- MODAL: GITHUB DEVICE AUTH POPUP -->
+  <div id="modal-github-device-auth" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div onclick="closeGitHubDeviceAuthModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md"></div>
+    <div class="relative w-full max-w-md bg-ebony border-2 border-gold/70 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE] p-6 text-center space-y-5">
+      <div class="w-12 h-12 rounded-2xl bg-slate border border-gold/50 flex items-center justify-center text-gold mx-auto shadow-inner">
+        <i data-lucide="github" class="w-6 h-6"></i>
+      </div>
+      
+      <div>
+        <h3 class="font-cinzel text-lg font-bold text-parchment">Authorize Shelved on GitHub</h3>
+        <p class="text-xs text-[#9E9382] mt-1">Copy your one-time code and confirm authorization on GitHub:</p>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-slate border border-gold/50 cursor-pointer hover:border-gold transition-all" onclick="copyGitHubUserCode()" title="Click to copy">
+        <div class="text-[10px] text-gold-light uppercase font-bold tracking-widest mb-1">Your One-Time Code (Click to copy)</div>
+        <div id="gh-device-code-display" class="font-mono text-2xl sm:text-3xl font-extrabold text-gold tracking-widest">
+          ---- - ----
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <a 
+          id="gh-device-auth-link" 
+          href="https://github.com/login/device" 
+          target="_blank" 
+          onclick="handleGitHubDeviceAuthClick()"
+          class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-lg transition-all cursor-pointer"
+        >
+          <span>Continue on GitHub ↗</span>
+        </a>
+        <div class="text-[11px] text-[#9E9382] flex items-center justify-center gap-1.5 pt-1">
+          <i data-lucide="refresh-cw" class="w-3 h-3 animate-spin text-gold" id="gh-device-spinner"></i>
+          <span>Waiting for authorization in your browser...</span>
+        </div>
+      </div>
+
+      <button onclick="closeGitHubDeviceAuthModal()" class="text-xs text-[#9E9382] hover:text-parchment underline cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </div>
+
   <!-- MODAL 5: MANAGE LOCATIONS -->
   <div id="modal-manage-locations" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
     <div onclick="closeManageLocationsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md"></div>
@@ -5282,7 +5324,7 @@
     // ==========================================
     // GITHUB CLOUD & MULTI-DEVICE SYNC ENGINE
     // ==========================================
-    const DEFAULT_OAUTH_CLIENT_ID = 'Ov23lia8u7iXm2z1k3x';
+    const DEFAULT_OAUTH_CLIENT_ID = 'Ov23livmgToroxhdqlyZ';
     const DEFAULT_GATEKEEPER_URL = 'https://shelved-auth.berserkker.workers.dev';
 
     let githubSyncState = {
@@ -5409,15 +5451,135 @@
       }
     }
 
-    function startGitHubOAuthLogin() {
+    let currentDeviceUserCode = '';
+    let devicePollIntervalTimer = null;
+
+    async function startGitHubOAuthLogin() {
       saveGithubSettings();
       const clientId = githubSyncState.oauthClientId || DEFAULT_OAUTH_CLIENT_ID;
+      
+      const spinner = document.getElementById('github-sync-spinner');
+      if (spinner) spinner.classList.add('animate-spin');
+
+      try {
+        // 1. Try Device Flow API (Zero-backend official GitHub OAuth)
+        const res = await fetch('https://github.com/login/device/code', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            client_id: clientId,
+            scope: 'repo,user'
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (data.device_code && data.user_code) {
+          currentDeviceUserCode = data.user_code;
+          const displayEl = document.getElementById('gh-device-code-display');
+          const authLink = document.getElementById('gh-device-auth-link');
+          const modal = document.getElementById('modal-github-device-auth');
+          
+          if (displayEl) displayEl.textContent = data.user_code;
+          if (authLink) authLink.href = data.verification_uri || 'https://github.com/login/device';
+          if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+          }
+
+          try {
+            await navigator.clipboard.writeText(data.user_code);
+            showToast('Code copied to clipboard! Paste it on GitHub.');
+          } catch(e) {}
+
+          pollDeviceAuthToken(clientId, data.device_code, data.interval || 5);
+          return;
+        }
+      } catch (e) {
+        console.warn('Device flow attempt error:', e);
+      } finally {
+        if (spinner) spinner.classList.remove('animate-spin');
+      }
+
+      // Fallback: Web Redirect Flow
       const redirectUri = window.location.origin + window.location.pathname;
       const state = Math.random().toString(36).substring(2, 15);
       localStorage.setItem('shelved_oauth_state', state);
 
       const authUrl = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(clientId)}&scope=repo,user&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`;
       window.location.href = authUrl;
+    }
+
+    function pollDeviceAuthToken(clientId, deviceCode, intervalSec) {
+      clearInterval(devicePollIntervalTimer);
+      const intervalMs = Math.max((intervalSec || 5) * 1000, 4000);
+
+      devicePollIntervalTimer = setInterval(async () => {
+        try {
+          const res = await fetch('https://github.com/login/oauth/access_token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              client_id: clientId,
+              device_code: deviceCode,
+              grant_type: 'urn:ietf:params:oauth:grant-type:device_code'
+            })
+          });
+
+          const data = await res.json().catch(() => ({}));
+          if (data.access_token) {
+            clearInterval(devicePollIntervalTimer);
+            closeGitHubDeviceAuthModal();
+
+            githubSyncState.token = data.access_token;
+            localStorage.setItem('shelved_gh_token_v1', githubSyncState.token);
+
+            await setupGitHubUserAndRepo(githubSyncState.token);
+            confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+            showToast('✓ Successfully connected GitHub! Your library is syncing.');
+            updateGithubSyncUI();
+            renderAll();
+          } else if (data.error === 'authorization_pending') {
+            // Waiting for user to click authorize on GitHub
+          } else if (data.error === 'slow_down') {
+            // Slow down requested
+          } else if (data.error) {
+            clearInterval(devicePollIntervalTimer);
+            closeGitHubDeviceAuthModal();
+            alert(`Authorization failed: ${data.error_description || data.error}`);
+          }
+        } catch (err) {
+          console.warn('Device poll error:', err);
+        }
+      }, intervalMs);
+    }
+
+    function closeGitHubDeviceAuthModal() {
+      clearInterval(devicePollIntervalTimer);
+      const modal = document.getElementById('modal-github-device-auth');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function copyGitHubUserCode() {
+      if (!currentDeviceUserCode) return;
+      navigator.clipboard.writeText(currentDeviceUserCode).then(() => {
+        showToast('✓ Code copied to clipboard!');
+      }).catch(() => {
+        showToast('Code: ' + currentDeviceUserCode);
+      });
+    }
+
+    function handleGitHubDeviceAuthClick() {
+      copyGitHubUserCode();
     }
 
     async function handleOAuthCallback() {
