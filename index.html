@@ -1107,13 +1107,24 @@
                   </div>
                 </div>
               </div>
-              <button 
-                type="button" 
-                onclick="signOutGitHub()" 
-                class="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-mahogany/30 hover:bg-mahogany/60 border border-[#7C4B1E] text-red-200 transition-colors cursor-pointer shrink-0"
-              >
-                Sign Out
-              </button>
+              <div class="flex items-center gap-2 shrink-0">
+                <button 
+                  type="button" 
+                  onclick="openMobileQrModal()" 
+                  class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-gold hover:bg-gold-hover text-ebony shadow-sm transition-all cursor-pointer flex items-center gap-1"
+                  title="Open pairing QR code for phone or tablet"
+                >
+                  <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                  <span>Pair Phone</span>
+                </button>
+                <button 
+                  type="button" 
+                  onclick="signOutGitHub()" 
+                  class="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-mahogany/30 hover:bg-mahogany/60 border border-[#7C4B1E] text-red-200 transition-colors cursor-pointer"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1334,6 +1345,37 @@
 
       <button onclick="closeGitHubDeviceAuthModal()" class="text-xs text-[#9E9382] hover:text-parchment underline cursor-pointer">
         Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: MOBILE PAIRING QR CODE -->
+  <div id="modal-mobile-qr-sync" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div onclick="closeMobileQrModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md"></div>
+    <div class="relative w-full max-w-sm bg-ebony border-2 border-gold/70 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE] p-6 text-center space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-slate border border-gold/50 flex items-center justify-center text-gold mx-auto shadow-inner">
+        <i data-lucide="smartphone" class="w-6 h-6"></i>
+      </div>
+      
+      <div>
+        <h3 class="font-cinzel text-lg font-bold text-parchment">Connect Your Phone</h3>
+        <p class="text-xs text-[#9E9382] mt-1">Scan this QR code with your phone camera to instantly link your library:</p>
+      </div>
+
+      <div class="p-3 bg-white rounded-2xl shadow-inner inline-block mx-auto">
+        <img id="mobile-qr-img" src="" alt="Pairing QR Code" class="w-48 h-48 mx-auto" />
+      </div>
+
+      <div class="space-y-2 pt-1">
+        <button onclick="copyMobilePairingLink()" class="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold bg-slate hover:bg-oxford border border-gold/40 text-gold-light transition-all cursor-pointer">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span>Copy Direct Pairing Link</span>
+        </button>
+        <p class="text-[10px] text-[#9E9382]">No tokens or passwords needed on your phone.</p>
+      </div>
+
+      <button onclick="closeMobileQrModal()" class="text-xs text-[#9E9382] hover:text-parchment underline cursor-pointer">
+        Done
       </button>
     </div>
   </div>
@@ -5462,17 +5504,18 @@
       if (spinner) spinner.classList.add('animate-spin');
 
       try {
-        // 1. Try Device Flow API (Zero-backend official GitHub OAuth)
+        // 1. Try Device Flow API with URL-encoded params (Zero-backend, 100% Mobile & Desktop compatible)
+        const params = new URLSearchParams();
+        params.append('client_id', clientId);
+        params.append('scope', 'repo,user');
+
         const res = await fetch('https://github.com/login/device/code', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
           },
-          body: JSON.stringify({
-            client_id: clientId,
-            scope: 'repo,user'
-          })
+          body: params.toString()
         });
 
         const data = await res.json().catch(() => ({}));
@@ -5497,6 +5540,8 @@
 
           pollDeviceAuthToken(clientId, data.device_code, data.interval || 5);
           return;
+        } else if (data.error) {
+          console.warn('Device flow response:', data);
         }
       } catch (e) {
         console.warn('Device flow attempt error:', e);
@@ -5519,17 +5564,18 @@
 
       devicePollIntervalTimer = setInterval(async () => {
         try {
+          const params = new URLSearchParams();
+          params.append('client_id', clientId);
+          params.append('device_code', deviceCode);
+          params.append('grant_type', 'urn:ietf:params:oauth:grant-type:device_code');
+
           const res = await fetch('https://github.com/login/oauth/access_token', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: JSON.stringify({
-              client_id: clientId,
-              device_code: deviceCode,
-              grant_type: 'urn:ietf:params:oauth:grant-type:device_code'
-            })
+            body: params.toString()
           });
 
           const data = await res.json().catch(() => ({}));
@@ -5546,9 +5592,9 @@
             updateGithubSyncUI();
             renderAll();
           } else if (data.error === 'authorization_pending') {
-            // Waiting for user to click authorize on GitHub
+            // Still waiting for authorization on GitHub
           } else if (data.error === 'slow_down') {
-            // Slow down requested
+            // Slower polling requested
           } else if (data.error) {
             clearInterval(devicePollIntervalTimer);
             closeGitHubDeviceAuthModal();
@@ -5580,6 +5626,82 @@
 
     function handleGitHubDeviceAuthClick() {
       copyGitHubUserCode();
+    }
+
+    // ==========================================
+    // MOBILE QR CODE & DIRECT PAIRING ENGINE
+    // ==========================================
+    function openMobileQrModal() {
+      if (!githubSyncState.token) {
+        alert('Please sign in on this device first to generate a pairing QR code.');
+        return;
+      }
+      const pairingPayload = {
+        token: githubSyncState.token,
+        repo: githubSyncState.repo,
+        user: githubSyncState.user
+      };
+      const encoded = encodeURIComponent(encodeBase64Utf8(JSON.stringify(pairingPayload)));
+      const baseAppUrl = window.location.origin + window.location.pathname;
+      const pairingUrl = `${baseAppUrl}#sync=${encoded}`;
+
+      const qrImg = document.getElementById('mobile-qr-img');
+      if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(pairingUrl)}`;
+      }
+
+      window._currentPairingUrl = pairingUrl;
+      const modal = document.getElementById('modal-mobile-qr-sync');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        lucide.createIcons();
+      }
+    }
+
+    function closeMobileQrModal() {
+      const modal = document.getElementById('modal-mobile-qr-sync');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function copyMobilePairingLink() {
+      if (!window._currentPairingUrl) return;
+      navigator.clipboard.writeText(window._currentPairingUrl).then(() => {
+        showToast('✓ Pairing link copied! Open on your phone.');
+      }).catch(() => {
+        prompt('Copy pairing link:', window._currentPairingUrl);
+      });
+    }
+
+    function handleSyncHashLink() {
+      if (!window.location.hash || !window.location.hash.startsWith('#sync=')) return;
+      try {
+        const rawPayload = decodeURIComponent(window.location.hash.substring(6));
+        const data = JSON.parse(decodeBase64Utf8(rawPayload));
+        if (data.token) {
+          githubSyncState.token = data.token;
+          githubSyncState.repo = data.repo || '';
+          githubSyncState.user = data.user || null;
+          githubSyncState.autoSync = true;
+          localStorage.setItem('shelved_gh_token_v1', githubSyncState.token);
+          localStorage.setItem('shelved_gh_repo_v1', githubSyncState.repo);
+          if (githubSyncState.user) localStorage.setItem('shelved_gh_user_v1', JSON.stringify(githubSyncState.user));
+          localStorage.setItem('shelved_gh_autosync_v1', 'true');
+          
+          window.location.hash = '';
+          history.replaceState({}, document.title, window.location.pathname);
+          
+          confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+          showToast('✓ Successfully paired with your library!');
+          updateGithubSyncUI();
+          githubPull();
+        }
+      } catch (e) {
+        console.warn('Sync hash parse error:', e);
+      }
     }
 
     async function handleOAuthCallback() {
@@ -6020,11 +6142,16 @@
       return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
 
-    // App Initialization & OAuth Callback Listener
+    // App Initialization, Hash Pairing & OAuth Callback Listener
     window.addEventListener('DOMContentLoaded', async () => {
       loadStorage();
       renderAll();
+      handleSyncHashLink();
       await handleOAuthCallback();
+    });
+
+    window.addEventListener('hashchange', () => {
+      handleSyncHashLink();
     });
   </script>
 </body>
