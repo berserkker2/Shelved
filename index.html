@@ -5567,6 +5567,11 @@
       }
 
       // Fallback: Web Redirect Flow
+      if (window.location.protocol === 'file:') {
+        alert('ℹ️ GitHub 1-Click Sign In:\n\nGitHub OAuth requires running on your live website (https://berserkker2.github.io/Shelved/).\n\nTo use the local offline file, you can:\n1. Open your live website online.\n2. Or enter a Personal Access Token in the "Advanced" settings below.\n3. Or use the "Link Local library-data.js File" feature.');
+        return;
+      }
+
       const redirectUri = window.location.origin + window.location.pathname;
       const state = Math.random().toString(36).substring(2, 15);
       localStorage.setItem('shelved_oauth_state', state);
@@ -5799,8 +5804,8 @@
         localStorage.setItem('shelved_gh_repo_v1', githubSyncState.repo);
       }
 
-      const cleanRepo = getFullRepositorySlug();
-      const checkRepoRes = await fetch(`https://api.github.com/repos/${cleanRepo}`, {
+      let cleanRepo = getFullRepositorySlug();
+      let checkRepoRes = await fetch(`https://api.github.com/repos/${cleanRepo}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/vnd.github.v3+json'
@@ -5826,11 +5831,28 @@
           if (createRes.ok) {
             await new Promise(r => setTimeout(r, 1200));
             await githubPush();
+          } else {
+            // Fallback: Check if website repo exists
+            const fallbackRepo = `${login}/Shelved`;
+            const checkFallback = await fetch(`https://api.github.com/repos/${fallbackRepo}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+              }
+            });
+            if (checkFallback.ok) {
+              githubSyncState.repo = fallbackRepo;
+              localStorage.setItem('shelved_gh_repo_v1', fallbackRepo);
+              cleanRepo = fallbackRepo;
+              checkRepoRes = checkFallback;
+            }
           }
         } catch (e) {
           console.warn('Could not create private repo automatically:', e);
         }
-      } else if (checkRepoRes.ok) {
+      }
+
+      if (checkRepoRes.ok) {
         try {
           const fileCheckRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?ref=${githubSyncState.branch}&t=${Date.now()}`, {
             headers: {
@@ -5862,7 +5884,8 @@
       const label = document.getElementById('nav-cloud-sync-text');
       if (!btn || !dot || !label) return;
 
-      if (!githubSyncState.token || !githubSyncState.repo) {
+      const cleanRepo = getFullRepositorySlug();
+      if (!githubSyncState.token || !cleanRepo) {
         dot.className = 'w-2 h-2 rounded-full bg-[#7d7467]';
         label.textContent = 'Sync';
         btn.title = 'GitHub Sync Not Connected (Click to set up)';
@@ -5876,7 +5899,7 @@
       } else if (status === 'synced') {
         dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
         label.textContent = text || 'Synced';
-        btn.title = `Connected to ${githubSyncState.repo} (Last synced: ${githubSyncState.lastSynced ? formatTimeAgo(new Date(githubSyncState.lastSynced)) : 'recently'})`;
+        btn.title = `Connected to ${cleanRepo} (Last synced: ${githubSyncState.lastSynced ? formatTimeAgo(new Date(githubSyncState.lastSynced)) : 'recently'})`;
       } else if (status === 'error') {
         dot.className = 'w-2 h-2 rounded-full bg-rose-500';
         label.textContent = 'Sync Error';
@@ -6148,7 +6171,8 @@
     let autoSyncTimer = null;
     function triggerAutoSyncIfEnabled() {
       saveToLinkedLocalFile();
-      if (!githubSyncState.autoSync || !githubSyncState.repo || !githubSyncState.token) return;
+      const cleanRepo = getFullRepositorySlug();
+      if (!githubSyncState.autoSync || !cleanRepo || !githubSyncState.token) return;
       clearTimeout(autoSyncTimer);
       updateHeaderSyncBadge('syncing', 'Saving...');
       autoSyncTimer = setTimeout(() => {
@@ -6163,7 +6187,8 @@
 
     let isSyncingInProgress = false;
     async function backgroundSyncCheck() {
-      if (isSyncingInProgress || !githubSyncState.token || !githubSyncState.repo) return;
+      const cleanRepo = getFullRepositorySlug();
+      if (isSyncingInProgress || !githubSyncState.token || !cleanRepo) return;
       try {
         isSyncingInProgress = true;
         const pulled = await githubPull(false);
