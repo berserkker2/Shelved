@@ -5340,6 +5340,75 @@
       }
     }
 
+    function decodeBase64Utf8(base64Str) {
+      if (!base64Str) return '';
+      const clean = base64Str.replace(/\s/g, '');
+      try {
+        const binaryStr = atob(clean);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+          bytes[i] = binaryStr.charCodeAt(i);
+        }
+        return new TextDecoder('utf-8').decode(bytes);
+      } catch (e) {
+        return decodeURIComponent(escape(atob(clean)));
+      }
+    }
+
+    function encodeBase64Utf8(str) {
+      if (!str) return '';
+      try {
+        const bytes = new TextEncoder().encode(str);
+        let binaryStr = '';
+        for (let i = 0; i < bytes.length; i++) {
+          binaryStr += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binaryStr);
+      } catch (e) {
+        return btoa(unescape(encodeURIComponent(str)));
+      }
+    }
+
+    function safeParseDatabase(rawStr) {
+      if (!rawStr || typeof rawStr !== 'string') return null;
+      const trimmed = rawStr.trim();
+
+      // 1. Direct JSON parse
+      try {
+        return JSON.parse(trimmed);
+      } catch (e) {}
+
+      // 2. Extract assignment if wrapped in window.SHELVED_DATABASE = ... or const SHELVED_DATABASE = ...
+      let candidate = trimmed;
+      const match = trimmed.match(/(?:window\.)?SHELVED_DATABASE\s*=\s*([\s\S]+?);?\s*$/);
+      if (match && match[1]) {
+        candidate = match[1].trim().replace(/;$/, '');
+      }
+
+      // 3. Try JSON.parse on candidate
+      try {
+        return JSON.parse(candidate);
+      } catch (e) {}
+
+      // 4. Safe JavaScript evaluation fallback (handles unquoted keys, trailing commas, comments)
+      try {
+        const fn = new Function(`
+          "use strict";
+          try {
+            return (${candidate});
+          } catch(e) {
+            return null;
+          }
+        `);
+        const evaluated = fn();
+        if (evaluated && typeof evaluated === 'object') {
+          return evaluated;
+        }
+      } catch (e) {}
+
+      return null;
+    }
+
     // Pull from GitHub
     async function githubPull(isBiDirectional = false) {
       const cleanRepo = githubSyncState.repo.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '');
@@ -5354,7 +5423,7 @@
 
       if (res.status === 404) {
         if (isBiDirectional) return false;
-        throw new Error(`File "${githubSyncState.path}" not found in branch "${githubSyncState.branch}".`);
+        throw new Error(`File "${githubSyncState.path}" not found in branch "${githubSyncState.branch}". You can use "Push to Cloud" to create it.`);
       }
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -5364,19 +5433,12 @@
       const fileData = await res.json();
       githubSyncState.lastSha = fileData.sha;
 
-      const decodedRaw = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
-      
-      let parsed = null;
-      if (decodedRaw.trim().startsWith('{') || decodedRaw.trim().startsWith('[')) {
-        parsed = JSON.parse(decodedRaw);
-      } else {
-        const match = decodedRaw.match(/window\.SHELVED_DATABASE\s*=\s*(\{[\s\S]*\});?\s*$/);
-        if (match && match[1]) {
-          parsed = JSON.parse(match[1]);
-        }
-      }
+      const decodedRaw = decodeBase64Utf8(fileData.content);
+      const parsed = safeParseDatabase(decodedRaw);
 
-      if (!parsed) throw new Error('Could not parse database content from repository file.');
+      if (!parsed) {
+        throw new Error('Could not parse database content from repository file.');
+      }
 
       const remoteBooks = Array.isArray(parsed) ? parsed : (parsed.books || []);
       const remoteUpdatedAt = parsed.updatedAt ? new Date(parsed.updatedAt).getTime() : 0;
@@ -5423,7 +5485,7 @@
 
       const isJson = githubSyncState.path.endsWith('.json');
       const contentStr = isJson ? JSON.stringify(buildDatabaseObject(), null, 2) : buildDatabaseJsFileString();
-      const contentBase64 = btoa(unescape(encodeURIComponent(contentStr)));
+      const contentBase64 = encodeBase64Utf8(contentStr);
 
       const bodyPayload = {
         message: `Update library catalog via Shelved [${books.length} volumes]`,
