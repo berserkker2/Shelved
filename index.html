@@ -1058,69 +1058,62 @@
                 <i data-lucide="cloud" class="w-4 h-4"></i>
               </div>
               <div>
-                <h3 class="font-cinzel text-base font-bold text-parchment">Cloud & Multi-Device Sync (GitHub)</h3>
+                <h3 class="font-cinzel text-base font-bold text-parchment">Cloud & Multi-Device Sync</h3>
                 <p class="text-[11px] text-[#9E9382]">Sync your library live across all your phones, laptops & tablets</p>
               </div>
             </div>
             <div id="github-sync-status-badge" class="text-[11px] px-2.5 py-1 rounded-full font-semibold border bg-ebony text-[#9E9382] border-[#3d3835] flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-[#7d7467]"></span>
-              <span>Not Configured</span>
+              <span>Not Connected</span>
             </div>
           </div>
 
-          <!-- Configuration Inputs -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-            <div>
-              <label class="block text-xs font-semibold text-[#C7BCAC] mb-1 flex items-center gap-1">
-                <i data-lucide="github" class="w-3.5 h-3.5 text-gold"></i>
-                <span>GitHub Repository</span>
-              </label>
-              <input 
-                type="text" 
-                id="github-repo-input" 
-                oninput="saveGithubSettings()"
-                placeholder="username/repository-name" 
-                class="w-full px-3.5 py-2 rounded-xl bg-ebony border border-moss text-xs text-parchment placeholder-[#7d7467] focus:outline-none focus:border-gold font-mono"
-              />
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-[#C7BCAC] mb-1 flex items-center justify-between">
-                <span class="flex items-center gap-1"><i data-lucide="key" class="w-3.5 h-3.5 text-gold"></i> Personal Access Token (PAT)</span>
-                <button type="button" onclick="toggleGithubTokenVisibility()" class="text-[10px] text-gold hover:underline">Show/Hide</button>
-              </label>
-              <input 
-                type="password" 
-                id="github-token-input" 
-                oninput="saveGithubSettings()"
-                placeholder="github_pat_..." 
-                class="w-full px-3.5 py-2 rounded-xl bg-ebony border border-moss text-xs text-parchment placeholder-[#7d7467] focus:outline-none focus:border-gold font-mono"
-              />
+          <!-- Logged Out View (1-Click OAuth Login) -->
+          <div id="github-logged-out-view" class="p-4 rounded-xl bg-ebony/80 border border-moss/50 space-y-3">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div class="text-left">
+                <div class="text-xs font-bold text-parchment flex items-center gap-1.5">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-gold"></i>
+                  <span>1-Click GitHub Sign In</span>
+                </div>
+                <div class="text-[11px] text-[#9E9382]">Automatically connects or creates your private library database</div>
+              </div>
+              <button 
+                type="button" 
+                onclick="startGitHubOAuthLogin()" 
+                class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-[#24292e] hover:bg-[#2f363d] border border-[#444d56] text-white shadow-md transition-all cursor-pointer shrink-0"
+              >
+                <i data-lucide="github" class="w-4 h-4 text-white"></i>
+                <span>Sign in with GitHub</span>
+              </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-[#C7BCAC] mb-1">Branch (default: main)</label>
-              <input 
-                type="text" 
-                id="github-branch-input" 
-                oninput="saveGithubSettings()"
-                placeholder="main" 
-                value="main" 
-                class="w-full px-3.5 py-2 rounded-xl bg-ebony border border-moss text-xs text-parchment placeholder-[#7d7467] focus:outline-none focus:border-gold font-mono"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-[#C7BCAC] mb-1">Database File in Repo</label>
-              <input 
-                type="text" 
-                id="github-path-input" 
-                oninput="saveGithubSettings()"
-                placeholder="library-data.js" 
-                value="library-data.js" 
-                class="w-full px-3.5 py-2 rounded-xl bg-ebony border border-moss text-xs text-parchment placeholder-[#7d7467] focus:outline-none focus:border-gold font-mono"
-              />
+          <!-- Logged In View (User Profile & Repo Card) -->
+          <div id="github-logged-in-view" class="hidden p-3.5 rounded-xl bg-ebony/90 border border-gold/40 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <img id="gh-user-avatar" src="" alt="Avatar" class="w-8 h-8 rounded-full border border-gold/50 shadow-sm hidden shrink-0" />
+                <div id="gh-user-avatar-fallback" class="w-8 h-8 rounded-full bg-gold text-ebony flex items-center justify-center text-xs font-bold shrink-0">GH</div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-parchment flex items-center gap-1.5 truncate">
+                    <span id="gh-user-name" class="truncate">GitHub User</span>
+                    <span id="gh-user-login" class="text-[10px] text-gold-light font-normal shrink-0">@username</span>
+                  </div>
+                  <div class="text-[11px] text-[#9E9382] flex items-center gap-1 truncate">
+                    <i data-lucide="lock" class="w-3 h-3 text-gold shrink-0"></i>
+                    <span>Storage Repo:</span>
+                    <span id="gh-connected-repo-label" class="font-mono text-[#C7BCAC] font-semibold truncate">username/shelved-library-data</span>
+                  </div>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onclick="signOutGitHub()" 
+                class="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-mahogany/30 hover:bg-mahogany/60 border border-[#7C4B1E] text-red-200 transition-colors cursor-pointer shrink-0"
+              >
+                Sign Out
+              </button>
             </div>
           </div>
 
@@ -1166,17 +1159,88 @@
             </button>
           </div>
 
-          <!-- Quick Token Helper Collapsible -->
-          <details class="text-xs text-[#9E9382] border-t border-[#3d3835] pt-2">
-            <summary class="cursor-pointer font-semibold text-gold hover:underline py-1">
-              📖 How to create your free GitHub Token (1 minute guide)
+          <!-- Advanced / Manual Token & Repo Configuration Collapsible -->
+          <details class="text-xs text-[#9E9382] border-t border-[#3d3835] pt-2" id="github-advanced-details">
+            <summary class="cursor-pointer font-semibold text-gold hover:underline py-1 flex items-center justify-between">
+              <span>⚙️ Advanced: Manual Repository & Token Configuration</span>
+              <span class="text-[10px] text-[#9E9382]">(Optional)</span>
             </summary>
-            <div class="mt-2 space-y-1.5 p-3 rounded-xl bg-ebony/90 border border-[#3d3835] text-[11px] leading-relaxed">
-              <p>1. Go to <a href="https://github.com/settings/tokens?type=beta" target="_blank" class="text-gold underline font-semibold">github.com/settings/tokens (Fine-grained tokens)</a>.</p>
-              <p>2. Click <strong>Generate new token</strong>.</p>
-              <p>3. Give it a name (e.g. <em>Shelved Sync</em>) and select your repository under <strong>Repository access</strong>.</p>
-              <p>4. Under <strong>Permissions → Repository permissions</strong>, select <strong>Contents: Read and write</strong>.</p>
-              <p>5. Click <strong>Generate token</strong>, copy the token (starts with <code>github_pat_</code>), and paste it above.</p>
+            
+            <div class="mt-3 space-y-3 p-3.5 rounded-xl bg-ebony/90 border border-[#3d3835]">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-[#C7BCAC] mb-1 flex items-center gap-1">
+                    <i data-lucide="github" class="w-3.5 h-3.5 text-gold"></i>
+                    <span>Custom Repository</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="github-repo-input" 
+                    oninput="saveGithubSettings()"
+                    placeholder="username/shelved-library-data" 
+                    class="w-full px-3.5 py-2 rounded-xl bg-ebony border border-moss text-xs text-parchment placeholder-[#7d7467] focus:outline-none focus:border-gold font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-[#C7BCAC] mb-1 flex items-center justify-between">
+                    <span class="flex items-center gap-1"><i data-lucide="key" class="w-3.5 h-3.5 text-gold"></i> Personal Access Token (PAT)</span>
+                    <button type="button" onclick="toggleGithubTokenVisibility()" class="text-[10px] text-gold hover:underline">Show/Hide</button>
+                  </label>
+                  <input 
+                    type="password" 
+                    id="github-token-input" 
+                    oninput="saveGithubSettings()"
+                    placeholder="github_pat_..." 
+                    class="w-full px-3.5 py-2 rounded-xl bg-ebony border border-moss text-xs text-parchment placeholder-[#7d7467] focus:outline-none focus:border-gold font-mono"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-[#C7BCAC] mb-1">Branch (default: main)</label>
+                  <input 
+                    type="text" 
+                    id="github-branch-input" 
+                    oninput="saveGithubSettings()"
+                    placeholder="main" 
+                    value="main" 
+                    class="w-full px-3.5 py-2 rounded-xl bg-ebony border border-moss text-xs text-parchment placeholder-[#7d7467] focus:outline-none focus:border-gold font-mono"
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-[#C7BCAC] mb-1">Database File in Repo</label>
+                  <input 
+                    type="text" 
+                    id="github-path-input" 
+                    oninput="saveGithubSettings()"
+                    placeholder="library-data.js" 
+                    value="library-data.js" 
+                    class="w-full px-3.5 py-2 rounded-xl bg-ebony border border-moss text-xs text-parchment placeholder-[#7d7467] focus:outline-none focus:border-gold font-mono"
+                  />
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-[#3d3835]/70">
+                <label class="block text-[11px] font-semibold text-[#9E9382] mb-1">Custom OAuth Client ID & Gatekeeper (Optional)</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input 
+                    type="text" 
+                    id="github-oauth-client-id" 
+                    oninput="saveGithubSettings()"
+                    placeholder="OAuth Client ID" 
+                    class="w-full px-3 py-1.5 rounded-lg bg-ebony/60 border border-[#3d3835] text-[11px] text-[#BACAE0] font-mono"
+                  />
+                  <input 
+                    type="text" 
+                    id="github-oauth-gatekeeper" 
+                    oninput="saveGithubSettings()"
+                    placeholder="https://auth-worker.example.workers.dev" 
+                    class="w-full px-3 py-1.5 rounded-lg bg-ebony/60 border border-[#3d3835] text-[11px] text-[#BACAE0] font-mono"
+                  />
+                </div>
+              </div>
             </div>
           </details>
         </div>
@@ -5218,6 +5282,9 @@
     // ==========================================
     // GITHUB CLOUD & MULTI-DEVICE SYNC ENGINE
     // ==========================================
+    const DEFAULT_OAUTH_CLIENT_ID = 'Ov23lia8u7iXm2z1k3x';
+    const DEFAULT_GATEKEEPER_URL = 'https://shelved-auth.berserkker.workers.dev';
+
     let githubSyncState = {
       repo: '',
       token: '',
@@ -5225,7 +5292,10 @@
       path: 'library-data.js',
       autoSync: false,
       lastSynced: null,
-      lastSha: null
+      lastSha: null,
+      user: null,
+      oauthClientId: '',
+      oauthGatekeeper: ''
     };
 
     function loadGithubSettings() {
@@ -5236,6 +5306,10 @@
         githubSyncState.path = localStorage.getItem('shelved_gh_path_v1') || 'library-data.js';
         githubSyncState.autoSync = localStorage.getItem('shelved_gh_autosync_v1') === 'true';
         githubSyncState.lastSynced = localStorage.getItem('shelved_gh_last_synced_v1') || null;
+        githubSyncState.oauthClientId = localStorage.getItem('shelved_gh_oauth_client_id_v1') || '';
+        githubSyncState.oauthGatekeeper = localStorage.getItem('shelved_gh_oauth_gatekeeper_v1') || '';
+        const savedUser = localStorage.getItem('shelved_gh_user_v1');
+        if (savedUser) githubSyncState.user = JSON.parse(savedUser);
       } catch (e) {}
     }
 
@@ -5245,18 +5319,24 @@
       const branchInput = document.getElementById('github-branch-input');
       const pathInput = document.getElementById('github-path-input');
       const autoSyncToggle = document.getElementById('github-autosync-toggle');
+      const oauthClientInput = document.getElementById('github-oauth-client-id');
+      const oauthGatekeeperInput = document.getElementById('github-oauth-gatekeeper');
 
       if (repoInput) githubSyncState.repo = repoInput.value.trim();
       if (tokenInput) githubSyncState.token = tokenInput.value.trim();
       if (branchInput) githubSyncState.branch = branchInput.value.trim() || 'main';
       if (pathInput) githubSyncState.path = pathInput.value.trim() || 'library-data.js';
       if (autoSyncToggle) githubSyncState.autoSync = autoSyncToggle.checked;
+      if (oauthClientInput) githubSyncState.oauthClientId = oauthClientInput.value.trim();
+      if (oauthGatekeeperInput) githubSyncState.oauthGatekeeper = oauthGatekeeperInput.value.trim();
 
       localStorage.setItem('shelved_gh_repo_v1', githubSyncState.repo);
       localStorage.setItem('shelved_gh_token_v1', githubSyncState.token);
       localStorage.setItem('shelved_gh_branch_v1', githubSyncState.branch);
       localStorage.setItem('shelved_gh_path_v1', githubSyncState.path);
       localStorage.setItem('shelved_gh_autosync_v1', String(githubSyncState.autoSync));
+      localStorage.setItem('shelved_gh_oauth_client_id_v1', githubSyncState.oauthClientId || '');
+      localStorage.setItem('shelved_gh_oauth_gatekeeper_v1', githubSyncState.oauthGatekeeper || '');
 
       updateGithubSyncUI();
     }
@@ -5273,18 +5353,51 @@
       const branchInput = document.getElementById('github-branch-input');
       const pathInput = document.getElementById('github-path-input');
       const autoSyncToggle = document.getElementById('github-autosync-toggle');
+      const oauthClientInput = document.getElementById('github-oauth-client-id');
+      const oauthGatekeeperInput = document.getElementById('github-oauth-gatekeeper');
       const statusBadge = document.getElementById('github-sync-status-badge');
+
+      const loggedOutView = document.getElementById('github-logged-out-view');
+      const loggedInView = document.getElementById('github-logged-in-view');
+      const userNameEl = document.getElementById('gh-user-name');
+      const userLoginEl = document.getElementById('gh-user-login');
+      const userAvatarImg = document.getElementById('gh-user-avatar');
+      const userAvatarFallback = document.getElementById('gh-user-avatar-fallback');
+      const repoLabel = document.getElementById('gh-connected-repo-label');
 
       if (repoInput && document.activeElement !== repoInput) repoInput.value = githubSyncState.repo;
       if (tokenInput && document.activeElement !== tokenInput) tokenInput.value = githubSyncState.token;
       if (branchInput && document.activeElement !== branchInput) branchInput.value = githubSyncState.branch;
       if (pathInput && document.activeElement !== pathInput) pathInput.value = githubSyncState.path;
       if (autoSyncToggle) autoSyncToggle.checked = githubSyncState.autoSync;
+      if (oauthClientInput && document.activeElement !== oauthClientInput) oauthClientInput.value = githubSyncState.oauthClientId || '';
+      if (oauthGatekeeperInput && document.activeElement !== oauthGatekeeperInput) oauthGatekeeperInput.value = githubSyncState.oauthGatekeeper || '';
+
+      const isConnected = Boolean(githubSyncState.token);
+      if (loggedOutView && loggedInView) {
+        loggedOutView.classList.toggle('hidden', isConnected);
+        loggedInView.classList.toggle('hidden', !isConnected);
+      }
+
+      if (isConnected && githubSyncState.user) {
+        if (userNameEl) userNameEl.textContent = githubSyncState.user.name || githubSyncState.user.login;
+        if (userLoginEl) userLoginEl.textContent = `@${githubSyncState.user.login}`;
+        if (repoLabel) repoLabel.textContent = githubSyncState.repo || `${githubSyncState.user.login}/shelved-library-data`;
+        if (userAvatarImg && githubSyncState.user.avatar_url) {
+          userAvatarImg.src = githubSyncState.user.avatar_url;
+          userAvatarImg.classList.remove('hidden');
+          if (userAvatarFallback) userAvatarFallback.classList.add('hidden');
+        }
+      } else if (isConnected) {
+        if (repoLabel) repoLabel.textContent = githubSyncState.repo || 'Connected Repository';
+        if (userNameEl) userNameEl.textContent = 'GitHub Connected';
+        if (userLoginEl) userLoginEl.textContent = githubSyncState.repo ? `@${githubSyncState.repo.split('/')[0]}` : '';
+      }
 
       if (statusBadge) {
-        if (!githubSyncState.repo || !githubSyncState.token) {
+        if (!githubSyncState.token || !githubSyncState.repo) {
           statusBadge.className = 'text-[11px] px-2.5 py-1 rounded-full font-semibold border bg-ebony text-[#9E9382] border-[#3d3835] flex items-center gap-1.5';
-          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#7d7467]"></span><span>Not Configured</span>';
+          statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#7d7467]"></span><span>Not Connected</span>';
         } else if (githubSyncState.lastSynced) {
           statusBadge.className = 'text-[11px] px-2.5 py-1 rounded-full font-semibold border bg-moss/30 text-emerald-300 border-moss/60 flex items-center gap-1.5';
           const timeAgo = formatTimeAgo(new Date(githubSyncState.lastSynced));
@@ -5293,6 +5406,145 @@
           statusBadge.className = 'text-[11px] px-2.5 py-1 rounded-full font-semibold border bg-gold/20 text-gold-light border-gold/40 flex items-center gap-1.5';
           statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-gold"></span><span>Ready to Sync</span>';
         }
+      }
+    }
+
+    function startGitHubOAuthLogin() {
+      saveGithubSettings();
+      const clientId = githubSyncState.oauthClientId || DEFAULT_OAUTH_CLIENT_ID;
+      const redirectUri = window.location.origin + window.location.pathname;
+      const state = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('shelved_oauth_state', state);
+
+      const authUrl = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(clientId)}&scope=repo,user&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`;
+      window.location.href = authUrl;
+    }
+
+    async function handleOAuthCallback() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      if (!code) return;
+
+      // Clean URL immediately
+      const cleanUrl = window.location.origin + window.location.pathname + window.location.hash;
+      window.history.replaceState({}, document.title, cleanUrl);
+
+      showToast('Signing in to GitHub...');
+      const spinner = document.getElementById('github-sync-spinner');
+      if (spinner) spinner.classList.add('animate-spin');
+
+      try {
+        loadGithubSettings();
+        const gatekeeper = githubSyncState.oauthGatekeeper || DEFAULT_GATEKEEPER_URL;
+        const res = await fetch(`${gatekeeper.replace(/\/$/, '')}/authenticate/${encodeURIComponent(code)}`);
+        if (!res.ok) throw new Error(`Gatekeeper responded with status ${res.status}`);
+        const data = await res.json();
+        if (data.error || !data.access_token) {
+          throw new Error(data.error_description || data.error || 'Authentication token exchange failed.');
+        }
+
+        githubSyncState.token = data.access_token;
+        localStorage.setItem('shelved_gh_token_v1', githubSyncState.token);
+
+        await setupGitHubUserAndRepo(githubSyncState.token);
+        showToast('✓ Successfully signed in with GitHub! Your personal library is connected.');
+        updateGithubSyncUI();
+        renderAll();
+      } catch (err) {
+        console.error('OAuth Login Error:', err);
+        alert(`GitHub Sign In failed: ${err.message || 'Please check your connection.'}`);
+      } finally {
+        if (spinner) spinner.classList.remove('animate-spin');
+      }
+    }
+
+    async function setupGitHubUserAndRepo(token) {
+      try {
+        const userRes = await fetch('https://api.github.com/user', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        if (userRes.ok) {
+          const user = await userRes.json();
+          githubSyncState.user = {
+            login: user.login,
+            name: user.name || user.login,
+            avatar_url: user.avatar_url
+          };
+          localStorage.setItem('shelved_gh_user_v1', JSON.stringify(githubSyncState.user));
+        }
+      } catch (e) {
+        console.warn('Could not fetch user profile:', e);
+      }
+
+      const login = githubSyncState.user ? githubSyncState.user.login : '';
+      const repoName = 'shelved-library-data';
+      if (!githubSyncState.repo || githubSyncState.repo.includes('username/')) {
+        githubSyncState.repo = login ? `${login}/${repoName}` : repoName;
+        localStorage.setItem('shelved_gh_repo_v1', githubSyncState.repo);
+      }
+
+      const cleanRepo = githubSyncState.repo.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '');
+      const checkRepoRes = await fetch(`https://api.github.com/repos/${cleanRepo}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
+      if (checkRepoRes.status === 404 && login) {
+        try {
+          const createRes = await fetch('https://api.github.com/user/repos', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: repoName,
+              description: 'Shelved Book Catalog & Reading Progress (Private Database)',
+              private: true,
+              auto_init: true
+            })
+          });
+          if (createRes.ok) {
+            await new Promise(r => setTimeout(r, 1200));
+            await githubPush();
+          }
+        } catch (e) {
+          console.warn('Could not create private repo automatically:', e);
+        }
+      } else if (checkRepoRes.ok) {
+        try {
+          const pulled = await githubPull(true);
+          if (!pulled) {
+            await githubPush();
+          }
+        } catch (e) {
+          await githubPush();
+        }
+      }
+
+      githubSyncState.autoSync = true;
+      localStorage.setItem('shelved_gh_autosync_v1', 'true');
+      githubSyncState.lastSynced = new Date().toISOString();
+      localStorage.setItem('shelved_gh_last_synced_v1', githubSyncState.lastSynced);
+    }
+
+    function signOutGitHub() {
+      if (confirm('Sign out of GitHub Sync? (Your local books and progress will stay saved in your browser)')) {
+        githubSyncState.token = '';
+        githubSyncState.user = null;
+        githubSyncState.lastSynced = null;
+        githubSyncState.lastSha = null;
+        localStorage.removeItem('shelved_gh_token_v1');
+        localStorage.removeItem('shelved_gh_user_v1');
+        localStorage.removeItem('shelved_gh_last_synced_v1');
+        updateGithubSyncUI();
+        showToast('Signed out of GitHub sync.');
       }
     }
 
@@ -5309,7 +5561,7 @@
     async function saveGithubSettingsAndSync(direction = 'both') {
       saveGithubSettings();
       if (!githubSyncState.repo || !githubSyncState.token) {
-        alert('Please enter both your GitHub Repository (e.g. username/repo) and your GitHub Token to sync.');
+        alert('Please sign in with GitHub or enter your GitHub Repository and Token in Settings.');
         return;
       }
       const spinner = document.getElementById('github-sync-spinner');
@@ -5334,7 +5586,7 @@
         updateGithubSyncUI();
       } catch (err) {
         console.error('GitHub Sync Error:', err);
-        alert(`GitHub Sync failed: ${err.message || 'Check your repository name and token permissions (Contents: Read & Write).'}`);
+        alert(`GitHub Sync failed: ${err.message || 'Check your repository name and token permissions.'}`);
       } finally {
         if (spinner) spinner.classList.remove('animate-spin');
       }
@@ -5605,6 +5857,13 @@
       if (!str) return '';
       return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
+
+    // App Initialization & OAuth Callback Listener
+    window.addEventListener('DOMContentLoaded', async () => {
+      loadStorage();
+      renderAll();
+      await handleOAuthCallback();
+    });
   </script>
 </body>
 </html>
