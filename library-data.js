@@ -1,11 +1,11 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T12:17:43.166Z
+ * Generated on 2026-08-30T12:19:22.462Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T12:17:43.166Z",
-  "libraryMode": "individual",
+  "updatedAt": "2026-08-30T12:19:22.462Z",
+  "libraryMode": "shared",
   "libraryMembers": [
     "João"
   ],
