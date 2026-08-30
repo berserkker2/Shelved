@@ -1,10 +1,10 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T11:59:25.843Z
+ * Generated on 2026-08-30T12:00:49.263Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T11:59:25.843Z",
+  "updatedAt": "2026-08-30T12:00:49.263Z",
   "libraryMode": "shared",
   "libraryMembers": [
     "João",
@@ -60,7 +60,17 @@ window.SHELVED_DATABASE = {
       "pageCount": 199,
       "dateAdded": "2026-08-30T11:51:45.200Z",
       "readingProgress": 5,
-      "currentPage": 10
+      "currentPage": 10,
+      "memberProgress": {
+        "João": {
+          "status": "Currently Reading",
+          "readingProgress": 5,
+          "currentPage": 10,
+          "isFavorite": false,
+          "lastOpened": "2026-08-30T12:00:47.622Z"
+        }
+      },
+      "lastOpened": "2026-08-30T12:00:47.622Z"
     },
     {
       "id": "book-1",
