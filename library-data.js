@@ -1,10 +1,10 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T11:59:19.207Z
+ * Generated on 2026-08-30T11:59:25.843Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T11:59:19.207Z",
+  "updatedAt": "2026-08-30T11:59:25.843Z",
   "libraryMode": "shared",
   "libraryMembers": [
     "João",
@@ -52,7 +52,7 @@ window.SHELVED_DATABASE = {
         "General"
       ],
       "status": "Currently Reading",
-      "rating": 0,
+      "rating": 5,
       "coverUrl": "https://covers.openlibrary.org/b/id/10317035-L.jpg",
       "description": "Dawn breaks over Vancouver and no one in the world has slept the night before, or almost no one. A few people, perhaps one in ten thousand, can still sleep, and theyve all shared the same golden dream.",
       "isFavorite": false,
@@ -60,17 +60,7 @@ window.SHELVED_DATABASE = {
       "pageCount": 199,
       "dateAdded": "2026-08-30T11:51:45.200Z",
       "readingProgress": 5,
-      "currentPage": 10,
-      "lastOpened": "2026-08-30T11:59:17.625Z",
-      "memberProgress": {
-        "João": {
-          "status": "Currently Reading",
-          "readingProgress": 5,
-          "currentPage": 10,
-          "isFavorite": false,
-          "lastOpened": "2026-08-30T11:51:48.289Z"
-        }
-      }
+      "currentPage": 10
     },
     {
       "id": "book-1",
