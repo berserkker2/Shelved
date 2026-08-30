@@ -421,26 +421,39 @@
           </div>
 
           <!-- Sorting & View Mode Switcher -->
-          <div class="flex items-center justify-between sm:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#3d3835]">
+          <div class="flex items-center justify-between sm:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#3d3835]">
             
-            <select id="sort-select" onchange="updateSort(this.value)" class="px-3 py-2 text-xs md:text-sm rounded-xl bg-ebony border border-moss text-[#EDE8DE] focus:outline-none focus:border-gold cursor-pointer">
-              <option value="dateAdded-desc">Newest Added</option>
-              <option value="dateAdded-asc">Oldest Added</option>
-              <option value="title-asc">Title (A-Z)</option>
-              <option value="title-desc">Title (Z-A)</option>
-              <option value="year-desc">Year (Newest)</option>
-              <option value="year-asc">Year (Oldest)</option>
-              <option value="rating-desc">Rating (Highest)</option>
-            </select>
-
+            <!-- Sort Field & Direction Toggle -->
             <div class="flex items-center bg-ebony p-1 rounded-xl border border-moss">
-              <button id="view-shelf-btn" onclick="setViewMode('shelf')" title="Library Bookshelf Mode" class="p-1.5 rounded-lg bg-gold text-ebony font-bold transition-all">
+              <select id="sort-select" onchange="updateSortField(this.value)" class="py-1 pl-2.5 pr-2 text-xs md:text-sm rounded-lg bg-transparent text-[#EDE8DE] focus:outline-none focus:text-gold cursor-pointer border-0 font-medium">
+                <option value="lastRead" class="bg-ebony text-parchment">Latest Reads</option>
+                <option value="dateAdded" class="bg-ebony text-parchment" selected>Date Added</option>
+                <option value="title" class="bg-ebony text-parchment">Name</option>
+                <option value="year" class="bg-ebony text-parchment">Year</option>
+                <option value="pages" class="bg-ebony text-parchment">Pages</option>
+                <option value="rating" class="bg-ebony text-parchment">Rating</option>
+              </select>
+
+              <button 
+                id="sort-direction-btn" 
+                onclick="toggleSortDirection()" 
+                type="button"
+                title="Sort Order: Descending (Click to switch to Ascending)" 
+                class="p-1.5 rounded-lg text-gold hover:text-parchment hover:bg-slate/70 transition-all cursor-pointer flex items-center justify-center border-l border-[#3d3835]"
+              >
+                <i data-lucide="arrow-down-up" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <!-- View Mode Switcher -->
+            <div class="flex items-center bg-ebony p-1 rounded-xl border border-moss">
+              <button id="view-shelf-btn" onclick="setViewMode('shelf')" title="Library Bookshelf Mode" class="p-1.5 rounded-lg bg-gold text-ebony font-bold transition-all cursor-pointer">
                 <i data-lucide="layout-grid" class="w-4 h-4"></i>
               </button>
-              <button id="view-detail-btn" onclick="setViewMode('detail')" title="Detailed List Mode" class="p-1.5 rounded-lg text-[#9E9382] hover:text-parchment transition-all">
+              <button id="view-detail-btn" onclick="setViewMode('detail')" title="Detailed List Mode" class="p-1.5 rounded-lg text-[#9E9382] hover:text-parchment transition-all cursor-pointer">
                 <i data-lucide="list" class="w-4 h-4"></i>
               </button>
-              <button id="view-table-btn" onclick="setViewMode('table')" title="Table Mode" class="p-1.5 rounded-lg text-[#9E9382] hover:text-parchment transition-all">
+              <button id="view-table-btn" onclick="setViewMode('table')" title="Table Mode" class="p-1.5 rounded-lg text-[#9E9382] hover:text-parchment transition-all cursor-pointer">
                 <i data-lucide="table-2" class="w-4 h-4"></i>
               </button>
             </div>
@@ -1826,7 +1839,8 @@
       location: '',
       status: '',
       onlyFavorites: false,
-      sortBy: 'dateAdded-desc'
+      sortBy: 'dateAdded',
+      sortOrder: 'desc'
     };
 
     // Initialize App
@@ -2081,8 +2095,22 @@
       renderAll();
     }
 
-    function updateSort(val) {
+    function updateSortField(val) {
       filters.sortBy = val;
+      renderBooks();
+    }
+
+    function toggleSortDirection() {
+      filters.sortOrder = filters.sortOrder === 'asc' ? 'desc' : 'asc';
+      const btn = document.getElementById('sort-direction-btn');
+      if (btn) {
+        btn.title = filters.sortOrder === 'asc' 
+          ? 'Sort Order: Ascending (Click to switch to Descending)' 
+          : 'Sort Order: Descending (Click to switch to Ascending)';
+        btn.className = filters.sortOrder === 'asc'
+          ? 'p-1.5 rounded-lg text-parchment bg-slate/70 hover:text-gold transition-all cursor-pointer flex items-center justify-center border-l border-[#3d3835]'
+          : 'p-1.5 rounded-lg text-gold hover:text-parchment hover:bg-slate/70 transition-all cursor-pointer flex items-center justify-center border-l border-[#3d3835]';
+      }
       renderBooks();
     }
 
@@ -2095,7 +2123,8 @@
         location: '',
         status: '',
         onlyFavorites: currentTab === 'favorites',
-        sortBy: 'dateAdded-desc'
+        sortBy: 'dateAdded',
+        sortOrder: 'desc'
       };
       document.getElementById('main-search-input').value = '';
       document.getElementById('search-clear-btn').classList.add('hidden');
@@ -2104,6 +2133,13 @@
       document.getElementById('filter-category').value = '';
       document.getElementById('filter-location').value = '';
       document.getElementById('filter-status').value = '';
+      const sortSelect = document.getElementById('sort-select');
+      if (sortSelect) sortSelect.value = 'dateAdded';
+      const dirBtn = document.getElementById('sort-direction-btn');
+      if (dirBtn) {
+        dirBtn.title = 'Sort Order: Descending (Click to switch to Ascending)';
+        dirBtn.className = 'p-1.5 rounded-lg text-gold hover:text-parchment hover:bg-slate/70 transition-all cursor-pointer flex items-center justify-center border-l border-[#3d3835]';
+      }
       renderAll();
     }
 
@@ -2150,19 +2186,41 @@
       }
       if (filters.status) list = list.filter(b => b.status === filters.status);
 
-      // Sorting
+      // Sorting Calculation
+      const isAsc = filters.sortOrder === 'asc';
       list.sort((a, b) => {
+        const getBookLastReadTime = (book) => {
+          if (book.memberProgress && activeMember && book.memberProgress[activeMember] && book.memberProgress[activeMember].lastOpened) {
+            return new Date(book.memberProgress[activeMember].lastOpened).getTime();
+          }
+          if (book.lastOpened) return new Date(book.lastOpened).getTime();
+          return new Date(book.dateAdded || 0).getTime();
+        };
+
+        let diff = 0;
         switch (filters.sortBy) {
-          case 'title-asc': return a.title.localeCompare(b.title);
-          case 'title-desc': return b.title.localeCompare(a.title);
-          case 'year-desc': return (b.year || 0) - (a.year || 0);
-          case 'year-asc': return (a.year || 0) - (b.year || 0);
-          case 'rating-desc': return (b.rating || 0) - (a.rating || 0);
-          case 'dateAdded-asc': return new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime();
-          case 'dateAdded-desc':
+          case 'lastRead':
+            diff = getBookLastReadTime(b) - getBookLastReadTime(a);
+            break;
+          case 'title':
+            diff = (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' });
+            return isAsc ? -diff : diff;
+          case 'year':
+            diff = (b.year || 0) - (a.year || 0);
+            break;
+          case 'pages':
+            diff = (b.pageCount || 0) - (a.pageCount || 0);
+            break;
+          case 'rating':
+            diff = (b.rating || 0) - (a.rating || 0);
+            break;
+          case 'dateAdded':
           default:
-            return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();
+            diff = new Date(b.dateAdded || 0).getTime() - new Date(a.dateAdded || 0).getTime();
+            break;
         }
+
+        return isAsc ? -diff : diff;
       });
 
       return list;
