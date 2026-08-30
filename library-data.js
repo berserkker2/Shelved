@@ -1,14 +1,14 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T12:23:40.376Z
+ * This file contains your books, custom shelves, reader profiles, and reading progress.
+ * It is automatically loaded when you open index.html locally (offline) or on GitHub Pages.
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T12:23:40.376Z",
-  "libraryMode": "shared",
+  "updatedAt": "2026-08-30T10:50:00.000Z",
+  "libraryMode": "individual",
   "libraryMembers": [
-    "João",
-    "Ines"
+    "João"
   ],
   "activeMember": "João",
   "customLocations": [
@@ -32,45 +32,6 @@ window.SHELVED_DATABASE = {
     "Online / Cloud": "cloud"
   },
   "books": [
-    {
-      "id": "book-1788092596181",
-      "title": "Nod",
-      "authors": [
-        "Adrian Barnes"
-      ],
-      "year": 2012,
-      "format": "Physical",
-      "ageGroup": "Adult",
-      "language": "English",
-      "location": "",
-      "categories": [
-        "Dystopian",
-        "Sleep Deprivation",
-        "Dreams",
-        "Fiction",
-        "General"
-      ],
-      "status": "Currently Reading",
-      "rating": 0,
-      "coverUrl": "https://covers.openlibrary.org/b/id/10317035-L.jpg",
-      "description": "Dawn breaks over Vancouver and no one in the world has slept the night before, or almost no one. A few people, perhaps one in ten thousand, can still sleep, and theyve all shared the same golden dream.",
-      "isFavorite": false,
-      "isbn": "9781785655814",
-      "pageCount": 199,
-      "dateAdded": "2026-08-30T12:23:16.181Z",
-      "readingProgress": 5,
-      "currentPage": 10,
-      "lastOpened": "2026-08-30T12:23:16.837Z",
-      "memberProgress": {
-        "João": {
-          "status": "Currently Reading",
-          "readingProgress": 5,
-          "currentPage": 10,
-          "isFavorite": false,
-          "lastOpened": "2026-08-30T12:23:16.837Z"
-        }
-      }
-    },
     {
       "id": "book-1",
       "title": "The Name of the Rose",
@@ -107,13 +68,6 @@ window.SHELVED_DATABASE = {
           "currentPage": 512,
           "isFavorite": true,
           "lastOpened": "2024-03-15T12:00:00.000Z"
-        },
-        "Ines": {
-          "status": "Want to Read",
-          "readingProgress": 0,
-          "currentPage": 0,
-          "isFavorite": false,
-          "lastOpened": null
         }
       }
     },
@@ -154,13 +108,6 @@ window.SHELVED_DATABASE = {
           "currentPage": 308,
           "isFavorite": true,
           "lastOpened": "2024-03-18T20:30:00.000Z"
-        },
-        "Ines": {
-          "status": "Want to Read",
-          "readingProgress": 0,
-          "currentPage": 0,
-          "isFavorite": false,
-          "lastOpened": null
         }
       }
     },
@@ -200,13 +147,6 @@ window.SHELVED_DATABASE = {
           "currentPage": 97,
           "isFavorite": false,
           "lastOpened": "2024-03-17T18:15:00.000Z"
-        },
-        "Ines": {
-          "status": "Want to Read",
-          "readingProgress": 0,
-          "currentPage": 0,
-          "isFavorite": false,
-          "lastOpened": null
         }
       }
     },
@@ -245,16 +185,8 @@ window.SHELVED_DATABASE = {
           "currentPage": 0,
           "isFavorite": true,
           "lastOpened": null
-        },
-        "Ines": {
-          "status": "Want to Read",
-          "readingProgress": 0,
-          "currentPage": 0,
-          "isFavorite": false,
-          "lastOpened": null
         }
-      },
-      "currentPage": 0
+      }
     },
     {
       "id": "book-5",
@@ -291,16 +223,8 @@ window.SHELVED_DATABASE = {
           "currentPage": 0,
           "isFavorite": false,
           "lastOpened": null
-        },
-        "Ines": {
-          "status": "Want to Read",
-          "readingProgress": 0,
-          "currentPage": 0,
-          "isFavorite": false,
-          "lastOpened": null
         }
-      },
-      "currentPage": 0
+      }
     },
     {
       "id": "book-6",
@@ -338,16 +262,8 @@ window.SHELVED_DATABASE = {
           "currentPage": 0,
           "isFavorite": false,
           "lastOpened": null
-        },
-        "Ines": {
-          "status": "Want to Read",
-          "readingProgress": 0,
-          "currentPage": 0,
-          "isFavorite": false,
-          "lastOpened": null
         }
-      },
-      "currentPage": 0
+      }
     }
   ]
 };

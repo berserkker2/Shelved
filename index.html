@@ -5920,7 +5920,8 @@
 
     async function saveGithubSettingsAndSync(direction = 'both') {
       saveGithubSettings();
-      if (!githubSyncState.repo || !githubSyncState.token) {
+      const cleanRepo = getFullRepositorySlug();
+      if (!cleanRepo || !githubSyncState.token) {
         alert('Please sign in with GitHub or enter your GitHub Repository and Token in Settings.');
         return;
       }
@@ -6022,8 +6023,10 @@
 
     // Pull from GitHub
     async function githubPull(forcePull = true) {
-      if (!githubSyncState.token || !githubSyncState.repo) return false;
-      const cleanRepo = githubSyncState.repo.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '');
+      if (!githubSyncState.token) return false;
+      const cleanRepo = getFullRepositorySlug();
+      if (!cleanRepo || !cleanRepo.includes('/')) return false;
+
       const url = `https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?ref=${githubSyncState.branch}&t=${Date.now()}`;
       
       const res = await fetch(url, {
@@ -6079,8 +6082,10 @@
 
     // Push to GitHub
     async function githubPush() {
-      if (!githubSyncState.token || !githubSyncState.repo) return;
-      const cleanRepo = githubSyncState.repo.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '');
+      if (!githubSyncState.token) return;
+      const cleanRepo = getFullRepositorySlug();
+      if (!cleanRepo || !cleanRepo.includes('/')) return;
+
       const url = `https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}`;
 
       updateHeaderSyncBadge('syncing', 'Saving...');
