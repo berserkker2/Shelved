@@ -6088,7 +6088,7 @@
       if (!cleanRepo || !cleanRepo.includes('/')) return false;
 
       const cacheBust = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-      const url = `https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?ref=${githubSyncState.branch}&nocache=${cacheBust}`;
+      const url = `https://api.github.com/repos/${cleanRepo}/contents/${githubSyncState.path}?nocache=${cacheBust}`;
       
       addSyncLog('info', `📡 Pulling ${cleanRepo}/${githubSyncState.path}...`);
 
@@ -6102,9 +6102,9 @@
       });
 
       if (res.status === 404) {
-        addSyncLog('warn', `⚠️ File "${githubSyncState.path}" not found on GitHub branch "${githubSyncState.branch}".`);
+        addSyncLog('warn', `⚠️ File "${githubSyncState.path}" not found on GitHub.`);
         if (!forcePull) return false;
-        throw new Error(`File "${githubSyncState.path}" not found in branch "${githubSyncState.branch}".`);
+        throw new Error(`File "${githubSyncState.path}" not found.`);
       }
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -6161,9 +6161,11 @@
       updateHeaderSyncBadge('syncing', 'Saving...');
       addSyncLog('info', `📡 Pushing ${books.length} volumes to ${cleanRepo}/${githubSyncState.path}...`);
 
-      let latestSha = githubSyncState.lastSha;
+      let latestSha = githubSyncState.lastSha || null;
+
+      // Fetch file directly from GitHub to obtain exact current SHA
       try {
-        const getRes = await fetch(`${url}?ref=${githubSyncState.branch}&nocache=${Date.now()}`, {
+        const getRes = await fetch(`${url}?nocache=${Date.now()}_${Math.random().toString(36).substring(2,7)}`, {
           headers: {
             'Authorization': `Bearer ${githubSyncState.token}`,
             'Accept': 'application/vnd.github.v3+json',
@@ -6173,10 +6175,21 @@
         });
         if (getRes.ok) {
           const getData = await getRes.json();
-          latestSha = getData.sha;
-          githubSyncState.lastSha = getData.sha;
+          if (getData && getData.sha) {
+            latestSha = getData.sha;
+            githubSyncState.lastSha = getData.sha;
+            addSyncLog('info', `🔍 Found existing remote file (SHA: ${latestSha.substring(0, 7)})`);
+          }
+        } else if (getRes.status === 404) {
+          latestSha = null;
+          addSyncLog('info', `✨ Remote file does not exist yet. Creating new file...`);
+        } else {
+          const errData = await getRes.json().catch(() => ({}));
+          addSyncLog('warn', `⚠️ SHA lookup returned HTTP ${getRes.status}: ${errData.message || 'unknown'}`);
         }
-      } catch (e) {}
+      } catch (e) {
+        addSyncLog('warn', `⚠️ Could not fetch latest SHA: ${e.message}`);
+      }
 
       const isJson = githubSyncState.path.endsWith('.json');
       const contentStr = isJson ? JSON.stringify(buildDatabaseObject(), null, 2) : buildDatabaseJsFileString();
@@ -6184,9 +6197,11 @@
 
       const bodyPayload = {
         message: `Update library catalog via Shelved [${books.length} volumes]`,
-        content: contentBase64,
-        branch: githubSyncState.branch || 'main'
+        content: contentBase64
       };
+      if (githubSyncState.branch && githubSyncState.branch !== 'main') {
+        bodyPayload.branch = githubSyncState.branch;
+      }
       if (latestSha) {
         bodyPayload.sha = latestSha;
       }
