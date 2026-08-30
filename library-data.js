@@ -1,10 +1,10 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T12:30:14.006Z
+ * Generated on 2026-08-30T12:31:29.397Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T12:30:14.006Z",
+  "updatedAt": "2026-08-30T12:31:29.397Z",
   "libraryMode": "individual",
   "libraryMembers": [
     "João"
@@ -32,6 +32,33 @@ window.SHELVED_DATABASE = {
   },
   "books": [
     {
+      "id": "book-1788093087710",
+      "title": "The Two Towers",
+      "titlePt": "The Two Towers",
+      "authors": [
+        "J.R.R. Tolkien"
+      ],
+      "year": 1954,
+      "format": "Physical",
+      "ageGroup": "Adult",
+      "language": "Portuguese",
+      "location": "",
+      "categories": [
+        "Fantasy",
+        "Adventure",
+        "Classics"
+      ],
+      "status": "Want to Read",
+      "rating": 0,
+      "coverUrl": "https://covers.openlibrary.org/b/id/14627564-L.jpg",
+      "description": "The Lord of the Rings, J.R.R. Tolkien's three-volume epic, is set in the imaginary world of Middle-earth -- home to many strange beings, and most notably hobbits, a peace-loving \"little people,\" cheerful and shy. Since its original British publication in 1954-55, the saga has entranced readers of all ages. It is at once a classic myth and a modern fairy tale. Critic Michael Straight has hailed it as one of the \"very few works of genius in recent literature.\" Middle-earth is a world receptive to poets, scholars, children, and all other people of good will. Donald Barr has described it as \"a scrubbed morning world, and a ringing nightmare world...especially sunlit, and shadowed by perils very fundamental, of a peculiarly uncompounded darkness.\" The story of this world is one of high and heroic adventure. Barr compared it to Beowulf, C.S. Lewis to Orlando Furioso, W.H. Auden to The Thirty-nine Steps. In fact the saga is sui generis -- a triumph of imagination which springs to life within its own framework and on its own terms. - Jacket flap.\n\nFrodo and the Companions of the Ring have been beset by danger during their quest to prevent the Ruling Ring from falling into the hands of the Dark Lord by destroying it in the Cracks of Doom. They have lost the wizard, Gandalf, in the battle with an evil spirit in the Mines of Moria; and at the Falls of Rauros, Boromir, seduced by the power of the Ring, tried to seize it by force. While Frodo and Sam made their escape the rest of the company were attacked by Orcs. Now they continue their journey alone down the great River Anduin – alone, that is, save for the mysterious creeping figure that follows wherever they go. J.R.R. Tolkien’s great work of imaginative fiction has been labelled both a heroic romance and a classic fantasy fiction. By turns comic and homely, epic and diabolic, the narrative moves through countless changes of scene and character in an imaginary world which is totally convincing in its detail.\n\n---\n\n**Also contained in:**\n\n- [The Lord of the Rings](https://openlibrary.org/works/OL27448W/The_Lord_of_the_Rings)",
+      "isFavorite": false,
+      "isbn": "9789984056265",
+      "pageCount": 450,
+      "dateAdded": "2026-08-30T12:31:27.710Z",
+      "readingProgress": 0
+    },
+    {
       "id": "book-1788093012277",
       "title": "The Lord of the Rings",
       "titlePt": "The Lord of the Rings",
@@ -56,7 +83,18 @@ window.SHELVED_DATABASE = {
       "isbn": "978-8830119000",
       "pageCount": 1376,
       "dateAdded": "2026-08-30T12:30:12.277Z",
-      "readingProgress": 0
+      "readingProgress": 0,
+      "memberProgress": {
+        "João": {
+          "status": "Want to Read",
+          "readingProgress": 0,
+          "currentPage": 0,
+          "isFavorite": false,
+          "lastOpened": null
+        }
+      },
+      "currentPage": 0,
+      "lastOpened": null
     },
     {
       "id": "book-1788092886515",
