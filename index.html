@@ -99,6 +99,48 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    .book-spine-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      overflow-x: auto;
+      padding: 16px 8px 0 8px;
+      min-height: 265px;
+      scrollbar-width: thin;
+    }
+    .book-spine-card {
+      position: relative;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 4px;
+      border-radius: 4px 4px 0 0;
+      transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+      user-select: none;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.6), inset 1.5px 0 2px rgba(255,255,255,0.14), inset -2px 0 3px rgba(0,0,0,0.45);
+    }
+    .book-spine-card:hover {
+      transform: translateY(-16px) scale(1.02);
+      z-index: 20;
+      box-shadow: 0 18px 28px rgba(0,0,0,0.85), 0 0 14px rgba(212,160,23,0.6);
+    }
+    .book-spine-text {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      text-orientation: mixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-height: 175px;
+      width: 100%;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-ebony text-[#EDE8DE] flex flex-col antialiased selection:bg-gold selection:text-ebony">
@@ -520,10 +562,32 @@
 
       <!-- Physical Rooms & Shelves -->
       <div>
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <div class="flex items-center gap-2">
             <i data-lucide="home" class="w-5 h-5 text-gold"></i>
             <h3 class="font-cinzel text-xl font-bold text-parchment">Physical Rooms & Shelf Locations</h3>
+          </div>
+
+          <!-- Location View Mode Toggle: Spines vs Covers -->
+          <div class="flex items-center bg-ebony p-1 rounded-xl border border-moss self-end sm:self-auto">
+            <button 
+              id="loc-view-spines-btn" 
+              onclick="setLocationViewMode('spines')" 
+              title="Bookshelf Spines View (Lombada)" 
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-gold text-ebony font-bold shadow"
+            >
+              <i data-lucide="library" class="w-3.5 h-3.5"></i>
+              <span>Spines View</span>
+            </button>
+            <button 
+              id="loc-view-covers-btn" 
+              onclick="setLocationViewMode('covers')" 
+              title="Standard Cover Grid View" 
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9E9382] hover:text-parchment transition-all cursor-pointer"
+            >
+              <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+              <span>Covers Grid</span>
+            </button>
           </div>
         </div>
         <div id="locations-shelves-container" class="space-y-6"></div>
@@ -2942,11 +3006,109 @@
       setTab('home');
     }
 
+    // Locations View Mode State & Logic
+    let locationViewMode = localStorage.getItem('shelved_location_view_mode_v1') || 'spines';
+
+    function setLocationViewMode(mode) {
+      locationViewMode = mode;
+      localStorage.setItem('shelved_location_view_mode_v1', mode);
+      updateLocationViewModeButtons();
+      renderLocationsView();
+    }
+
+    function updateLocationViewModeButtons() {
+      const spinesBtn = document.getElementById('loc-view-spines-btn');
+      const coversBtn = document.getElementById('loc-view-covers-btn');
+      if (spinesBtn && coversBtn) {
+        if (locationViewMode === 'spines') {
+          spinesBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-gold text-ebony font-bold shadow';
+          coversBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9E9382] hover:text-parchment transition-all cursor-pointer';
+        } else {
+          spinesBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9E9382] hover:text-parchment transition-all cursor-pointer';
+          coversBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-gold text-ebony font-bold shadow';
+        }
+      }
+    }
+
+    function getBookSpineTheme(book, index) {
+      const themes = [
+        { bg: 'linear-gradient(180deg, #5C1D1D 0%, #380E0E 100%)', border: '#7C2D2D', accent: '#F3E5AB', rib: '#D4AF37' }, // Burgundy/Crimson
+        { bg: 'linear-gradient(180deg, #1C3B30 0%, #0F231D 100%)', border: '#2D594B', accent: '#E8F5E9', rib: '#A3D9C9' }, // Emerald/Forest
+        { bg: 'linear-gradient(180deg, #1A2B42 0%, #0D192B 100%)', border: '#2C4466', accent: '#E3F2FD', rib: '#90CAF9' }, // Oxford Navy
+        { bg: 'linear-gradient(180deg, #4A3319 0%, #2E1E0E 100%)', border: '#6B4A24', accent: '#FFF8E1', rib: '#FFE082' }, // Vintage Leather/Amber
+        { bg: 'linear-gradient(180deg, #32203C 0%, #1D1124 100%)', border: '#4E385D', accent: '#F3E5F5', rib: '#CE93D8' }, // Royal Plum
+        { bg: 'linear-gradient(180deg, #242424 0%, #141414 100%)', border: '#404040', accent: '#FAFAFA', rib: '#D4AF37' }, // Ebony/Gold
+        { bg: 'linear-gradient(180deg, #3E241E 0%, #241411 100%)', border: '#5D4037', accent: '#EFEBE9', rib: '#BCAAA4' }, // Deep Mahogany
+        { bg: 'linear-gradient(180deg, #1B3838 0%, #0E2222 100%)', border: '#2E5A5A', accent: '#E0F2F1', rib: '#80CBC4' }  // Dark Teal
+      ];
+
+      let hash = 0;
+      const str = (book.id || '') + (book.title || '') + (book.isbn || '');
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      const themeIndex = Math.abs(hash) % themes.length;
+      const theme = themes[themeIndex];
+
+      const pages = book.pageCount || 320;
+      const width = Math.min(74, Math.max(44, Math.round(42 + (pages / 800) * 26)));
+      const height = 215 + (Math.abs(hash * 7) % 36);
+
+      return { ...theme, width, height };
+    }
+
+    function renderBookSpine(book, idx) {
+      const theme = getBookSpineTheme(book, idx);
+      const progressPercent = getBookProgress(book);
+
+      return `
+        <div 
+          onclick="openDetailModal('${book.id}')"
+          class="book-spine-card group"
+          title="${escapeHtml(book.title)} by ${escapeHtml(book.authors.join(', '))}"
+          style="
+            width: ${theme.width}px;
+            height: ${theme.height}px;
+            background: ${theme.bg};
+            border-left: 1px solid ${theme.border};
+            border-right: 1px solid ${theme.border};
+          "
+        >
+          <!-- Top Embossed Ribs -->
+          <div class="w-full flex flex-col gap-1 items-center px-0.5 pt-1.5 shrink-0">
+            <div class="w-full h-[2px] rounded-full" style="background: ${theme.rib}; opacity: 0.85;"></div>
+            <div class="w-full h-[1px] rounded-full" style="background: ${theme.rib}; opacity: 0.45;"></div>
+          </div>
+
+          <!-- Vertical Spine Text: Title (larger) & Author (smaller) -->
+          <div class="book-spine-text my-auto select-none px-0.5">
+            <span class="font-cinzel text-xs md:text-[12.5px] font-bold text-parchment tracking-wider uppercase group-hover:text-gold transition-colors leading-tight">
+              ${escapeHtml(book.title)}
+            </span>
+            <span class="text-[9.5px] md:text-[10.5px] font-playfair italic text-[#C7BCAC] opacity-85">
+              ${escapeHtml(book.authors[0] || '')}
+            </span>
+          </div>
+
+          <!-- Bottom Embossed Ribs & Progress Indicator -->
+          <div class="w-full flex flex-col gap-1 items-center px-0.5 pb-1.5 shrink-0">
+            <div class="w-full h-[1px] rounded-full" style="background: ${theme.rib}; opacity: 0.45;"></div>
+            <div class="w-full h-[2px] rounded-full" style="background: ${theme.rib}; opacity: 0.85;"></div>
+            ${progressPercent > 0 ? `
+              <div class="w-2.5 h-2.5 rounded-full mt-1.5 ${progressPercent === 100 ? 'bg-emerald-400' : 'bg-gold'} shadow" title="${progressPercent}% Read"></div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
     // Locations View Render
     function renderLocationsView() {
       const locContainer = document.getElementById('locations-shelves-container');
       if (!locContainer) return;
 
+      updateLocationViewModeButtons();
       const allLocs = getAllLocations();
 
       if (allLocs.length === 0) {
@@ -2974,7 +3136,7 @@
         const hasBooks = lBooks.length > 0;
 
         return `
-          <div class="bg-slate/70 rounded-2xl p-5 md:p-6 border border-[#3d3835]">
+          <div class="bg-slate/70 rounded-2xl p-5 md:p-6 border border-[#3d3835] shadow-lg">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-[#3d3835]">
               <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-ebony border border-moss flex items-center justify-center text-gold shrink-0">
@@ -3013,28 +3175,49 @@
               </div>
             </div>
 
-            ${hasBooks ? `
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                ${lBooks.map(b => `
-                  <div onclick="openDetailModal('${b.id}')" class="group cursor-pointer flex flex-col items-center text-center transition-transform hover:-translate-y-1">
-                    <div class="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-ebony border border-[#3d3835] group-hover:border-gold shadow-md">
-                      ${b.coverUrl ? `<img src="${b.coverUrl}" class="w-full h-full object-cover" />` : `<div class="p-1 text-[8px] font-cinzel">${escapeHtml(b.title)}</div>`}
+            ${hasBooks ? (
+              locationViewMode === 'spines' ? `
+                <!-- Multi-Tier Bookshelf Spines View: Fills bottom shelves first and stacks upwards -->
+                <div class="space-y-6 pt-2">
+                  ${(() => {
+                    const BOOKS_PER_SHELF = 14;
+                    const tiers = [];
+                    for (let i = 0; i < lBooks.length; i += BOOKS_PER_SHELF) {
+                      tiers.push(lBooks.slice(i, i + BOOKS_PER_SHELF));
+                    }
+                    return [...tiers].reverse().map(tierBooks => `
+                      <div class="relative">
+                        <div class="book-spine-row">
+                          ${tierBooks.map((b, bIdx) => renderBookSpine(b, bIdx)).join('')}
+                        </div>
+                        <div class="h-3.5 w-full wood-shelf rounded shadow-md border-t border-[#4a3325]"></div>
+                      </div>
+                    `).join('');
+                  })()}
+                </div>
+              ` : `
+                <!-- Standard Cover Grid View -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                  ${lBooks.map(b => `
+                    <div onclick="openDetailModal('${b.id}')" class="group cursor-pointer flex flex-col items-center text-center transition-transform hover:-translate-y-1">
+                      <div class="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-ebony border border-[#3d3835] group-hover:border-gold shadow-md">
+                        ${b.coverUrl ? `<img src="${b.coverUrl}" class="w-full h-full object-cover" />` : `<div class="p-1 text-[8px] font-cinzel">${escapeHtml(b.title)}</div>`}
+                      </div>
+                      <h5 class="mt-2 text-xs font-semibold text-parchment group-hover:text-gold line-clamp-1 w-full font-cinzel">${escapeHtml(b.title)}</h5>
                     </div>
-                    <h5 class="mt-2 text-xs font-semibold text-parchment group-hover:text-gold line-clamp-1 w-full font-cinzel">${escapeHtml(b.title)}</h5>
-                  </div>
-                `).join('')}
-              </div>
-            ` : `
+                  `).join('')}
+                </div>
+                <div class="mt-4 h-2 w-full wood-shelf rounded-full"></div>
+              `
+            ) : `
               <div class="py-6 text-center text-xs text-[#9E9382] font-playfair italic flex items-center justify-center gap-2">
                 <span>No volumes are currently placed on this shelf.</span>
                 <button onclick="openAddBookModalWithLocation('${escapeJs(location)}')" class="text-gold font-sans font-semibold underline hover:text-gold-light cursor-pointer">
                   + Add Book here
                 </button>
               </div>
+              <div class="mt-4 h-2 w-full wood-shelf rounded-full"></div>
             `}
-
-            <!-- Sleek wood shelf divider without shadow -->
-            <div class="mt-4 h-2 w-full wood-shelf rounded-full"></div>
           </div>
         `;
       }).join('');
