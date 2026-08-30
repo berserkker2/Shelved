@@ -1,10 +1,10 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T11:58:37.973Z
+ * Generated on 2026-08-30T11:59:19.207Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T11:58:37.973Z",
+  "updatedAt": "2026-08-30T11:59:19.207Z",
   "libraryMode": "shared",
   "libraryMembers": [
     "João",
@@ -61,7 +61,7 @@ window.SHELVED_DATABASE = {
       "dateAdded": "2026-08-30T11:51:45.200Z",
       "readingProgress": 5,
       "currentPage": 10,
-      "lastOpened": "2026-08-30T11:51:48.289Z",
+      "lastOpened": "2026-08-30T11:59:17.625Z",
       "memberProgress": {
         "João": {
           "status": "Currently Reading",
