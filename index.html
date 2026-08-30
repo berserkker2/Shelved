@@ -5423,21 +5423,21 @@
       const oauthClientInput = document.getElementById('github-oauth-client-id');
       const oauthGatekeeperInput = document.getElementById('github-oauth-gatekeeper');
 
-      if (repoInput) githubSyncState.repo = repoInput.value.trim();
-      if (tokenInput) githubSyncState.token = tokenInput.value.trim();
-      if (branchInput) githubSyncState.branch = branchInput.value.trim() || 'main';
-      if (pathInput) githubSyncState.path = pathInput.value.trim() || 'library-data.js';
+      if (repoInput && repoInput.value.trim()) githubSyncState.repo = repoInput.value.trim();
+      if (tokenInput && tokenInput.value.trim()) githubSyncState.token = tokenInput.value.trim();
+      if (branchInput && branchInput.value.trim()) githubSyncState.branch = branchInput.value.trim();
+      if (pathInput && pathInput.value.trim()) githubSyncState.path = pathInput.value.trim();
       if (autoSyncToggle) githubSyncState.autoSync = autoSyncToggle.checked;
-      if (oauthClientInput) githubSyncState.oauthClientId = oauthClientInput.value.trim();
-      if (oauthGatekeeperInput) githubSyncState.oauthGatekeeper = oauthGatekeeperInput.value.trim();
+      if (oauthClientInput && oauthClientInput.value.trim()) githubSyncState.oauthClientId = oauthClientInput.value.trim();
+      if (oauthGatekeeperInput && oauthGatekeeperInput.value.trim()) githubSyncState.oauthGatekeeper = oauthGatekeeperInput.value.trim();
 
-      localStorage.setItem('shelved_gh_repo_v1', githubSyncState.repo);
-      localStorage.setItem('shelved_gh_token_v1', githubSyncState.token);
-      localStorage.setItem('shelved_gh_branch_v1', githubSyncState.branch);
-      localStorage.setItem('shelved_gh_path_v1', githubSyncState.path);
+      if (githubSyncState.repo) localStorage.setItem('shelved_gh_repo_v1', githubSyncState.repo);
+      if (githubSyncState.token) localStorage.setItem('shelved_gh_token_v1', githubSyncState.token);
+      localStorage.setItem('shelved_gh_branch_v1', githubSyncState.branch || 'main');
+      localStorage.setItem('shelved_gh_path_v1', githubSyncState.path || 'library-data.js');
       localStorage.setItem('shelved_gh_autosync_v1', String(githubSyncState.autoSync));
-      localStorage.setItem('shelved_gh_oauth_client_id_v1', githubSyncState.oauthClientId || '');
-      localStorage.setItem('shelved_gh_oauth_gatekeeper_v1', githubSyncState.oauthGatekeeper || '');
+      if (githubSyncState.oauthClientId) localStorage.setItem('shelved_gh_oauth_client_id_v1', githubSyncState.oauthClientId);
+      if (githubSyncState.oauthGatekeeper) localStorage.setItem('shelved_gh_oauth_gatekeeper_v1', githubSyncState.oauthGatekeeper);
 
       updateGithubSyncUI();
     }
