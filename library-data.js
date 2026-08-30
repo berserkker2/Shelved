@@ -1,10 +1,10 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T12:23:05.940Z
+ * Generated on 2026-08-30T12:23:19.328Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T12:23:05.940Z",
+  "updatedAt": "2026-08-30T12:23:19.328Z",
   "libraryMode": "shared",
   "libraryMembers": [
     "João",
@@ -32,6 +32,45 @@ window.SHELVED_DATABASE = {
     "Online / Cloud": "cloud"
   },
   "books": [
+    {
+      "id": "book-1788092596181",
+      "title": "Nod",
+      "authors": [
+        "Adrian Barnes"
+      ],
+      "year": 2012,
+      "format": "Physical",
+      "ageGroup": "Adult",
+      "language": "English",
+      "location": "",
+      "categories": [
+        "Dystopian",
+        "Sleep Deprivation",
+        "Dreams",
+        "Fiction",
+        "General"
+      ],
+      "status": "Currently Reading",
+      "rating": 0,
+      "coverUrl": "https://covers.openlibrary.org/b/id/10317035-L.jpg",
+      "description": "Dawn breaks over Vancouver and no one in the world has slept the night before, or almost no one. A few people, perhaps one in ten thousand, can still sleep, and theyve all shared the same golden dream.",
+      "isFavorite": false,
+      "isbn": "9781785655814",
+      "pageCount": 199,
+      "dateAdded": "2026-08-30T12:23:16.181Z",
+      "readingProgress": 5,
+      "currentPage": 10,
+      "lastOpened": "2026-08-30T12:23:16.837Z",
+      "memberProgress": {
+        "João": {
+          "status": "Currently Reading",
+          "readingProgress": 5,
+          "currentPage": 10,
+          "isFavorite": false,
+          "lastOpened": "2026-08-30T12:23:16.837Z"
+        }
+      }
+    },
     {
       "id": "book-1",
       "title": "The Name of the Rose",
