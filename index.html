@@ -1048,7 +1048,7 @@
               <input 
                 type="text" 
                 id="new-member-name-input" 
-                placeholder="Add person name (e.g. Maria, João)..." 
+                placeholder="Add person name (e.g. Maria, Alex)..." 
                 class="flex-1 px-3.5 py-2 rounded-xl bg-ebony border border-moss text-xs text-parchment placeholder-[#7d7467] focus:outline-none focus:border-gold"
               />
               <button 
@@ -1937,16 +1937,16 @@
         const savedMembers = localStorage.getItem('shelved_library_members_v1');
         if (savedMembers) {
           libraryMembers = JSON.parse(savedMembers);
-          if (!libraryMembers.length) libraryMembers = ['João'];
+          if (!libraryMembers.length) libraryMembers = ['User'];
         } else {
-          libraryMembers = (window.SHELVED_DATABASE && Array.isArray(window.SHELVED_DATABASE.libraryMembers)) ? [...window.SHELVED_DATABASE.libraryMembers] : ['João'];
+          libraryMembers = (window.SHELVED_DATABASE && Array.isArray(window.SHELVED_DATABASE.libraryMembers)) ? [...window.SHELVED_DATABASE.libraryMembers] : ['User'];
         }
 
         const savedActive = localStorage.getItem('shelved_active_member_v1');
         if (savedActive && libraryMembers.includes(savedActive)) {
           activeMember = savedActive;
         } else {
-          activeMember = libraryMembers[0] || 'João';
+          activeMember = libraryMembers[0] || 'User';
         }
 
         syncActiveMemberToAllBooks();
@@ -1955,8 +1955,8 @@
         customLocations = [...DEFAULT_LOCATIONS];
         locationIcons = { ...DEFAULT_LOCATION_ICONS };
         libraryMode = 'individual';
-        libraryMembers = ['João'];
-        activeMember = 'João';
+        libraryMembers = ['User'];
+        activeMember = 'User';
       }
     }
 
@@ -5127,8 +5127,8 @@
       libraryMode = mode;
       if (mode === 'shared') {
         if (libraryMembers.length === 1 && (libraryMembers[0] === 'Me' || libraryMembers[0] === 'Profile')) {
-          libraryMembers = ['João', 'Reader 2'];
-          activeMember = 'João';
+          libraryMembers = ['User', 'Reader 2'];
+          activeMember = 'User';
         }
         syncActiveMemberToAllBooks();
       }
@@ -6281,7 +6281,7 @@
             if (Array.isArray(parsed.libraryMembers)) libraryMembers = parsed.libraryMembers;
             if (Array.isArray(parsed.customLocations)) customLocations = parsed.customLocations;
             if (parsed.locationIcons) locationIcons = parsed.locationIcons;
-            if (!libraryMembers.includes(activeMember)) activeMember = libraryMembers[0] || 'João';
+            if (!libraryMembers.includes(activeMember)) activeMember = libraryMembers[0] || 'User';
           } else {
             throw new Error('Invalid schema');
           }
@@ -6301,8 +6301,8 @@
       if (confirm('Reset library to default sample collection?')) {
         books = (window.SHELVED_DATABASE && Array.isArray(window.SHELVED_DATABASE.books)) ? window.SHELVED_DATABASE.books : SAMPLE_BOOKS;
         libraryMode = 'individual';
-        libraryMembers = ['João'];
-        activeMember = 'João';
+        libraryMembers = ['User'];
+        activeMember = 'User';
         saveStorage();
         renderAll();
         closeSettingsModal();

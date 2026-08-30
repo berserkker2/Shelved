@@ -8,9 +8,9 @@ window.SHELVED_DATABASE = {
   "updatedAt": "2026-08-30T10:50:00.000Z",
   "libraryMode": "individual",
   "libraryMembers": [
-    "João"
+    "User"
   ],
-  "activeMember": "João",
+  "activeMember": "User",
   "customLocations": [
     "Shelf 1",
     "Shelf 2",
@@ -62,7 +62,7 @@ window.SHELVED_DATABASE = {
       "dateAdded": "2024-01-10T14:30:00.000Z",
       "lastOpened": "2024-03-15T12:00:00.000Z",
       "memberProgress": {
-        "João": {
+        "User": {
           "status": "Completed",
           "readingProgress": 100,
           "currentPage": 512,
@@ -102,7 +102,7 @@ window.SHELVED_DATABASE = {
       "dateAdded": "2024-01-15T18:00:00.000Z",
       "lastOpened": "2024-03-18T20:30:00.000Z",
       "memberProgress": {
-        "João": {
+        "User": {
           "status": "Currently Reading",
           "readingProgress": 45,
           "currentPage": 308,
@@ -141,7 +141,7 @@ window.SHELVED_DATABASE = {
       "dateAdded": "2024-02-01T09:15:00.000Z",
       "lastOpened": "2024-03-17T18:15:00.000Z",
       "memberProgress": {
-        "João": {
+        "User": {
           "status": "Currently Reading",
           "readingProgress": 20,
           "currentPage": 97,
@@ -179,7 +179,7 @@ window.SHELVED_DATABASE = {
       "dateAdded": "2024-02-15T16:20:00.000Z",
       "lastOpened": null,
       "memberProgress": {
-        "João": {
+        "User": {
           "status": "Want to Read",
           "readingProgress": 0,
           "currentPage": 0,
@@ -217,7 +217,7 @@ window.SHELVED_DATABASE = {
       "dateAdded": "2024-03-01T10:00:00.000Z",
       "lastOpened": null,
       "memberProgress": {
-        "João": {
+        "User": {
           "status": "Want to Read",
           "readingProgress": 0,
           "currentPage": 0,
@@ -256,7 +256,7 @@ window.SHELVED_DATABASE = {
       "dateAdded": "2024-03-12T19:00:00.000Z",
       "lastOpened": null,
       "memberProgress": {
-        "João": {
+        "User": {
           "status": "Want to Read",
           "readingProgress": 0,
           "currentPage": 0,
