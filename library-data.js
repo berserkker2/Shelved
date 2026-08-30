@@ -1,16 +1,16 @@
 /**
  * Shelved — Standalone Library Database File
- * Generated on 2026-08-30T12:23:03.880Z
+ * Generated on 2026-08-30T12:23:05.940Z
  */
 window.SHELVED_DATABASE = {
   "version": 1,
-  "updatedAt": "2026-08-30T12:23:03.880Z",
+  "updatedAt": "2026-08-30T12:23:05.940Z",
   "libraryMode": "shared",
   "libraryMembers": [
     "João",
     "Ines"
   ],
-  "activeMember": "Ines",
+  "activeMember": "João",
   "customLocations": [
     "Shelf 1",
     "Shelf 2",
@@ -49,18 +49,18 @@ window.SHELVED_DATABASE = {
       "ageGroup": "Adult",
       "format": "Physical",
       "location": "Shelf 1",
-      "status": "Want to Read",
+      "status": "Completed",
       "rating": 5,
-      "isFavorite": false,
-      "readingProgress": 0,
-      "currentPage": 0,
+      "isFavorite": true,
+      "readingProgress": 100,
+      "currentPage": 512,
       "language": "Italian / English",
       "description": "The year is 1327. Franciscans in a wealthy Italian abbey are suspected of heresy, and Brother William of Baskerville arrives to investigate. When his delicate mission is overshadowed by seven bizarre deaths, Brother William turns detective.",
       "coverUrl": "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1415375498i/119073.jpg",
       "isbn": "9780156001311",
       "pageCount": 512,
       "dateAdded": "2024-01-10T14:30:00.000Z",
-      "lastOpened": null,
+      "lastOpened": "2024-03-15T12:00:00.000Z",
       "memberProgress": {
         "João": {
           "status": "Completed",
@@ -96,18 +96,18 @@ window.SHELVED_DATABASE = {
       "format": "Physical & Digital",
       "digitalUrl": "https://play.google.com/books",
       "location": "Shelf 2",
-      "status": "Want to Read",
+      "status": "Currently Reading",
       "rating": 5,
-      "isFavorite": false,
-      "readingProgress": 0,
-      "currentPage": 0,
+      "isFavorite": true,
+      "readingProgress": 45,
+      "currentPage": 308,
       "language": "English",
       "description": "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the 'spice' melange.",
       "coverUrl": "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1555447414i/44767458.jpg",
       "isbn": "9780441172719",
       "pageCount": 688,
       "dateAdded": "2024-01-15T18:00:00.000Z",
-      "lastOpened": null,
+      "lastOpened": "2024-03-18T20:30:00.000Z",
       "memberProgress": {
         "João": {
           "status": "Currently Reading",
@@ -142,18 +142,18 @@ window.SHELVED_DATABASE = {
       "ageGroup": "Adult",
       "format": "Physical",
       "location": "Shelf 1",
-      "status": "Want to Read",
+      "status": "Currently Reading",
       "rating": 4,
       "isFavorite": false,
-      "readingProgress": 0,
-      "currentPage": 0,
+      "readingProgress": 20,
+      "currentPage": 97,
       "language": "Spanish / English",
       "description": "Barcelona, 1945: A city slowly heals from its war wounds, and Daniel, an antiquarian book dealer's son who mourns the loss of his mother, finds solace in a mysterious book from the Cemetery of Forgotten Books.",
       "coverUrl": "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1344922523i/1232.jpg",
       "isbn": "9780143034902",
       "pageCount": 487,
       "dateAdded": "2024-02-01T09:15:00.000Z",
-      "lastOpened": null,
+      "lastOpened": "2024-03-17T18:15:00.000Z",
       "memberProgress": {
         "João": {
           "status": "Currently Reading",
@@ -190,7 +190,7 @@ window.SHELVED_DATABASE = {
       "location": "Bedroom - Nightstand",
       "status": "Want to Read",
       "rating": 0,
-      "isFavorite": false,
+      "isFavorite": true,
       "readingProgress": 0,
       "language": "Portuguese",
       "description": "The masterpiece of modern Portuguese literature. A mesmerizing diary of existential meditation, melancholy reflections, and aesthetic reveries in Lisbon.",
