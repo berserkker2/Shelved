@@ -308,9 +308,12 @@
       <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate via-ebony to-oxford/40 border border-moss/50 p-4 sm:p-5 shadow-xl">
         <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div class="max-w-md">
-            <h1 class="text-2xl sm:text-3xl font-extrabold font-cinzel text-parchment tracking-wide leading-tight">
+            <h1 id="home-banner-title" class="text-2xl sm:text-3xl font-extrabold font-cinzel text-parchment tracking-wide leading-tight">
               Private Library
             </h1>
+            <p id="home-banner-subtitle" class="mt-1 text-xs sm:text-sm text-[#B3A796] font-playfair italic leading-relaxed">
+              "A room without books is like a body without a soul." — Cicero
+            </p>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
@@ -2149,10 +2152,17 @@
         }
       });
 
+      const bannerTitle = document.getElementById('home-banner-title');
+      const bannerSubtitle = document.getElementById('home-banner-subtitle');
+
       if (tab === 'favorites') {
         filters.onlyFavorites = true;
-      } else if (tab === 'home' && filters.onlyFavorites) {
-        filters.onlyFavorites = false;
+        if (bannerTitle) bannerTitle.textContent = 'Favorites';
+        if (bannerSubtitle) bannerSubtitle.classList.add('hidden');
+      } else if (tab === 'home') {
+        if (filters.onlyFavorites) filters.onlyFavorites = false;
+        if (bannerTitle) bannerTitle.textContent = 'Private Library';
+        if (bannerSubtitle) bannerSubtitle.classList.remove('hidden');
       }
 
       renderAll();
