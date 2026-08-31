@@ -189,7 +189,7 @@
 
           <button id="nav-locations" onclick="setTab('locations')" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all text-[#C7BCAC] hover:text-parchment hover:bg-ebony/60">
             <i data-lucide="map-pin" class="w-4 h-4"></i>
-            <span>Where to Find</span>
+            <span>Locations</span>
           </button>
         </nav>
 
@@ -311,9 +311,6 @@
             <h1 class="text-2xl sm:text-3xl font-extrabold font-cinzel text-parchment tracking-wide leading-tight">
               Private Library
             </h1>
-            <p class="mt-1 text-xs sm:text-sm text-[#B3A796] font-playfair italic leading-relaxed">
-              "A room without books is like a body without a soul." — Cicero
-            </p>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
@@ -510,42 +507,71 @@
     </section>
 
     <!-- VIEW TAB: CATEGORIES VIEW -->
-    <section id="tab-categories-view" class="hidden space-y-10">
+    <section id="tab-categories-view" class="hidden space-y-8">
       <div class="bg-gradient-to-r from-slate via-ebony to-oxford/50 rounded-2xl p-6 md:p-8 border border-moss shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/15 border border-gold/30 text-gold-light text-xs font-semibold uppercase tracking-wider mb-2">
-            <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-            <span>Curated Genres</span>
-          </div>
           <h2 class="text-2xl md:text-3xl font-bold font-cinzel text-parchment">
-            Browse by Categories & Genres
+            Categories
           </h2>
-          <p class="text-sm text-[#9E9382] font-playfair italic mt-1">
-            Explore our curated literary shelves
-          </p>
         </div>
-        <div id="category-total-badge" class="text-xs text-[#9E9382] bg-ebony px-4 py-2 rounded-xl border border-[#3d3835]">
-          Genres: <strong class="text-gold">0</strong>
+
+        <div class="flex items-center gap-3 flex-wrap">
+          <div id="category-total-badge" class="text-xs text-[#9E9382] bg-ebony px-4 py-2 rounded-xl border border-[#3d3835]">
+            Selected: <strong class="text-gold">0</strong> genres
+          </div>
+
+          <!-- Category View Mode Toggle: Spines vs Covers -->
+          <div class="flex items-center bg-ebony p-1 rounded-xl border border-moss">
+            <button 
+              id="cat-view-spines-btn" 
+              onclick="setCategoryViewMode('spines')" 
+              title="Bookshelf Spines View (Lombada)" 
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-gold text-ebony font-bold shadow"
+            >
+              <i data-lucide="library" class="w-3.5 h-3.5"></i>
+              <span>Spines View</span>
+            </button>
+            <button 
+              id="cat-view-covers-btn" 
+              onclick="setCategoryViewMode('covers')" 
+              title="Standard Cover Grid View" 
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9E9382] hover:text-parchment transition-all cursor-pointer"
+            >
+              <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+              <span>Covers Grid</span>
+            </button>
+          </div>
         </div>
+      </div>
+
+      <!-- Category Filter Pills Row -->
+      <div class="bg-slate/60 p-4 sm:p-5 rounded-2xl border border-[#3d3835] shadow-lg">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="filter" class="w-4 h-4 text-gold"></i>
+            <span class="font-cinzel text-xs sm:text-sm font-bold text-parchment uppercase tracking-wider">Select Categories to Shelf</span>
+          </div>
+          <button 
+            id="cat-select-all-btn"
+            onclick="toggleAllCategoryFilters()" 
+            class="text-xs font-semibold px-3 py-1 rounded-lg bg-ebony hover:bg-oxford border border-moss text-gold hover:text-gold-light transition-all cursor-pointer select-none"
+          >
+            Select All
+          </button>
+        </div>
+        <div id="category-pills-row" class="flex flex-wrap gap-2 pt-1"></div>
       </div>
 
       <div id="categories-shelves-container" class="space-y-8"></div>
     </section>
 
-    <!-- VIEW TAB: WHERE TO FIND (LOCATIONS & OWNERS) -->
+    <!-- VIEW TAB: LOCATIONS (ROOMS & SHELVES) -->
     <section id="tab-locations-view" class="hidden space-y-12">
       <div class="bg-gradient-to-r from-slate via-ebony to-mahogany/40 rounded-2xl p-6 md:p-8 border border-moss shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/15 border border-gold/30 text-gold-light text-xs font-semibold uppercase tracking-wider mb-2">
-            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
-            <span>Inventory & Shelves</span>
-          </div>
           <h2 class="text-2xl md:text-3xl font-bold font-cinzel text-parchment">
-            Where to Find Our Books
+            Locations
           </h2>
-          <p class="text-sm text-[#9E9382] font-playfair italic mt-1">
-            Browse books organized by physical room, floor and shelf location
-          </p>
         </div>
 
         <div class="flex items-center gap-3 flex-wrap">
@@ -2950,12 +2976,33 @@
       `;
     }
 
-    // Categories View Render
-    function renderCategoriesView() {
-      const container = document.getElementById('categories-shelves-container');
-      const badge = document.getElementById('category-total-badge');
-      const catMap = new Map();
+    // Categories View State & Logic
+    let selectedCategories = new Set(); // Default: all filter categories deselected
+    let categoryViewMode = localStorage.getItem('shelved_category_view_mode_v1') || 'spines';
 
+    function setCategoryViewMode(mode) {
+      categoryViewMode = mode;
+      localStorage.setItem('shelved_category_view_mode_v1', mode);
+      updateCategoryViewModeButtons();
+      renderCategoriesView();
+    }
+
+    function updateCategoryViewModeButtons() {
+      const spinesBtn = document.getElementById('cat-view-spines-btn');
+      const coversBtn = document.getElementById('cat-view-covers-btn');
+      if (spinesBtn && coversBtn) {
+        if (categoryViewMode === 'spines') {
+          spinesBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-gold text-ebony font-bold shadow';
+          coversBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9E9382] hover:text-parchment transition-all cursor-pointer';
+        } else {
+          spinesBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9E9382] hover:text-parchment transition-all cursor-pointer';
+          coversBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-gold text-ebony font-bold shadow';
+        }
+      }
+    }
+
+    function getAllAvailableCategories() {
+      const catMap = new Map();
       books.forEach(b => {
         (b.categories || ['General']).forEach(cat => {
           const list = catMap.get(cat) || [];
@@ -2963,40 +3010,163 @@
           catMap.set(cat, list);
         });
       });
+      return Array.from(catMap.entries()).sort((a, b) => b[1].length - a[1].length);
+    }
 
-      const sorted = Array.from(catMap.entries()).sort((a, b) => b[1].length - a[1].length);
-      badge.innerHTML = `Genres: <strong class="text-gold">${sorted.length}</strong>`;
+    function toggleCategoryFilter(category) {
+      if (selectedCategories.has(category)) {
+        selectedCategories.delete(category);
+      } else {
+        selectedCategories.add(category);
+      }
+      renderCategoriesView();
+    }
 
-      container.innerHTML = sorted.map(([category, catBooks]) => `
-        <div class="bg-slate/60 rounded-2xl p-5 md:p-6 border border-[#3d3835] shadow-lg">
-          <div class="flex items-center justify-between pb-4 mb-4 border-b border-[#3d3835]">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-ebony border border-gold/40 flex items-center justify-center text-gold">
-                <i data-lucide="sparkles" class="w-4 h-4"></i>
-              </div>
-              <div>
-                <h3 class="font-cinzel text-xl font-bold text-parchment">${escapeHtml(category)}</h3>
-                <p class="text-xs text-[#9E9382] font-playfair italic">${catBooks.length} volume(s)</p>
-              </div>
+    function toggleAllCategoryFilters() {
+      const allCategories = getAllAvailableCategories().map(([cat]) => cat);
+      if (selectedCategories.size === allCategories.length) {
+        selectedCategories.clear();
+      } else {
+        selectedCategories = new Set(allCategories);
+      }
+      renderCategoriesView();
+    }
+
+    function selectAllCategories() {
+      const allCategories = getAllAvailableCategories().map(([cat]) => cat);
+      selectedCategories = new Set(allCategories);
+      renderCategoriesView();
+    }
+
+    // Categories View Render
+    function renderCategoriesView() {
+      const container = document.getElementById('categories-shelves-container');
+      const pillsContainer = document.getElementById('category-pills-row');
+      const badge = document.getElementById('category-total-badge');
+      const selectAllBtn = document.getElementById('cat-select-all-btn');
+      if (!container) return;
+
+      updateCategoryViewModeButtons();
+
+      const sortedCategories = getAllAvailableCategories();
+      const allCategoryNames = sortedCategories.map(([cat]) => cat);
+
+      if (badge) {
+        badge.innerHTML = `Selected: <strong class="text-gold">${selectedCategories.size}</strong> of ${allCategoryNames.length} genres`;
+      }
+
+      if (selectAllBtn) {
+        selectAllBtn.textContent = (selectedCategories.size === allCategoryNames.length) ? 'Deselect All' : 'Select All';
+      }
+
+      // Render Interactive Category Filter Pills
+      if (pillsContainer) {
+        pillsContainer.innerHTML = sortedCategories.map(([category, catBooks]) => {
+          const isSelected = selectedCategories.has(category);
+          return `
+            <button
+              onclick="toggleCategoryFilter('${escapeJs(category)}')"
+              type="button"
+              title="${isSelected ? 'Click to deselect' : 'Click to select and shelf'} ${escapeHtml(category)}"
+              class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 select-none ${
+                isSelected 
+                  ? 'bg-gold text-ebony font-bold shadow border border-gold hover:brightness-110' 
+                  : 'bg-ebony/80 text-[#7d7467] hover:text-[#C7BCAC] border border-[#3d3835] hover:border-moss opacity-70 hover:opacity-100'
+              }"
+            >
+              <span>${escapeHtml(category)}</span>
+              <span class="text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-ebony/30 text-ebony font-extrabold' : 'bg-slate text-[#9E9382]'}">
+                ${catBooks.length}
+              </span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      // Filter all books matching any of the selected categories
+      const displayedBooks = books.filter(b => {
+        const bCats = (b.categories && b.categories.length > 0) ? b.categories : ['General'];
+        return bCats.some(cat => selectedCategories.has(cat));
+      });
+
+      // Sort books primarily by main category, then alphabetically by title
+      displayedBooks.sort((a, b) => {
+        const catA = (a.categories && a.categories[0]) || 'General';
+        const catB = (b.categories && b.categories[0]) || 'General';
+        const catCmp = catA.localeCompare(catB);
+        if (catCmp !== 0) return catCmp;
+        return (a.title || '').localeCompare(b.title || '');
+      });
+
+      if (displayedBooks.length === 0) {
+        container.innerHTML = `
+          <div class="py-16 text-center bg-slate/40 rounded-3xl border border-[#3d3835] p-8">
+            <div class="w-12 h-12 rounded-2xl bg-ebony border border-moss flex items-center justify-center text-gold mx-auto mb-3">
+              <i data-lucide="sparkles" class="w-6 h-6"></i>
             </div>
-            <button onclick="filterByGenre('${escapeHtml(category)}')" class="text-xs font-semibold text-gold hover:underline cursor-pointer">
-              View all in ${escapeHtml(category)} →
+            <h3 class="font-cinzel text-lg font-bold text-parchment">No Categories Selected</h3>
+            <p class="text-xs text-[#9E9382] font-playfair italic mt-1 max-w-md mx-auto">
+              Select one or more category badges above to place their books onto the shelf.
+            </p>
+            <button onclick="selectAllCategories()" class="mt-4 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow cursor-pointer">
+              Select All Categories
             </button>
           </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
 
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-            ${catBooks.slice(0, 6).map(b => `
-              <div onclick="openDetailModal('${b.id}')" class="group cursor-pointer flex flex-col items-center text-center transition-transform hover:-translate-y-1">
-                <div class="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-ebony border border-[#3d3835] group-hover:border-gold shadow-md">
-                  ${b.coverUrl ? `<img src="${b.coverUrl}" alt="${escapeHtml(b.title)}" class="w-full h-full object-cover" />` : `<div class="p-2 text-[10px] font-cinzel">${escapeHtml(b.title)}</div>`}
-                </div>
-                <h4 class="mt-2 text-xs font-semibold text-parchment group-hover:text-gold line-clamp-1 w-full font-cinzel">${escapeHtml(b.title)}</h4>
+      // Modern, clean category labels below the shelf
+      const selectedCatList = Array.from(selectedCategories).sort((a, b) => a.localeCompare(b));
+      const labelsHtml = selectedCatList.map(cat => {
+        const count = displayedBooks.filter(b => (b.categories || ['General']).includes(cat)).length;
+        return `
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-ebony/90 border border-gold/40 text-gold-light text-xs font-cinzel font-semibold tracking-wider shadow-sm">
+            <span>${escapeHtml(cat)}</span>
+            <span class="text-[10px] text-parchment/80 font-mono font-medium">(${count})</span>
+          </span>
+        `;
+      }).join('');
+
+      // Render ONE unified shelf with all books in the selected view mode
+      container.innerHTML = `
+        <div class="bg-slate/70 rounded-3xl p-5 md:p-6 border border-[#3d3835] shadow-xl space-y-4">
+          ${categoryViewMode === 'spines' ? `
+            <!-- Multi-Tier Bookshelf Spines View: Single unified shelf with multi-tier stacking -->
+            <div class="space-y-6 pt-2">
+              ${(() => {
+                const BOOKS_PER_SHELF = 14;
+                const tiers = [];
+                for (let i = 0; i < displayedBooks.length; i += BOOKS_PER_SHELF) {
+                  tiers.push(displayedBooks.slice(i, i + BOOKS_PER_SHELF));
+                }
+                return [...tiers].reverse().map(tierBooks => `
+                  <div class="relative">
+                    <div class="book-spine-row">
+                      ${tierBooks.map((b, bIdx) => renderBookSpine(b, bIdx)).join('')}
+                    </div>
+                    <div class="h-3.5 w-full wood-shelf rounded shadow-md border-t border-[#4a3325]"></div>
+                  </div>
+                `).join('');
+              })()}
+            </div>
+          ` : `
+            <!-- Standard Cover Grid View: Single unified shelf -->
+            <div class="pt-2">
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-5 gap-y-8">
+                ${displayedBooks.map(b => renderShelfCard(b)).join('')}
               </div>
-            `).join('')}
+              <div class="mt-6 h-3.5 w-full wood-shelf rounded shadow-md border-t border-[#4a3325]"></div>
+            </div>
+          `}
+
+          <!-- Clean, Modern Category Labels Below the Shelf -->
+          <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
+            ${labelsHtml}
           </div>
-          <div class="mt-4 h-2 w-full wood-shelf rounded-full"></div>
         </div>
-      `).join('');
+      `;
 
       lucide.createIcons();
     }
