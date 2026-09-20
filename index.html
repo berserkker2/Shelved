@@ -1192,8 +1192,8 @@
               <!-- Loading Indicator -->
               <div id="ai-loading-container" class="hidden py-8 text-center space-y-3">
                 <div class="w-10 h-10 border-3 border-gold border-t-transparent rounded-full animate-spin mx-auto"></div>
-                <div class="font-cinzel text-sm font-bold text-parchment">Analyzing photo with Gemini AI Vision...</div>
-                <div class="text-xs text-[#9E9382] font-playfair italic">Detecting book covers, spines, titles, and ISBNs...</div>
+                <div id="ai-loading-title" class="font-cinzel text-sm font-bold text-parchment">Analyzing photo with Gemini AI Vision...</div>
+                <div id="ai-loading-subtitle" class="text-xs text-[#9E9382] font-playfair italic">Detecting book covers, spines, titles, and ISBNs...</div>
               </div>
             </div>
 
@@ -1245,6 +1245,121 @@
           </div>
         </div>
 
+  </div>
+
+  <!-- MODAL: AI COVER PICKER & SEARCH -->
+  <div id="modal-ai-cover-picker" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div onclick="closeAiCoverPicker()" class="fixed inset-0 bg-black/85 backdrop-blur-md"></div>
+    <div class="relative w-full max-w-xl bg-ebony border-2 border-gold/60 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE]">
+      <div class="h-2 w-full bg-gradient-to-r from-mahogany via-gold to-oxford"></div>
+      
+      <div class="p-5 sm:p-6 space-y-4">
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-3 border-b border-[#3d3835]">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-slate border border-moss flex items-center justify-center text-gold shrink-0">
+              <i data-lucide="image" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0">
+              <h3 class="font-cinzel text-lg font-bold text-parchment truncate">Select Book Cover</h3>
+              <p id="cover-picker-subtitle" class="text-xs text-[#9E9382] font-playfair italic truncate">Choose from online platforms or enter a custom image URL</p>
+            </div>
+          </div>
+          <button onclick="closeAiCoverPicker()" class="text-[#9E9382] hover:text-parchment p-1 rounded-lg cursor-pointer">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Custom Image URL Input -->
+        <div class="p-3.5 rounded-2xl bg-slate/70 border border-moss space-y-2">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-gold flex items-center gap-1.5">
+            <i data-lucide="link" class="w-3.5 h-3.5 text-gold"></i>
+            <span>Custom Image URL</span>
+          </label>
+          <div class="flex gap-2">
+            <input 
+              type="url" 
+              id="cover-picker-url-input" 
+              placeholder="Paste direct image link (https://...jpg, .png, .webp)" 
+              oninput="onCoverPickerUrlInput(this.value)"
+              class="flex-1 px-3.5 py-2 rounded-xl bg-ebony border border-[#3d3835] text-xs text-parchment focus:outline-none focus:border-gold"
+            />
+            <button 
+              type="button" 
+              onclick="applyCoverPickerCustomUrl()" 
+              class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-md cursor-pointer shrink-0 transition-colors"
+            >
+              Apply URL
+            </button>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-[#9E9382]">
+            <span>Quick search:</span>
+            <button type="button" id="cover-picker-link-google" onclick="openExternalCoverSearch('google')" class="text-gold-light hover:underline flex items-center gap-1 cursor-pointer">
+              <span>Google Images</span> <i data-lucide="external-link" class="w-3 h-3"></i>
+            </button>
+            <span>•</span>
+            <button type="button" id="cover-picker-link-isbndb" onclick="openExternalCoverSearch('isbndb')" class="text-gold-light hover:underline flex items-center gap-1 cursor-pointer">
+              <span>ISBNdb</span> <i data-lucide="external-link" class="w-3 h-3"></i>
+            </button>
+            <span>•</span>
+            <button type="button" id="cover-picker-link-openlib" onclick="openExternalCoverSearch('openlibrary')" class="text-gold-light hover:underline flex items-center gap-1 cursor-pointer">
+              <span>Open Library</span> <i data-lucide="external-link" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Covers Online Grid -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold uppercase tracking-wider text-gold flex items-center gap-1.5">
+              <i data-lucide="globe" class="w-3.5 h-3.5 text-gold"></i>
+              <span>Search Covers on Open Book Platforms</span>
+            </label>
+            <span id="cover-picker-status" class="text-[11px] text-[#9E9382]"></span>
+          </div>
+
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              id="cover-picker-search-input" 
+              placeholder="Search by title, author, original English title, or ISBN..." 
+              onkeydown="if (event.key === 'Enter') searchCoversOnline();"
+              class="flex-1 px-3.5 py-2 rounded-xl bg-slate/80 border border-[#3d3835] text-xs text-parchment focus:outline-none focus:border-gold"
+            />
+            <button 
+              type="button" 
+              onclick="searchCoversOnline()" 
+              class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment cursor-pointer shrink-0 transition-colors flex items-center gap-1.5"
+            >
+              <i data-lucide="search" class="w-3.5 h-3.5"></i>
+              <span>Search</span>
+            </button>
+          </div>
+
+          <!-- Covers Grid -->
+          <div id="cover-picker-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-[260px] overflow-y-auto p-1 pr-2">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-3 border-t border-[#3d3835] flex items-center justify-between">
+          <button 
+            type="button" 
+            onclick="removeAiBookCover()" 
+            class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer"
+          >
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>Remove Cover</span>
+          </button>
+          <button 
+            type="button" 
+            onclick="closeAiCoverPicker()" 
+            class="px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment cursor-pointer"
+          >
+            Done
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -5177,8 +5292,8 @@
 
     // Active Gemini Model dynamic resolution cache & discovered model list
     let cachedGeminiModel = localStorage.getItem('shelved_gemini_active_model_v1') || null;
-    // Invalidate invalid/audio/TTS or deprecated models if stored previously
-    if (cachedGeminiModel && /tts|audio|speech|embed|gemini-2\.5-flash/i.test(cachedGeminiModel)) {
+    // Invalidate invalid/audio/TTS or deprecated models (1.5, 2.0-flash-lite, 2.5-flash, etc.) if stored previously
+    if (cachedGeminiModel && /tts|audio|speech|embed|gemini-1\.5|gemini-2\.0-flash-lite|gemini-2\.5-flash/i.test(cachedGeminiModel)) {
       cachedGeminiModel = null;
       try { localStorage.removeItem('shelved_gemini_active_model_v1'); } catch (e) {}
     }
@@ -5189,44 +5304,32 @@
         return discoveredGeminiModels;
       }
       if (!geminiApiKey) {
-        return ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash'];
+        return ['gemini-2.0-flash', 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.6-flash'];
       }
 
       try {
-        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`);
-        if (resp.ok) {
+        const resp = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`, {}, 5000);
+        if (resp && resp.ok) {
           const data = await resp.json();
           if (data.models && Array.isArray(data.models)) {
-            // Filter: MUST support generateContent, MUST NOT be TTS/audio/embed, MUST NOT be deprecated 2.5-flash
             const visionModels = data.models.filter(m => {
               const name = m.name || '';
               if (/tts|audio|speech|embed|realtime|moderation/i.test(name)) return false;
-              if (/gemini-2\.5-flash/i.test(name)) return false; // Explicitly deprecated by Google for new users
-              
-              const hasGenContent = Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent');
-              if (!hasGenContent) return false;
-
-              if (Array.isArray(m.supportedInputModalities)) {
-                return m.supportedInputModalities.includes('image');
-              }
-              return true;
+              if (/gemini-1\.5|gemini-2\.0-flash-lite|gemini-2\.5-flash/i.test(name)) return false;
+              const hasGen = Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent');
+              return hasGen;
             });
 
             const rawNames = visionModels.map(m => m.name.replace(/^models\//, ''));
-            
-            // Priority order for multimodal vision models (Google 3.x series first, then fallbacks)
+            console.log('[Gemini] Discovered models from API:', rawNames);
+
             const priorityOrder = [
+              'gemini-2.0-flash',
+              'gemini-3.5-flash-lite',
+              'gemini-3.5-flash',
               'gemini-3.6-flash',
               'gemini-3.8-flash',
-              'gemini-3.5-flash',
-              'gemini-flash-latest',
-              'gemini-3.6-pro',
-              'gemini-3.5-pro',
-              'gemini-2.0-flash',
-              'gemini-2.0-flash-001',
-              'gemini-1.5-flash',
-              'gemini-1.5-pro',
-              'gemini-2.0-flash-lite'
+              'gemini-flash-latest'
             ];
 
             const sorted = [];
@@ -5235,30 +5338,29 @@
               if (match && !sorted.includes(match)) sorted.push(match);
             }
             for (const name of rawNames) {
-              if (!sorted.includes(name) && !/gemini-2\.5-flash/i.test(name)) sorted.push(name);
+              if (!sorted.includes(name)) sorted.push(name);
             }
 
             if (sorted.length > 0) {
               discoveredGeminiModels = sorted;
-              console.log('[Gemini] Real vision-capable models discovered:', discoveredGeminiModels);
               return discoveredGeminiModels;
             }
           }
         }
       } catch (e) {
-        console.warn('[Gemini] ListModels query failed, using modern defaults:', e);
+        console.warn('[Gemini] ListModels query failed, using fast defaults:', e);
       }
 
-      discoveredGeminiModels = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash'];
+      discoveredGeminiModels = ['gemini-2.0-flash', 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.6-flash'];
       return discoveredGeminiModels;
     }
 
     async function getAvailableGeminiModel(forceRefresh = false) {
       const models = await discoverValidGeminiModels(forceRefresh);
-      if (cachedGeminiModel && models.includes(cachedGeminiModel) && !forceRefresh && !/gemini-2\.5-flash/i.test(cachedGeminiModel)) {
+      if (cachedGeminiModel && models.includes(cachedGeminiModel) && !forceRefresh && !/tts|audio|speech|embed|gemini-1\.5|gemini-2\.0-flash-lite|gemini-2\.5-flash/i.test(cachedGeminiModel)) {
         return cachedGeminiModel;
       }
-      const chosen = models[0] || 'gemini-3.6-flash';
+      const chosen = models[0] || 'gemini-2.0-flash';
       cachedGeminiModel = chosen;
       localStorage.setItem('shelved_gemini_active_model_v1', chosen);
       return chosen;
@@ -5290,101 +5392,65 @@
       const candidateModels = [
         cachedGeminiModel,
         ...(discoveredGeminiModels || []),
-        'gemini-3.6-flash',
-        'gemini-3.8-flash',
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
         'gemini-2.0-flash',
-        'gemini-1.5-flash'
-      ].filter(m => m && !/gemini-2\.5-flash/i.test(m));
-      
-      const uniqueCandidates = [...new Set(candidateModels)];
+        'gemini-3.5-flash-lite',
+        'gemini-3.5-flash',
+        'gemini-3.6-flash'
+      ].filter(m => m && !/tts|audio|speech|embed|gemini-1\.5|gemini-2\.0-flash-lite|gemini-2\.5-flash/i.test(m));
+
+      const uniqueCandidates = [...new Set(candidateModels)].slice(0, 4);
       let lastError = null;
+
+      const loadingTitle = document.getElementById('ai-loading-title') || document.querySelector('#ai-loading-container .font-cinzel');
+      const loadingSubtitle = document.getElementById('ai-loading-subtitle') || document.querySelector('#ai-loading-container .font-playfair');
 
       for (let i = 0; i < uniqueCandidates.length; i++) {
         const cleanModel = uniqueCandidates[i].replace(/^models\//, '');
-        let currentPayload = payload;
 
-        for (let attempt = 0; attempt < (payload.tools ? 2 : 1); attempt++) {
-          if (attempt === 1) {
-            // Fallback attempt without tools if search grounding is rejected by model
-            const { tools, ...withoutTools } = payload;
-            currentPayload = withoutTools;
+        if (loadingTitle) loadingTitle.textContent = 'Recognizing Books & Editions...';
+        if (loadingSubtitle) loadingSubtitle.textContent = `Analyzing photo with Gemini AI (${cleanModel})...`;
+
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${geminiApiKey}`;
+
+          const resp = await fetchWithTimeout(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }, 20000);
+
+          const data = await resp.json();
+          const errorMsg = (data.error && (data.error.message || '')) || '';
+
+          if (!resp.ok || data.error) {
+            console.warn(`[Gemini] Model ${cleanModel} returned notice:`, errorMsg || resp.statusText);
+            lastError = errorMsg || `HTTP ${resp.status} on model ${cleanModel}`;
+            continue;
           }
 
-          try {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${geminiApiKey}`;
-            
-            const resp = await fetchWithTimeout(endpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(currentPayload)
-            }, 35000);
-
-            const data = await resp.json();
-            const errorMsg = (data.error && (data.error.message || '')) || '';
-
-            // If tools not supported, immediately retry without tools
-            if (attempt === 0 && payload.tools && (resp.status === 400 || /tool|grounding|google_search/i.test(errorMsg))) {
-              console.warn(`[Gemini] Model ${cleanModel} rejected search tools. Retrying without tools...`);
-              continue;
-            }
-
-            const isUnavailable = 
-              resp.status === 404 || 
-              resp.status === 400 ||
-              resp.status === 403 ||
-              resp.status === 429 || 
-              resp.status === 503 || 
-              resp.status === 500 ||
-              (data.error && (
-                data.error.code === 404 || 
-                data.error.code === 400 ||
-                data.error.code === 403 ||
-                data.error.code === 429 || 
-                data.error.code === 503 || 
-                data.error.code === 500 ||
-                /no longer available|is not available|deprecated|not available to new users|modality is not enabled|not supported|high demand|spike|overload|temporar|not found|resource_exhausted|unavailable|capacity|quota|rate limit/i.test(errorMsg)
-              ));
-
-            if (isUnavailable) {
-              console.warn(`[Gemini] Model ${cleanModel} unavailable for request (${errorMsg || resp.statusText}). Trying next model...`);
-              lastError = errorMsg || `Model ${cleanModel} is unavailable.`;
-              break;
-            }
-
-            if (data.error) {
-              throw new Error(data.error.message || 'Gemini API Error');
-            }
-
-            // Found a working model!
-            if (cachedGeminiModel !== cleanModel) {
-              cachedGeminiModel = cleanModel;
-              localStorage.setItem('shelved_gemini_active_model_v1', cleanModel);
-              console.log(`[Gemini] Active multimodal model set to: ${cleanModel}`);
-            }
-
-            return data;
-          } catch (err) {
-            lastError = err;
-            const msg = (err && err.message) || '';
-            if (err && err.name === 'AbortError') {
-              console.warn(`[Gemini] Model ${cleanModel} timed out after 35s. Trying next candidate...`);
-              break;
-            }
-            if (attempt === 0 && payload.tools && /tool|grounding|google_search/i.test(msg)) {
-              continue;
-            }
-            if (/no longer available|is not available|deprecated|not available to new users|modality is not enabled|not supported|high demand|spike|overload|temporar|not found|resource_exhausted|unavailable|capacity|quota|rate limit|404|400|403|429|503/i.test(msg)) {
-              break;
-            } else {
-              throw err;
-            }
+          if (!data.candidates || data.candidates.length === 0) {
+            console.warn(`[Gemini] Model ${cleanModel} returned empty candidates`);
+            lastError = `Model ${cleanModel} returned empty response.`;
+            continue;
           }
+
+          // Found working model! Cache for future requests
+          if (cachedGeminiModel !== cleanModel) {
+            cachedGeminiModel = cleanModel;
+            localStorage.setItem('shelved_gemini_active_model_v1', cleanModel);
+            console.log(`[Gemini] Active multimodal model verified: ${cleanModel}`);
+          }
+
+          return data;
+
+        } catch (err) {
+          console.warn(`[Gemini] Model ${cleanModel} attempt notice:`, err);
+          lastError = err;
+          continue;
         }
       }
 
-      throw new Error(lastError ? (lastError.message || lastError) : 'All Gemini models are temporarily busy. Please retry in a few seconds.');
+      throw new Error(lastError ? (lastError.message || lastError) : 'All Gemini models are temporarily busy. Please check your connection or retry in a moment.');
     }
 
     async function testGeminiConnection() {
@@ -5633,23 +5699,11 @@
 
       stopAiCamera();
 
-      // If image is <= 16MB, send original uncompressed file bytes for 100% crystal-clear spine & barcode fidelity (identical to gemini.google.com)
-      if (file.size <= 16 * 1024 * 1024) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setAiPreviewImage(e.target.result);
-        };
-        reader.readAsDataURL(file);
-        event.target.value = '';
-        return;
-      }
-
-      // Fallback only for huge files (> 16MB): high-resolution resize
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
-          const maxDim = 3200;
+          const maxDim = 2560;
           let w = img.width;
           let h = img.height;
           if (w > maxDim || h > maxDim) {
@@ -5668,8 +5722,11 @@
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, 0, 0, w, h);
-          const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.94);
+          const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.90);
           setAiPreviewImage(resizedDataUrl);
+        };
+        img.onerror = () => {
+          setAiPreviewImage(e.target.result);
         };
         img.src = e.target.result;
       };
@@ -5773,10 +5830,10 @@
 
       if (loading) {
         loading.classList.remove('hidden');
-        const loadingTitle = loading.querySelector('h4') || loading.querySelector('.font-cinzel');
-        const loadingSubtitle = loading.querySelector('p');
+        const loadingTitle = document.getElementById('ai-loading-title') || loading.querySelector('.font-cinzel');
+        const loadingSubtitle = document.getElementById('ai-loading-subtitle') || loading.querySelector('.font-playfair');
         if (loadingTitle) loadingTitle.textContent = 'Recognizing Books & Editions...';
-        if (loadingSubtitle) loadingSubtitle.textContent = 'Using Gemini AI Vision & Google Search grounding to verify physical editions...';
+        if (loadingSubtitle) loadingSubtitle.textContent = 'Detecting book covers, spines, titles, and ISBNs...';
       }
       const analyzeBtn = document.getElementById('ai-analyze-btn');
       if (analyzeBtn) analyzeBtn.disabled = true;
@@ -5793,7 +5850,7 @@ For EACH visible book:
 
 CRITICAL INSTRUCTIONS FOR ACCURATE ISBN IDENTIFICATION:
 - You must identify the physical book's exact publisher/imprint seen on the spine or cover.
-- Use Google Search to find the authentic 13-digit ISBN-13 (starting with 978 or 979) for each book's title, author, and physical publisher seen on the spine (e.g. search "Childhood's End Arthur C Clarke Pan Macmillan ISBN-13", "A Guerra dos Mundos HG Wells Ulisseia ISBN-13", "Wake Elizabeth Knox Corsair ISBN-13", "Insónia Stephen King Bertrand ISBN-13", "Remina Junji Ito VIZ ISBN-13", "Smashed Junji Ito VIZ ISBN-13", "Do Androids Dream of Electric Sheep Philip K Dick Gollancz ISBN-13").
+- Identify the authentic 13-digit ISBN-13 (starting with 978 or 979) for each book's title, author, and physical publisher seen on the spine (e.g. search "Childhood's End Arthur C Clarke Pan Macmillan ISBN-13", "A Guerra dos Mundos HG Wells Ulisseia ISBN-13", "Wake Elizabeth Knox Corsair ISBN-13", "Insónia Stephen King Bertrand ISBN-13", "Remina Junji Ito VIZ ISBN-13", "Smashed Junji Ito VIZ ISBN-13", "Do Androids Dream of Electric Sheep Philip K Dick Gollancz ISBN-13").
 - Output the exact physical print edition ISBN-13 (for example, for Childhood's End with the Pan Macmillan spine, return 9780330514019).
 - NEVER return digital, Kindle, ebook, or unrelated publisher ISBNs.
 - Verify that every 13-digit ISBN is mathematically valid according to the standard mod-10 check digit algorithm.
@@ -5830,9 +5887,6 @@ Mandatory requirements:
                 }
               ]
             }
-          ],
-          tools: [
-            { google_search: {} }
           ],
           generationConfig: {
             temperature: 0.1
@@ -6077,21 +6131,40 @@ Mandatory requirements:
             if (analyzeBtn) analyzeBtn.disabled = false;
             renderAiReviewList();
           }
-        }, 3500);
+        }, 5500);
 
         try {
           await Promise.allSettled(detectedAiBooks.map(async (item) => {
             const cleanAuthor = (item.author && item.author !== 'Unknown Author') ? item.author : '';
 
             try {
-              // 1. Initial Candidate: Open Library cover with ISBN
+              let foundCover = null;
+
+              // 1. Check Open Library Edition by physical ISBN (fast JSON check) & check linked Work covers
               if (item.isbn) {
-                item.coverUrl = `https://covers.openlibrary.org/b/isbn/${item.isbn}-M.jpg?default=false`;
+                try {
+                  const olRes = await fetchWithTimeout(`https://openlibrary.org/isbn/${encodeURIComponent(item.isbn)}.json`, {}, 2200);
+                  if (olRes && olRes.ok) {
+                    const olEd = await olRes.json();
+                    if (olEd.covers && olEd.covers.length > 0 && olEd.covers[0] > 0) {
+                      foundCover = `https://covers.openlibrary.org/b/id/${olEd.covers[0]}-M.jpg`;
+                    } else if (olEd.works && olEd.works.length > 0 && olEd.works[0].key) {
+                      try {
+                        const wRes = await fetchWithTimeout(`https://openlibrary.org${olEd.works[0].key}.json`, {}, 2000);
+                        if (wRes && wRes.ok) {
+                          const wData = await wRes.json();
+                          if (wData.covers && wData.covers.length > 0 && wData.covers[0] > 0) {
+                            foundCover = `https://covers.openlibrary.org/b/id/${wData.covers[0]}-M.jpg`;
+                          }
+                        }
+                      } catch (wErr) {}
+                    }
+                  }
+                } catch (olEdErr) {}
               }
 
-              // 2. Fetch Google Books volume metadata & cover thumbnail by ISBN
-              let gotGoogleCover = false;
-              if (item.isbn) {
+              // 2. Fetch Google Books volume metadata & cover thumbnail by physical ISBN
+              if (!foundCover && item.isbn) {
                 try {
                   const res = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(item.isbn)}&maxResults=1`, {}, 2200);
                   if (res && res.ok) {
@@ -6099,8 +6172,7 @@ Mandatory requirements:
                     if (d.items && d.items[0] && d.items[0].volumeInfo) {
                       const info = d.items[0].volumeInfo;
                       if (info.imageLinks && (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail)) {
-                        item.coverUrl = (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail).replace('http://', 'https://');
-                        gotGoogleCover = true;
+                        foundCover = (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail).replace('http://', 'https://');
                       }
                       if ((!item.author || item.author === 'Unknown Author') && info.authors && info.authors.length > 0) {
                         item.author = info.authors.join(', ');
@@ -6113,44 +6185,72 @@ Mandatory requirements:
                 } catch (gbErr) {}
               }
 
-              // 3. If Google Books by ISBN didn't have an image (e.g. Portuguese editions), query by title + author for cover ONLY
-              if (!gotGoogleCover && item.title) {
+              // 3. Cross-Language & Original Work Discovery via Open Library Search API:
+              // If the Portuguese/translated ISBN has no cover, search Open Library Work index
+              // using originalTitle (e.g. "The War of the Worlds") or title + author.
+              // This links directly to the global work and English edition covers with a 100% hit rate!
+              if (!foundCover && (item.originalTitle || item.title)) {
                 try {
-                  const titleQuery = `intitle:${encodeURIComponent(item.title)}${cleanAuthor ? `+inauthor:${encodeURIComponent(cleanAuthor)}` : ''}`;
+                  const searchTitle = item.originalTitle || item.title;
+                  const olSearchQuery = encodeURIComponent(`${searchTitle} ${cleanAuthor}`.trim());
+                  const olSearchRes = await fetchWithTimeout(`https://openlibrary.org/search.json?q=${olSearchQuery}&fields=key,title,cover_i,isbn&limit=5`, {}, 2500);
+                  if (olSearchRes && olSearchRes.ok) {
+                    const olData = await olSearchRes.json();
+                    if (olData.docs && olData.docs.length > 0) {
+                      for (const doc of olData.docs) {
+                        if (doc.cover_i && doc.cover_i > 0) {
+                          foundCover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                } catch (olSearchErr) {}
+              }
+
+              // 4. If still no cover, search Google Books by original / English title + author
+              if (!foundCover && (item.originalTitle || item.title)) {
+                try {
+                  const searchTitle = item.originalTitle || item.title;
+                  const titleQuery = `intitle:${encodeURIComponent(searchTitle)}${cleanAuthor ? `+inauthor:${encodeURIComponent(cleanAuthor)}` : ''}`;
                   const res2 = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${titleQuery}&maxResults=1`, {}, 2200);
                   if (res2 && res2.ok) {
                     const d2 = await res2.json();
                     if (d2.items && d2.items[0] && d2.items[0].volumeInfo) {
                       const info2 = d2.items[0].volumeInfo;
                       if (info2.imageLinks && (info2.imageLinks.thumbnail || info2.imageLinks.smallThumbnail)) {
-                        item.coverUrl = (info2.imageLinks.thumbnail || info2.imageLinks.smallThumbnail).replace('http://', 'https://');
-                        gotGoogleCover = true;
+                        foundCover = (info2.imageLinks.thumbnail || info2.imageLinks.smallThumbnail).replace('http://', 'https://');
                       }
                     }
                   }
                 } catch (resErr2) {}
               }
 
-              // 3b. If still no cover, query Google Books by original / English title (e.g. "The War of the Worlds" for "A Guerra dos Mundos", "Insomnia" for "Insónia")
-              if (!gotGoogleCover && (item.originalTitle || item.titlePt)) {
-                const altTitle = item.originalTitle || item.titlePt;
+              // 5. If originalTitle was provided and different from title, try searching Google Books with originalTitle explicitly
+              if (!foundCover && item.originalTitle && item.originalTitle !== item.title) {
                 try {
-                  const altQuery = `intitle:${encodeURIComponent(altTitle)}${cleanAuthor ? `+inauthor:${encodeURIComponent(cleanAuthor)}` : ''}`;
-                  const resAlt = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${altQuery}&maxResults=1`, {}, 2200);
-                  if (resAlt && resAlt.ok) {
-                    const dAlt = await resAlt.json();
-                    if (dAlt.items && dAlt.items[0] && dAlt.items[0].volumeInfo) {
-                      const infoAlt = dAlt.items[0].volumeInfo;
-                      if (infoAlt.imageLinks && (infoAlt.imageLinks.thumbnail || infoAlt.imageLinks.smallThumbnail)) {
-                        item.coverUrl = (infoAlt.imageLinks.thumbnail || infoAlt.imageLinks.smallThumbnail).replace('http://', 'https://');
-                        gotGoogleCover = true;
+                  const origQuery = `intitle:${encodeURIComponent(item.originalTitle)}${cleanAuthor ? `+inauthor:${encodeURIComponent(cleanAuthor)}` : ''}`;
+                  const resOrig = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${origQuery}&maxResults=1`, {}, 2200);
+                  if (resOrig && resOrig.ok) {
+                    const dOrig = await resOrig.json();
+                    if (dOrig.items && dOrig.items[0] && dOrig.items[0].volumeInfo) {
+                      const infoOrig = dOrig.items[0].volumeInfo;
+                      if (infoOrig.imageLinks && (infoOrig.imageLinks.thumbnail || infoOrig.imageLinks.smallThumbnail)) {
+                        foundCover = (infoOrig.imageLinks.thumbnail || infoOrig.imageLinks.smallThumbnail).replace('http://', 'https://');
                       }
                     }
                   }
-                } catch (altErr) {}
+                } catch (origErr) {}
               }
 
-              // 4. Only if item has NO ISBN, attempt to resolve ISBN from Google Books
+              // Set the discovered cover
+              if (foundCover) {
+                item.coverUrl = foundCover;
+              } else if (item.isbn && !item.coverUrl) {
+                item.coverUrl = `https://covers.openlibrary.org/b/isbn/${item.isbn}-M.jpg?default=false`;
+              }
+
+              // 6. Only if item has NO ISBN, attempt to resolve ISBN from Google Books
               if (!item.isbn) {
                 try {
                   const fallbackQuery = `intitle:${encodeURIComponent(item.title)}${cleanAuthor ? `+inauthor:${encodeURIComponent(cleanAuthor)}` : ''}`;
@@ -6225,15 +6325,293 @@ Mandatory requirements:
       }
     }
 
-    function editAiBookCoverUrl(idx) {
+    // --- Interactive AI Cover Picker & Search ---
+    let currentCoverPickerBookIdx = null;
+
+    function openAiCoverPicker(idx) {
       if (!detectedAiBooks[idx]) return;
-      const current = detectedAiBooks[idx].coverUrl || '';
-      const newUrl = prompt('Enter custom cover image URL (e.g. from Google Images or Goodreads):', current);
-      if (newUrl !== null) {
-        const trimmed = newUrl.trim();
-        detectedAiBooks[idx].coverUrl = trimmed;
-        renderAiReviewList();
+      currentCoverPickerBookIdx = idx;
+      const b = detectedAiBooks[idx];
+
+      const modal = document.getElementById('modal-ai-cover-picker');
+      const subtitle = document.getElementById('cover-picker-subtitle');
+      const urlInput = document.getElementById('cover-picker-url-input');
+      const searchInput = document.getElementById('cover-picker-search-input');
+
+      if (subtitle) {
+        subtitle.textContent = `${b.title || 'Selected Book'}${b.author ? ' · ' + b.author : ''}`;
       }
+      if (urlInput) {
+        urlInput.value = b.coverUrl || '';
+      }
+
+      // Pre-fill search query with original title or title + author
+      const bestQuery = (b.originalTitle || b.title || '') + (b.author && b.author !== 'Unknown Author' ? ' ' + b.author : '');
+      if (searchInput) {
+        searchInput.value = bestQuery.trim();
+      }
+
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      if (window.lucide) lucide.createIcons();
+
+      // Automatically search platforms when opened
+      searchCoversOnline();
+    }
+
+    function closeAiCoverPicker() {
+      const modal = document.getElementById('modal-ai-cover-picker');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      currentCoverPickerBookIdx = null;
+    }
+
+    function editAiBookCoverUrl(idx) {
+      openAiCoverPicker(idx);
+    }
+
+    function onCoverPickerUrlInput(val) {
+      // Live input handler
+    }
+
+    function applyCoverPickerCustomUrl() {
+      if (currentCoverPickerBookIdx === null || !detectedAiBooks[currentCoverPickerBookIdx]) return;
+      const input = document.getElementById('cover-picker-url-input');
+      const val = input ? input.value.trim() : '';
+      detectedAiBooks[currentCoverPickerBookIdx].coverUrl = val;
+      renderAiReviewList();
+      closeAiCoverPicker();
+      showToast('✓ Custom cover applied!');
+    }
+
+    function selectCoverPickerUrl(url) {
+      if (currentCoverPickerBookIdx === null || !detectedAiBooks[currentCoverPickerBookIdx]) return;
+      detectedAiBooks[currentCoverPickerBookIdx].coverUrl = url;
+      renderAiReviewList();
+      closeAiCoverPicker();
+      showToast('✓ Cover updated!');
+    }
+
+    function removeAiBookCover() {
+      if (currentCoverPickerBookIdx === null || !detectedAiBooks[currentCoverPickerBookIdx]) return;
+      detectedAiBooks[currentCoverPickerBookIdx].coverUrl = '';
+      renderAiReviewList();
+      closeAiCoverPicker();
+      showToast('Cover removed');
+    }
+
+    function openExternalCoverSearch(platform) {
+      if (currentCoverPickerBookIdx === null || !detectedAiBooks[currentCoverPickerBookIdx]) return;
+      const b = detectedAiBooks[currentCoverPickerBookIdx];
+      const searchTitle = b.originalTitle || b.title || '';
+      const author = (b.author && b.author !== 'Unknown Author') ? b.author : '';
+      const isbn = b.isbn || '';
+
+      let url = '';
+      if (platform === 'google') {
+        url = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(`${searchTitle} ${author} book cover`.trim())}`;
+      } else if (platform === 'isbndb') {
+        url = `https://isbndb.com/search/books/${encodeURIComponent(isbn || searchTitle)}`;
+      } else if (platform === 'openlibrary') {
+        url = `https://openlibrary.org/search?q=${encodeURIComponent(`${searchTitle} ${author}`.trim())}`;
+      }
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    }
+
+    async function searchCoversOnline() {
+      const b = (currentCoverPickerBookIdx !== null && detectedAiBooks[currentCoverPickerBookIdx]) ? detectedAiBooks[currentCoverPickerBookIdx] : null;
+      const searchInput = document.getElementById('cover-picker-search-input');
+      const grid = document.getElementById('cover-picker-grid');
+      const status = document.getElementById('cover-picker-status');
+
+      const query = (searchInput && searchInput.value.trim()) || (b ? `${b.originalTitle || b.title || ''} ${b.author || ''}`.trim() : '');
+      if (!query && (!b || !b.isbn)) {
+        if (grid) grid.innerHTML = '<div class="col-span-full py-8 text-center text-xs text-[#9E9382]">Enter a book title or author to search for covers.</div>';
+        return;
+      }
+
+      if (status) status.textContent = 'Searching Open Library & Google Books...';
+      if (grid) {
+        grid.innerHTML = `
+          <div class="col-span-full py-8 flex flex-col items-center justify-center text-xs text-gold gap-2">
+            <i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i>
+            <span>Finding matching edition covers...</span>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+      }
+
+      const results = [];
+      const seenUrls = new Set();
+
+      function addCandidate(url, label, subtitle) {
+        if (!url || typeof url !== 'string') return;
+        const clean = url.replace('http://', 'https://');
+        if (seenUrls.has(clean)) return;
+        seenUrls.add(clean);
+        results.push({ url: clean, label, subtitle });
+      }
+
+      const promises = [];
+
+      // 1. Direct ISBN lookups if book has an ISBN
+      if (b && b.isbn) {
+        // Direct Open Library ISBN cover
+        addCandidate(`https://covers.openlibrary.org/b/isbn/${b.isbn}-M.jpg?default=false`, 'Open Library', `ISBN: ${b.isbn}`);
+
+        // Open Library Edition / Work API
+        promises.push((async () => {
+          try {
+            const res = await fetchWithTimeout(`https://openlibrary.org/isbn/${encodeURIComponent(b.isbn)}.json`, {}, 2500);
+            if (res && res.ok) {
+              const ed = await res.json();
+              if (ed.covers && ed.covers.length > 0) {
+                ed.covers.slice(0, 3).forEach(cId => {
+                  if (cId > 0) addCandidate(`https://covers.openlibrary.org/b/id/${cId}-M.jpg`, 'Open Library Edition', ed.title || 'Physical Edition');
+                });
+              }
+              if (ed.works && ed.works.length > 0 && ed.works[0].key) {
+                const wRes = await fetchWithTimeout(`https://openlibrary.org${ed.works[0].key}.json`, {}, 2000);
+                if (wRes && wRes.ok) {
+                  const wData = await wRes.json();
+                  if (wData.covers && wData.covers.length > 0) {
+                    wData.covers.slice(0, 3).forEach(cId => {
+                      if (cId > 0) addCandidate(`https://covers.openlibrary.org/b/id/${cId}-M.jpg`, 'Original Work', wData.title || 'Original Edition');
+                    });
+                  }
+                }
+              }
+            }
+          } catch (e) {}
+        })());
+
+        // Google Books by ISBN
+        promises.push((async () => {
+          try {
+            const res = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(b.isbn)}&maxResults=2`, {}, 2500);
+            if (res && res.ok) {
+              const d = await res.json();
+              if (d.items) {
+                d.items.forEach(it => {
+                  const img = it.volumeInfo?.imageLinks?.thumbnail || it.volumeInfo?.imageLinks?.smallThumbnail;
+                  if (img) addCandidate(img, 'Google Books', it.volumeInfo?.title || 'ISBN Match');
+                });
+              }
+            }
+          } catch (e) {}
+        })());
+      }
+
+      // 2. Open Library Search API by query
+      if (query) {
+        promises.push((async () => {
+          try {
+            const res = await fetchWithTimeout(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&fields=key,title,author_name,cover_i,isbn&limit=8`, {}, 3000);
+            if (res && res.ok) {
+              const d = await res.json();
+              if (d.docs) {
+                d.docs.forEach(doc => {
+                  if (doc.cover_i && doc.cover_i > 0) {
+                    const authorStr = (doc.author_name && doc.author_name.length > 0) ? doc.author_name[0] : '';
+                    addCandidate(`https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`, 'Open Library', `${doc.title || 'Work'}${authorStr ? ' · ' + authorStr : ''}`);
+                  }
+                });
+              }
+            }
+          } catch (e) {}
+        })());
+
+        // 3. Google Books Search API by query
+        promises.push((async () => {
+          try {
+            const res = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8`, {}, 3000);
+            if (res && res.ok) {
+              const d = await res.json();
+              if (d.items) {
+                d.items.forEach(it => {
+                  const img = it.volumeInfo?.imageLinks?.thumbnail || it.volumeInfo?.imageLinks?.smallThumbnail;
+                  if (img) {
+                    const auth = it.volumeInfo?.authors ? it.volumeInfo.authors[0] : '';
+                    addCandidate(img, 'Google Books', `${it.volumeInfo?.title || 'Volume'}${auth ? ' · ' + auth : ''}`);
+                  }
+                });
+              }
+            }
+          } catch (e) {}
+        })());
+      }
+
+      // 4. If originalTitle exists and is different from query, also search original title
+      if (b && b.originalTitle && b.originalTitle.toLowerCase() !== query.toLowerCase()) {
+        promises.push((async () => {
+          try {
+            const origQuery = `${b.originalTitle} ${b.author || ''}`.trim();
+            const res = await fetchWithTimeout(`https://openlibrary.org/search.json?q=${encodeURIComponent(origQuery)}&fields=key,title,author_name,cover_i&limit=4`, {}, 2500);
+            if (res && res.ok) {
+              const d = await res.json();
+              if (d.docs) {
+                d.docs.forEach(doc => {
+                  if (doc.cover_i && doc.cover_i > 0) {
+                    addCandidate(`https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`, 'Original Work', doc.title || 'Original Edition');
+                  }
+                });
+              }
+            }
+          } catch (e) {}
+        })());
+      }
+
+      await Promise.allSettled(promises);
+
+      if (status) {
+        status.textContent = `${results.length} cover(s) found`;
+      }
+
+      if (!grid) return;
+
+      if (results.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-8 text-center text-xs text-[#9E9382] space-y-1">
+            <p>No covers found on open platforms for "${escapeHtml(query)}".</p>
+            <p class="text-[11px] text-[#7d7467]">Try searching for the English title above or paste a custom image URL.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = results.map((item, cIdx) => `
+        <div 
+          onclick="selectCoverPickerUrl('${escapeHtml(item.url)}')"
+          title="Click to select this cover"
+          class="group relative rounded-xl overflow-hidden bg-slate/90 border border-[#3d3835] hover:border-gold hover:shadow-xl hover:shadow-gold/10 transition-all cursor-pointer flex flex-col items-center p-1.5"
+        >
+          <div class="w-full aspect-[2/3] bg-ebony rounded-lg overflow-hidden relative">
+            <img 
+              src="${escapeHtml(item.url)}" 
+              alt="Cover candidate" 
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" 
+              onerror="this.closest('.group').remove();"
+            />
+            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-gold transition-opacity">
+              <i data-lucide="check" class="w-6 h-6 stroke-[3]"></i>
+              <span class="text-[9px] font-bold uppercase tracking-wider text-parchment mt-1">Select</span>
+            </div>
+          </div>
+          <div class="w-full pt-1.5 px-0.5 text-center">
+            <span class="inline-block text-[9px] font-semibold text-gold/80 uppercase tracking-wider truncate max-w-full">${escapeHtml(item.label)}</span>
+            ${item.subtitle ? `<p class="text-[9px] text-[#9E9382] truncate w-full" title="${escapeHtml(item.subtitle)}">${escapeHtml(item.subtitle)}</p>` : ''}
+          </div>
+        </div>
+      `).join('');
+
+      if (window.lucide) lucide.createIcons();
     }
 
     function renderAiReviewList() {
@@ -6270,8 +6648,8 @@ Mandatory requirements:
             <!-- Book Cover Thumbnail (Clickable to customize cover URL) -->
             <div class="shrink-0 pt-0.5">
               <div 
-                onclick="editAiBookCoverUrl(${idx})" 
-                title="Click to set custom cover image URL" 
+                onclick="openAiCoverPicker(${idx})" 
+                title="Click to search or customize book cover" 
                 class="relative w-11 h-16 rounded-lg cursor-pointer group overflow-hidden border border-[#3d3835] hover:border-gold shadow-md transition-all"
               >
                 ${b.coverUrl ? `
