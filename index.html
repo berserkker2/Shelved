@@ -5279,15 +5279,11 @@
         throw new Error('No Gemini API key configured.');
       }
 
-      const models = await discoverValidGeminiModels(false);
       const candidateModels = [
-        cachedGeminiModel,
-        ...models,
         'gemini-2.0-flash',
         'gemini-2.5-flash',
-        'gemini-2.0-flash-lite',
-        'gemini-2.5-pro'
-      ].filter(m => m && !/tts|audio|speech|embed/i.test(m));
+        cachedGeminiModel
+      ].filter(Boolean);
       
       const uniqueCandidates = [...new Set(candidateModels)];
       let lastError = null;
@@ -5310,7 +5306,7 @@
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(currentPayload)
-            }, 30000);
+            }, 35000);
 
             const data = await resp.json();
             const errorMsg = (data.error && (data.error.message || '')) || '';
@@ -5358,7 +5354,7 @@
             lastError = err;
             const msg = (err && err.message) || '';
             if (err && err.name === 'AbortError') {
-              console.warn(`[Gemini] Model ${cleanModel} timed out after 30s. Trying next candidate...`);
+              console.warn(`[Gemini] Model ${cleanModel} timed out after 35s. Trying next candidate...`);
               break;
             }
             if (attempt === 0 && payload.tools && /tool|grounding|google_search/i.test(msg)) {
@@ -5752,7 +5748,13 @@
       const loading = document.getElementById('ai-loading-container');
       const reviewSection = document.getElementById('ai-review-section');
 
-      if (loading) loading.classList.remove('hidden');
+      if (loading) {
+        loading.classList.remove('hidden');
+        const loadingTitle = loading.querySelector('h4') || loading.querySelector('.font-cinzel');
+        const loadingSubtitle = loading.querySelector('p');
+        if (loadingTitle) loadingTitle.textContent = 'Recognizing Books & Editions...';
+        if (loadingSubtitle) loadingSubtitle.textContent = 'Using Gemini AI Vision & Google Search grounding to verify physical editions...';
+      }
       const analyzeBtn = document.getElementById('ai-analyze-btn');
       if (analyzeBtn) analyzeBtn.disabled = true;
 
@@ -5762,13 +5764,14 @@ Carefully inspect the photograph and identify each distinct physical book visibl
 For EACH visible book:
 1. Exact Title of the book (do NOT wrap in quotes).
 2. Full Name of the Author directly associated with this specific book.
-3. Publisher or imprint name and logo visible on the spine or cover (e.g. Pan Macmillan, VIZ Media, Editora Ulisseia, Bertrand Editora, Corsair, Gollancz, Tor).
+3. Publisher or imprint name and logo visible on the spine or cover (e.g. Pan Macmillan, VIZ Media, Editora Ulisseia, Bertrand Editora, Corsair, Gollancz).
 4. Official 13-digit ISBN-13 corresponding strictly to this EXACT physical book edition and publisher.
 
 CRITICAL INSTRUCTIONS FOR ACCURATE ISBN IDENTIFICATION:
 - You must identify the physical book's exact publisher/imprint seen on the spine or cover.
-- Use Google Search with both the Title, Author, AND the specific Publisher on the spine (e.g. search "Childhood's End Arthur C Clarke Pan Macmillan ISBN-13", "A Guerra dos Mundos HG Wells Ulisseia ISBN-13", "Wake Elizabeth Knox Corsair ISBN-13", "Insónia Stephen King Bertrand ISBN-13", "Remina Junji Ito VIZ ISBN-13").
-- NEVER return digital, Kindle, ebook, or unrelated publisher ISBNs (for example, if the spine has the Pan Macmillan logo, return the physical Pan Macmillan ISBN 9780330514019, NOT an ebook/RosettaBooks ISBN).
+- Use Google Search to find the authentic 13-digit ISBN-13 (starting with 978 or 979) for each book's title, author, and physical publisher seen on the spine (e.g. search "Childhood's End Arthur C Clarke Pan Macmillan ISBN-13", "A Guerra dos Mundos HG Wells Ulisseia ISBN-13", "Wake Elizabeth Knox Corsair ISBN-13", "Insónia Stephen King Bertrand ISBN-13", "Remina Junji Ito VIZ ISBN-13", "Smashed Junji Ito VIZ ISBN-13", "Do Androids Dream of Electric Sheep Philip K Dick Gollancz ISBN-13").
+- Output the exact physical print edition ISBN-13 (for example, for Childhood's End with the Pan Macmillan spine, return 9780330514019).
+- NEVER return digital, Kindle, ebook, or unrelated publisher ISBNs.
 - Verify that every 13-digit ISBN is mathematically valid according to the standard mod-10 check digit algorithm.
 - Do not guess or invent digits. Each ISBN must start with 978 or 979.
 
@@ -6050,103 +6053,74 @@ Mandatory requirements:
         try {
           await Promise.allSettled(detectedAiBooks.map(async (item) => {
             const cleanAuthor = (item.author && item.author !== 'Unknown Author') ? item.author : '';
-            const cleanPub = (item.publisher || '').replace(/[\(\)\/\,\.\-\–]/g, ' ').replace(/\s+/g, ' ').trim();
-            const pubWords = cleanPub.toLowerCase().split(' ').filter(w => w.length >= 3 && !/^(media|books|editora|publishing|publisher|press|group|house|editions?)$/i.test(w));
 
             try {
-              let editionMismatch = false;
-
-              if (item.verified) {
+              // 1. Initial Candidate: Open Library cover with ISBN
+              if (item.isbn) {
                 item.coverUrl = `https://covers.openlibrary.org/b/isbn/${item.isbn}-M.jpg?default=false`;
+              }
+
+              // 2. Fetch Google Books volume metadata & cover thumbnail by ISBN
+              let gotGoogleCover = false;
+              if (item.isbn) {
                 try {
                   const res = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(item.isbn)}&maxResults=1`, {}, 2200);
                   if (res && res.ok) {
                     const d = await res.json();
                     if (d.items && d.items[0] && d.items[0].volumeInfo) {
                       const info = d.items[0].volumeInfo;
-                      const volumePub = (info.publisher || '').toLowerCase();
-
-                      // Check if the ISBN returned belongs to an unrelated publisher/ebook while we have a clear physical publisher
-                      if (pubWords.length > 0 && volumePub && !pubWords.some(pw => volumePub.includes(pw))) {
-                        console.warn(`[AI Scanner] Edition mismatch for "${item.title}": ISBN publisher is "${info.publisher}" but spine publisher is "${item.publisher}".`);
-                        editionMismatch = true;
-                      } else {
-                        if (info.imageLinks && (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail)) {
-                          item.coverUrl = (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail).replace('http://', 'https://');
-                        }
-                        if ((!item.author || item.author === 'Unknown Author') && info.authors && info.authors.length > 0) {
-                          item.author = info.authors.join(', ');
-                        }
-                        if (!item.publisher && info.publisher) {
-                          item.publisher = info.publisher;
-                        }
+                      if (info.imageLinks && (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail)) {
+                        item.coverUrl = (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail).replace('http://', 'https://');
+                        gotGoogleCover = true;
+                      }
+                      if ((!item.author || item.author === 'Unknown Author') && info.authors && info.authors.length > 0) {
+                        item.author = info.authors.join(', ');
+                      }
+                      if (!item.publisher && info.publisher) {
+                        item.publisher = info.publisher;
                       }
                     }
                   }
                 } catch (gbErr) {}
               }
 
-              // If ISBN was unverified/missing, OR if an edition mismatch was detected (e.g. ebook vs physical publisher)
-              if (!item.verified || editionMismatch) {
-                let matchedVolume = null;
-                const primarySearchQuery = [item.title, cleanAuthor, pubWords[0] || ''].filter(Boolean).join(' ');
-
+              // 3. If Google Books by ISBN didn't have an image (e.g. Portuguese editions), query by title + author for cover ONLY
+              if (!gotGoogleCover && item.title) {
                 try {
-                  const res = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(primarySearchQuery)}&maxResults=5`, {}, 2200);
-                  if (res && res.ok) {
-                    const d = await res.json();
-                    if (d.items && d.items.length > 0) {
-                      matchedVolume = d.items.find(it => {
-                        const vi = it.volumeInfo || {};
-                        const p = (vi.publisher || '').toLowerCase();
-                        return pubWords.some(pw => p.includes(pw));
-                      }) || (editionMismatch ? null : d.items[0]);
-                    }
-                  }
-                } catch (resErr) {}
-
-                // Secondary search if primary query with publisher yielded nothing
-                if (!matchedVolume) {
-                  try {
-                    const fallbackQuery = [item.title, cleanAuthor].filter(Boolean).join(' ');
-                    const res2 = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(fallbackQuery)}&maxResults=5`, {}, 2200);
-                    if (res2 && res2.ok) {
-                      const d2 = await res2.json();
-                      if (d2.items && d2.items.length > 0) {
-                        matchedVolume = d2.items.find(it => {
-                          const vi = it.volumeInfo || {};
-                          const p = (vi.publisher || '').toLowerCase();
-                          return pubWords.some(pw => p.includes(pw));
-                        }) || (!editionMismatch ? d2.items[0] : null);
-                      }
-                    }
-                  } catch (resErr2) {}
-                }
-
-                if (matchedVolume && matchedVolume.volumeInfo) {
-                  const vi = matchedVolume.volumeInfo;
-                  if (vi.industryIdentifiers) {
-                    const id13 = vi.industryIdentifiers.find(ii => ii.type === 'ISBN_13');
-                    const id10 = vi.industryIdentifiers.find(ii => ii.type === 'ISBN_10');
-                    if (id13 && isValidIsbn13(id13.identifier)) {
-                      item.isbn = id13.identifier;
-                      item.verified = true;
-                    } else if (id10) {
-                      const converted = isbn10to13(id10.identifier);
-                      if (isValidIsbn13(converted)) {
-                        item.isbn = converted;
-                        item.verified = true;
+                  const titleQuery = `intitle:${encodeURIComponent(item.title)}${cleanAuthor ? `+inauthor:${encodeURIComponent(cleanAuthor)}` : ''}`;
+                  const res2 = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${titleQuery}&maxResults=1`, {}, 2200);
+                  if (res2 && res2.ok) {
+                    const d2 = await res2.json();
+                    if (d2.items && d2.items[0] && d2.items[0].volumeInfo) {
+                      const info2 = d2.items[0].volumeInfo;
+                      if (info2.imageLinks && (info2.imageLinks.thumbnail || info2.imageLinks.smallThumbnail)) {
+                        item.coverUrl = (info2.imageLinks.thumbnail || info2.imageLinks.smallThumbnail).replace('http://', 'https://');
+                        gotGoogleCover = true;
                       }
                     }
                   }
-                  if ((!item.author || item.author === 'Unknown Author') && vi.authors) {
-                    item.author = vi.authors.join(', ');
+                } catch (resErr2) {}
+              }
+
+              // 4. Only if item has NO ISBN, attempt to resolve ISBN from Google Books
+              if (!item.isbn) {
+                try {
+                  const fallbackQuery = `intitle:${encodeURIComponent(item.title)}${cleanAuthor ? `+inauthor:${encodeURIComponent(cleanAuthor)}` : ''}`;
+                  const res3 = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${fallbackQuery}&maxResults=3`, {}, 2200);
+                  if (res3 && res3.ok) {
+                    const d3 = await res3.json();
+                    if (d3.items && d3.items.length > 0) {
+                      const matched = d3.items[0];
+                      if (matched && matched.volumeInfo && matched.volumeInfo.industryIdentifiers) {
+                        const id13 = matched.volumeInfo.industryIdentifiers.find(ii => ii.type === 'ISBN_13');
+                        if (id13 && isValidIsbn13(id13.identifier)) {
+                          item.isbn = id13.identifier;
+                          item.verified = true;
+                        }
+                      }
+                    }
                   }
-                  if (!item.publisher && vi.publisher) item.publisher = vi.publisher;
-                  if (vi.imageLinks && (vi.imageLinks.thumbnail || vi.imageLinks.smallThumbnail)) {
-                    item.coverUrl = (vi.imageLinks.thumbnail || vi.imageLinks.smallThumbnail).replace('http://', 'https://');
-                  }
-                }
+                } catch (resErr3) {}
 
                 if (!item.coverUrl && item.isbn) {
                   item.coverUrl = `https://covers.openlibrary.org/b/isbn/${item.isbn}-M.jpg?default=false`;
