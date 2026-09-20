@@ -53,10 +53,19 @@
   <script src="library-data.js"></script>
 
   <style>
-    body {
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100vw;
+      position: relative;
+      -webkit-tap-highlight-color: transparent;
       background-color: #1D1617;
       color: #EDE8DE;
       font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    body.modal-open {
+      overflow: hidden !important;
+      touch-action: none;
     }
     ::-webkit-scrollbar {
       width: 8px;
@@ -72,6 +81,22 @@
     }
     ::-webkit-scrollbar-thumb:hover {
       background: #9F6932;
+    }
+    @media (max-width: 768px) {
+      ::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+      }
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .overscroll-contain {
+      overscroll-behavior: contain;
     }
     .wood-shelf {
       background: #2e1d15;
@@ -108,6 +133,7 @@
       padding: 16px 8px 0 8px;
       min-height: 265px;
       scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
     }
     .book-spine-card {
       position: relative;
@@ -144,7 +170,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen bg-ebony text-[#EDE8DE] flex flex-col antialiased selection:bg-gold selection:text-ebony">
+<body class="min-h-screen bg-ebony text-[#EDE8DE] flex flex-col antialiased selection:bg-gold selection:text-ebony overflow-x-hidden w-full max-w-[100vw]">
 
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-semibold flex items-center gap-2 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none bg-slate text-parchment border-gold">
@@ -154,22 +180,22 @@
 
   <!-- NAVBAR -->
   <header class="sticky top-0 z-40 bg-ebony/95 backdrop-blur-md border-b border-[#3d332e] shadow-xl">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-20">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20 gap-2">
         
         <!-- Logo -->
-        <div class="flex items-center gap-3 cursor-pointer" onclick="setTab('home')">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-gold to-mahogany flex items-center justify-center shadow-lg shadow-gold/20 border border-gold/40">
-            <i data-lucide="library" class="w-6 h-6 text-ebony"></i>
+        <div class="flex items-center gap-2 sm:gap-3 cursor-pointer shrink-0" onclick="setTab('home')">
+          <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-gold to-mahogany flex items-center justify-center shadow-lg shadow-gold/20 border border-gold/40 shrink-0">
+            <i data-lucide="library" class="w-5 h-5 sm:w-6 sm:h-6 text-ebony"></i>
           </div>
           <div>
-            <span class="font-cinzel text-xl md:text-2xl font-bold tracking-wider text-parchment block leading-none">
+            <span class="font-cinzel text-lg sm:text-2xl font-bold tracking-wider text-parchment block leading-none">
               SHELVED
             </span>
           </div>
         </div>
 
-        <!-- Navigation Tabs -->
+        <!-- Navigation Tabs (Desktop) -->
         <nav class="hidden md:flex items-center gap-1 bg-slate/90 p-1.5 rounded-xl border border-moss">
           <button id="nav-home" onclick="setTab('home')" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gold text-ebony shadow-md">
             <i data-lucide="grid" class="w-4 h-4"></i>
@@ -195,23 +221,23 @@
         </nav>
 
         <!-- Right Side Actions -->
-        <div class="flex items-center gap-2 sm:gap-2.5">
+        <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           
-          <!-- Profile Switcher Dropdown (Always visible on header) -->
+          <!-- Profile Switcher Dropdown -->
           <div class="relative" id="header-profile-container">
             <button 
               type="button"
               onclick="toggleHeaderProfileDropdown(event)" 
-              class="flex items-center gap-2 px-2.5 sm:px-3 py-2 rounded-xl bg-slate/95 hover:bg-oxford border border-gold/40 hover:border-gold text-xs transition-all cursor-pointer shadow-sm group/prof"
+              class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-slate/95 hover:bg-oxford border border-gold/40 hover:border-gold text-xs transition-all cursor-pointer shadow-sm group/prof"
               title="Click to switch reader profile"
             >
               <div class="w-6 h-6 rounded-full bg-gold text-ebony flex items-center justify-center text-xs font-bold font-cinzel shadow shrink-0" id="nav-profile-avatar">
                 M
               </div>
-              <span class="font-cinzel font-bold text-parchment group-hover/prof:text-gold transition-colors max-w-[90px] sm:max-w-[120px] truncate" id="nav-active-reader-name">
+              <span class="font-cinzel font-bold text-parchment group-hover/prof:text-gold transition-colors max-w-[80px] sm:max-w-[120px] truncate hidden xs:inline sm:inline" id="nav-active-reader-name">
                 Profile
               </span>
-              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gold-light shrink-0"></i>
+              <i data-lucide="chevron-down" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gold-light shrink-0"></i>
             </button>
 
             <!-- Floating Profile Dropdown -->
@@ -256,20 +282,20 @@
             id="nav-cloud-sync-btn"
             onclick="handleHeaderSyncClick()" 
             title="Cloud Sync Status (Click to sync now)" 
-            class="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate hover:bg-oxford border border-[#3d3835] hover:border-gold text-[#9E9382] transition-all cursor-pointer"
+            class="flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-2 rounded-xl text-xs font-semibold bg-slate hover:bg-oxford border border-[#3d3835] hover:border-gold text-[#9E9382] transition-all cursor-pointer shrink-0"
           >
             <span id="nav-cloud-sync-dot" class="w-2 h-2 rounded-full bg-[#7d7467]"></span>
             <span id="nav-cloud-sync-text" class="text-[11px] font-mono hidden md:inline">Sync</span>
           </button>
 
           <!-- Add Book Button -->
-          <button onclick="openAddBookModal()" class="flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl font-semibold text-sm bg-gradient-to-r from-gold via-gold-hover to-gold text-ebony hover:brightness-110 shadow-lg shadow-gold/25 transition-all duration-200 active:scale-95 cursor-pointer">
+          <button onclick="openAddBookModal()" class="flex items-center gap-1.5 sm:gap-2 p-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-gradient-to-r from-gold via-gold-hover to-gold text-ebony hover:brightness-110 shadow-lg shadow-gold/25 transition-all duration-200 active:scale-95 cursor-pointer shrink-0" title="Add Book to Library">
             <i data-lucide="plus" class="w-4 h-4 stroke-[3]"></i>
             <span class="hidden sm:inline">Add Book</span>
           </button>
 
           <!-- Settings Button -->
-          <button onclick="openSettingsModal()" title="Library Settings, Profiles & Backups" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-[#C7BCAC] bg-slate hover:text-parchment hover:bg-oxford border border-[#3d3835] transition-all cursor-pointer">
+          <button onclick="openSettingsModal()" title="Library Settings, Profiles & Backups" class="flex items-center gap-1.5 p-2 sm:px-3 sm:py-2.5 rounded-xl text-[#C7BCAC] bg-slate hover:text-parchment hover:bg-oxford border border-[#3d3835] transition-all cursor-pointer shrink-0">
             <i data-lucide="settings" class="w-4 h-4 text-gold"></i>
             <span class="hidden sm:inline text-xs font-semibold">Settings</span>
           </button>
@@ -277,21 +303,21 @@
         </div>
       </div>
 
-      <!-- Mobile Navigation Sub-bar -->
-      <div class="flex md:hidden items-center justify-around py-2.5 border-t border-[#3d332e]/60">
-        <button onclick="setTab('home')" class="flex flex-col items-center gap-1 text-xs font-medium text-gold font-bold">
+      <!-- Mobile Navigation Sub-bar (Sticky Bottom-friendly touch targets) -->
+      <div class="flex md:hidden items-center justify-around py-2 border-t border-[#3d332e]/60">
+        <button id="mobile-nav-home" onclick="setTab('home')" class="flex flex-col items-center gap-0.5 text-[11px] font-medium text-gold font-bold py-1 px-3 rounded-lg transition-colors">
           <i data-lucide="grid" class="w-4 h-4"></i>
           <span>Library</span>
         </button>
-        <button onclick="setTab('categories')" class="flex flex-col items-center gap-1 text-xs font-medium text-[#9E9382]">
+        <button id="mobile-nav-categories" onclick="setTab('categories')" class="flex flex-col items-center gap-0.5 text-[11px] font-medium text-[#9E9382] py-1 px-3 rounded-lg transition-colors">
           <i data-lucide="sparkles" class="w-4 h-4"></i>
           <span>Categories</span>
         </button>
-        <button onclick="setTab('favorites')" class="flex flex-col items-center gap-1 text-xs font-medium text-[#9E9382]">
+        <button id="mobile-nav-favorites" onclick="setTab('favorites')" class="flex flex-col items-center gap-0.5 text-[11px] font-medium text-[#9E9382] py-1 px-3 rounded-lg transition-colors">
           <i data-lucide="heart" class="w-4 h-4"></i>
           <span>Favorites</span>
         </button>
-        <button onclick="setTab('locations')" class="flex flex-col items-center gap-1 text-xs font-medium text-[#9E9382]">
+        <button id="mobile-nav-locations" onclick="setTab('locations')" class="flex flex-col items-center gap-0.5 text-[11px] font-medium text-[#9E9382] py-1 px-3 rounded-lg transition-colors">
           <i data-lucide="map-pin" class="w-4 h-4"></i>
           <span>Locations</span>
         </button>
@@ -643,54 +669,54 @@
   </footer>
 
   <!-- MODAL 1: BOOK DETAIL POPUP -->
-  <div id="modal-detail" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+  <div id="modal-detail" class="fixed inset-0 z-50 hidden items-center justify-center p-2 sm:p-6 overflow-hidden">
     <div onclick="closeDetailModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md"></div>
-    <div class="relative w-full max-w-3xl bg-ebony border-2 border-gold/60 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE]">
-      <div class="h-3 w-full bg-gradient-to-r from-mahogany via-gold to-oxford"></div>
+    <div class="relative w-full max-w-3xl bg-ebony border-2 border-gold/60 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[94vh] sm:max-h-[85vh] text-[#EDE8DE]">
+      <div class="h-2 sm:h-3 w-full bg-gradient-to-r from-mahogany via-gold to-oxford shrink-0"></div>
       
-      <div class="absolute top-6 right-6 flex items-center gap-2 z-20">
-        <button id="modal-detail-fav-btn" onclick="toggleCurrentBookFav()" class="p-2.5 rounded-full bg-slate border border-[#3d3835] hover:text-red-400">
-          <i data-lucide="heart" class="w-5 h-5"></i>
+      <div class="absolute top-4 sm:top-6 right-4 sm:right-6 flex items-center gap-2 z-20">
+        <button id="modal-detail-fav-btn" onclick="toggleCurrentBookFav()" class="p-2 sm:p-2.5 rounded-full bg-slate/90 backdrop-blur-sm border border-[#3d3835] hover:text-red-400 cursor-pointer">
+          <i data-lucide="heart" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </button>
-        <button onclick="closeDetailModal()" class="p-2.5 rounded-full bg-slate hover:bg-mahogany border border-[#3d3835] text-[#9E9382] hover:text-parchment">
-          <i data-lucide="x" class="w-5 h-5"></i>
+        <button onclick="closeDetailModal()" class="p-2 sm:p-2.5 rounded-full bg-slate/90 backdrop-blur-sm hover:bg-mahogany border border-[#3d3835] text-[#9E9382] hover:text-parchment cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </button>
       </div>
 
-      <div id="modal-detail-content" class="p-6 sm:p-8 md:p-10 max-h-[85vh] overflow-y-auto"></div>
+      <div id="modal-detail-content" class="p-4 sm:p-8 md:p-10 overflow-y-auto overscroll-contain flex-1"></div>
     </div>
   </div>
 
   <!-- MODAL 2: ADD / EDIT BOOK MODAL WITH AUTO-FETCH API -->
-  <div id="modal-add" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto">
+  <div id="modal-add" class="fixed inset-0 z-50 hidden items-center justify-center p-2 sm:p-6 md:p-8 overflow-hidden">
     <div onclick="closeAddBookModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md"></div>
-    <div class="relative w-full max-w-4xl bg-ebony border-2 border-gold/70 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE]">
-      <div class="h-2.5 w-full bg-gradient-to-r from-mahogany via-gold to-oxford"></div>
+    <div class="relative w-full max-w-4xl bg-ebony border-2 border-gold/70 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[94vh] sm:max-h-[88vh] text-[#EDE8DE]">
+      <div class="h-2 sm:h-2.5 w-full bg-gradient-to-r from-mahogany via-gold to-oxford shrink-0"></div>
       
-      <div class="p-6 sm:p-8 pb-4 border-b border-[#3d3835] flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-slate border border-gold/40 flex items-center justify-center text-gold">
-            <i data-lucide="book-open" class="w-5 h-5"></i>
+      <div class="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-[#3d3835] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate border border-gold/40 flex items-center justify-center text-gold shrink-0">
+            <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
           <div>
-            <h2 id="modal-add-title" class="font-cinzel text-xl sm:text-2xl font-bold text-parchment">Add New Book to Library</h2>
-            <p class="text-xs text-[#9E9382] font-playfair italic">Search online, scan barcodes, or use AI photo recognition</p>
+            <h2 id="modal-add-title" class="font-cinzel text-lg sm:text-2xl font-bold text-parchment">Add New Book to Library</h2>
+            <p class="text-[11px] sm:text-xs text-[#9E9382] font-playfair italic">Search online, scan barcodes, or use AI photo recognition</p>
           </div>
         </div>
         <button onclick="closeAddBookModal()" class="p-2 rounded-full bg-slate hover:bg-mahogany text-[#9E9382] hover:text-parchment cursor-pointer">
-          <i data-lucide="x" class="w-5 h-5"></i>
+          <i data-lucide="x" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </button>
       </div>
 
       <!-- ADD BOOK SOURCE TABS (Search, Barcode, AI Vision) -->
-      <div id="add-book-tabs-nav" class="px-6 sm:px-8 pt-3 flex items-center gap-2 border-b border-[#3d3835] bg-slate/40">
+      <div id="add-book-tabs-nav" class="px-3 sm:px-8 pt-2 sm:pt-3 flex items-center gap-1.5 sm:gap-2 border-b border-[#3d3835] bg-slate/40 shrink-0 overflow-x-auto no-scrollbar flex-nowrap">
         <button 
           type="button" 
           id="add-tab-search-btn" 
           onclick="switchAddBookTab('search')" 
-          class="flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-gold text-gold bg-ebony/60 cursor-pointer"
+          class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-gold text-gold bg-ebony/60 cursor-pointer shrink-0"
         >
-          <i data-lucide="search" class="w-4 h-4"></i>
+          <i data-lucide="search" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
           <span>Search & Manual</span>
         </button>
 
@@ -698,9 +724,9 @@
           type="button" 
           id="add-tab-barcode-btn" 
           onclick="switchAddBookTab('barcode')" 
-          class="flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer"
+          class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer shrink-0"
         >
-          <i data-lucide="scan-barcode" class="w-4 h-4"></i>
+          <i data-lucide="scan-barcode" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
           <span>Barcode Scanner</span>
         </button>
 
@@ -708,14 +734,14 @@
           type="button" 
           id="add-tab-ai-btn" 
           onclick="switchAddBookTab('ai')" 
-          class="flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer"
+          class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer shrink-0"
         >
-          <i data-lucide="sparkles" class="w-4 h-4 text-gold"></i>
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gold"></i>
           <span>AI Shelf & Cover Scan</span>
         </button>
       </div>
 
-      <div class="p-6 sm:p-8 max-h-[75vh] overflow-y-auto space-y-6">
+      <div class="p-4 sm:p-6 sm:p-8 overflow-y-auto overscroll-contain flex-1 space-y-6">
         
         <!-- PANEL 1: SEARCH & MANUAL ENTRY -->
         <div id="add-panel-search" class="space-y-6">
@@ -1219,7 +1245,7 @@
               </p>
 
               <!-- Dynamic Detected Books Rows -->
-              <div id="ai-books-review-list" class="space-y-3 max-h-[520px] overflow-y-auto pr-1"></div>
+              <div id="ai-books-review-list" class="space-y-3"></div>
 
               <!-- Batch Import Action Button -->
               <div class="pt-3 flex items-center justify-end gap-3">
@@ -1248,28 +1274,29 @@
   </div>
 
   <!-- MODAL: AI COVER PICKER & SEARCH -->
-  <div id="modal-ai-cover-picker" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+  <div id="modal-ai-cover-picker" class="fixed inset-0 z-[70] hidden items-center justify-center p-2 sm:p-6 overflow-hidden">
     <div onclick="closeAiCoverPicker()" class="fixed inset-0 bg-black/85 backdrop-blur-md"></div>
-    <div class="relative w-full max-w-xl bg-ebony border-2 border-gold/60 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE]">
-      <div class="h-2 w-full bg-gradient-to-r from-mahogany via-gold to-oxford"></div>
+    <div class="relative w-full max-w-xl bg-ebony border-2 border-gold/60 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[94vh] sm:max-h-[85vh] text-[#EDE8DE]">
+      <div class="h-2 w-full bg-gradient-to-r from-mahogany via-gold to-oxford shrink-0"></div>
       
-      <div class="p-5 sm:p-6 space-y-4">
-        <!-- Header -->
-        <div class="flex items-center justify-between pb-3 border-b border-[#3d3835]">
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-slate border border-moss flex items-center justify-center text-gold shrink-0">
-              <i data-lucide="image" class="w-5 h-5"></i>
-            </div>
-            <div class="min-w-0">
-              <h3 class="font-cinzel text-lg font-bold text-parchment truncate">Select Book Cover</h3>
-              <p id="cover-picker-subtitle" class="text-xs text-[#9E9382] font-playfair italic truncate">Choose from online platforms or enter a custom image URL</p>
-            </div>
+      <!-- Pinned Header -->
+      <div class="p-4 sm:p-5 pb-3 border-b border-[#3d3835] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate border border-moss flex items-center justify-center text-gold shrink-0">
+            <i data-lucide="image" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
-          <button onclick="closeAiCoverPicker()" class="text-[#9E9382] hover:text-parchment p-1 rounded-lg cursor-pointer">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
+          <div class="min-w-0">
+            <h3 class="font-cinzel text-base sm:text-lg font-bold text-parchment truncate">Select Book Cover</h3>
+            <p id="cover-picker-subtitle" class="text-[11px] sm:text-xs text-[#9E9382] font-playfair italic truncate">Choose from online platforms or enter a custom image URL</p>
+          </div>
         </div>
+        <button onclick="closeAiCoverPicker()" class="text-[#9E9382] hover:text-parchment p-1 rounded-lg cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+        </button>
+      </div>
 
+      <!-- Single Scroll Body -->
+      <div class="p-4 sm:p-6 overflow-y-auto overscroll-contain flex-1 space-y-4">
         <!-- Custom Image URL Input -->
         <div class="p-3.5 rounded-2xl bg-slate/70 border border-moss space-y-2">
           <label class="block text-xs font-semibold uppercase tracking-wider text-gold flex items-center gap-1.5">
@@ -1282,12 +1309,12 @@
               id="cover-picker-url-input" 
               placeholder="Paste direct image link (https://...jpg, .png, .webp)" 
               oninput="onCoverPickerUrlInput(this.value)"
-              class="flex-1 px-3.5 py-2 rounded-xl bg-ebony border border-[#3d3835] text-xs text-parchment focus:outline-none focus:border-gold"
+              class="flex-1 px-3.5 py-2 rounded-xl bg-ebony border border-[#3d3835] text-xs text-parchment focus:outline-none focus:border-gold min-w-0"
             />
             <button 
               type="button" 
               onclick="applyCoverPickerCustomUrl()" 
-              class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-md cursor-pointer shrink-0 transition-colors"
+              class="px-3 sm:px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-md cursor-pointer shrink-0 transition-colors"
             >
               Apply URL
             </button>
@@ -1322,14 +1349,14 @@
             <input 
               type="text" 
               id="cover-picker-search-input" 
-              placeholder="Search by title, author, original English title, or ISBN..." 
+              placeholder="Search by title, author, or ISBN..." 
               onkeydown="if (event.key === 'Enter') searchCoversOnline();"
-              class="flex-1 px-3.5 py-2 rounded-xl bg-slate/80 border border-[#3d3835] text-xs text-parchment focus:outline-none focus:border-gold"
+              class="flex-1 px-3.5 py-2 rounded-xl bg-slate/80 border border-[#3d3835] text-xs text-parchment focus:outline-none focus:border-gold min-w-0"
             />
             <button 
               type="button" 
               onclick="searchCoversOnline()" 
-              class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment cursor-pointer shrink-0 transition-colors flex items-center gap-1.5"
+              class="px-3 sm:px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment cursor-pointer shrink-0 transition-colors flex items-center gap-1.5"
             >
               <i data-lucide="search" class="w-3.5 h-3.5"></i>
               <span>Search</span>
@@ -1337,55 +1364,55 @@
           </div>
 
           <!-- Covers Grid -->
-          <div id="cover-picker-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-[260px] overflow-y-auto p-1 pr-2">
+          <div id="cover-picker-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5 p-1 pr-1">
             <!-- Populated dynamically -->
           </div>
         </div>
+      </div>
 
-        <!-- Footer -->
-        <div class="pt-3 border-t border-[#3d3835] flex items-center justify-between">
-          <button 
-            type="button" 
-            onclick="removeAiBookCover()" 
-            class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer"
-          >
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            <span>Remove Cover</span>
-          </button>
-          <button 
-            type="button" 
-            onclick="closeAiCoverPicker()" 
-            class="px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment cursor-pointer"
-          >
-            Done
-          </button>
-        </div>
+      <!-- Pinned Footer -->
+      <div class="p-4 border-t border-[#3d3835] flex items-center justify-between shrink-0 bg-ebony">
+        <button 
+          type="button" 
+          onclick="removeAiBookCover()" 
+          class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 cursor-pointer"
+        >
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Remove Cover</span>
+        </button>
+        <button 
+          type="button" 
+          onclick="closeAiCoverPicker()" 
+          class="px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment cursor-pointer"
+        >
+          Done
+        </button>
       </div>
     </div>
   </div>
 
   <!-- MODAL 3: ADVANCED SEARCH MODAL -->
-  <div id="modal-advanced-search" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+  <div id="modal-advanced-search" class="fixed inset-0 z-50 hidden items-center justify-center p-2 sm:p-6 overflow-hidden">
     <div onclick="closeAdvancedSearchModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md"></div>
-    <div class="relative w-full max-w-2xl bg-ebony border-2 border-gold/60 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE]">
-      <div class="h-2 w-full bg-gradient-to-r from-mahogany via-gold to-oxford"></div>
+    <div class="relative w-full max-w-2xl bg-ebony border-2 border-gold/60 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[94vh] sm:max-h-[85vh] text-[#EDE8DE]">
+      <div class="h-2 w-full bg-gradient-to-r from-mahogany via-gold to-oxford shrink-0"></div>
       
-      <div class="p-6 border-b border-[#3d3835] flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="p-2.5 rounded-xl bg-slate border border-gold/40 text-gold">
-            <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+      <div class="p-4 sm:p-6 border-b border-[#3d3835] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="p-2 sm:p-2.5 rounded-xl bg-slate border border-gold/40 text-gold">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
           <div>
-            <h2 class="font-cinzel text-xl font-bold text-parchment">Advanced Search & Filters</h2>
-            <p class="text-xs text-[#9E9382] font-playfair italic">Search across multiple attributes</p>
+            <h2 class="font-cinzel text-lg sm:text-xl font-bold text-parchment">Advanced Search & Filters</h2>
+            <p class="text-[11px] sm:text-xs text-[#9E9382] font-playfair italic">Search across multiple attributes</p>
           </div>
         </div>
-        <button onclick="closeAdvancedSearchModal()" class="p-2 rounded-full bg-slate hover:bg-mahogany text-[#9E9382] hover:text-parchment">
-          <i data-lucide="x" class="w-5 h-5"></i>
+        <button onclick="closeAdvancedSearchModal()" class="p-2 rounded-full bg-slate hover:bg-mahogany text-[#9E9382] hover:text-parchment cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </button>
       </div>
 
-      <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+      <div class="p-4 sm:p-6 space-y-4 overflow-y-auto overscroll-contain flex-1">
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1">Keywords</label>
           <input type="text" id="adv-keyword" placeholder="Title, Portuguese title, author..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm" />
@@ -1449,11 +1476,11 @@
         </div>
       </div>
 
-      <div class="p-6 border-t border-[#3d3835] flex items-center justify-between">
-        <button onclick="resetFilters(); closeAdvancedSearchModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-[#9E9382] hover:text-parchment bg-slate">
+      <div class="p-4 sm:p-6 border-t border-[#3d3835] flex items-center justify-between shrink-0 bg-ebony">
+        <button onclick="resetFilters(); closeAdvancedSearchModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-[#9E9382] hover:text-parchment bg-slate cursor-pointer">
           Reset
         </button>
-        <button onclick="applyAdvancedSearch()" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-lg cursor-pointer">
+        <button onclick="applyAdvancedSearch()" class="px-5 sm:px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-lg cursor-pointer">
           Apply Filters
         </button>
       </div>
@@ -1461,27 +1488,27 @@
   </div>
 
   <!-- MODAL 4: SETTINGS & MEMBERS MANAGER -->
-  <div id="modal-settings" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+  <div id="modal-settings" class="fixed inset-0 z-50 hidden items-center justify-center p-2 sm:p-6 overflow-hidden">
     <div onclick="closeSettingsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md"></div>
-    <div class="relative w-full max-w-xl bg-ebony border-2 border-gold/70 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE]">
-      <div class="h-2.5 w-full bg-gradient-to-r from-mahogany via-gold to-oxford"></div>
+    <div class="relative w-full max-w-xl bg-ebony border-2 border-gold/70 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[94vh] sm:max-h-[85vh] text-[#EDE8DE]">
+      <div class="h-2 sm:h-2.5 w-full bg-gradient-to-r from-mahogany via-gold to-oxford shrink-0"></div>
       
-      <div class="p-6 border-b border-[#3d3835] flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="p-2.5 rounded-xl bg-slate border border-gold/40 text-gold">
-            <i data-lucide="settings" class="w-5 h-5"></i>
+      <div class="p-4 sm:p-6 border-b border-[#3d3835] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="p-2 sm:p-2.5 rounded-xl bg-slate border border-gold/40 text-gold">
+            <i data-lucide="settings" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
           <div>
-            <h2 class="font-cinzel text-xl font-bold text-parchment">Library Settings</h2>
-            <p class="text-xs text-[#9E9382] font-playfair italic">Configure library mode, reader profiles & backups</p>
+            <h2 class="font-cinzel text-lg sm:text-xl font-bold text-parchment">Library Settings</h2>
+            <p class="text-[11px] sm:text-xs text-[#9E9382] font-playfair italic">Configure library mode, reader profiles & backups</p>
           </div>
         </div>
         <button onclick="closeSettingsModal()" class="p-2 rounded-full bg-slate hover:bg-mahogany text-[#9E9382] hover:text-parchment cursor-pointer">
-          <i data-lucide="x" class="w-5 h-5"></i>
+          <i data-lucide="x" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </button>
       </div>
 
-      <div class="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+      <div class="p-4 sm:p-6 space-y-6 overflow-y-auto overscroll-contain flex-1">
         
         <!-- SECTION 1: LIBRARY MODE (INDIVIDUAL VS SHARED) -->
         <div class="bg-slate/70 p-5 rounded-2xl border border-moss space-y-4">
@@ -1885,8 +1912,8 @@
 
       </div>
 
-      <div class="p-6 border-t border-[#3d3835] flex items-center justify-end">
-        <button onclick="closeSettingsModal()" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony cursor-pointer">
+      <div class="p-4 sm:p-6 border-t border-[#3d3835] flex items-center justify-end shrink-0 bg-ebony">
+        <button onclick="closeSettingsModal()" class="px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony cursor-pointer">
           Done
         </button>
       </div>
@@ -1894,9 +1921,9 @@
   </div>
 
   <!-- MODAL: GITHUB DEVICE AUTH POPUP -->
-  <div id="modal-github-device-auth" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+  <div id="modal-github-device-auth" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6 overflow-hidden">
     <div onclick="closeGitHubDeviceAuthModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md"></div>
-    <div class="relative w-full max-w-md bg-ebony border-2 border-gold/70 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE] p-6 text-center space-y-5">
+    <div class="relative w-full max-w-md bg-ebony border-2 border-gold/70 rounded-2xl sm:rounded-3xl shadow-2xl overflow-y-auto overscroll-contain max-h-[90vh] z-10 text-[#EDE8DE] p-5 sm:p-6 text-center space-y-4 sm:space-y-5">
       <div class="w-12 h-12 rounded-2xl bg-slate border border-gold/50 flex items-center justify-center text-gold mx-auto shadow-inner">
         <i data-lucide="github" class="w-6 h-6"></i>
       </div>
@@ -1936,9 +1963,9 @@
   </div>
 
   <!-- MODAL: MOBILE PAIRING QR CODE -->
-  <div id="modal-mobile-qr-sync" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+  <div id="modal-mobile-qr-sync" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6 overflow-hidden">
     <div onclick="closeMobileQrModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md"></div>
-    <div class="relative w-full max-w-sm bg-ebony border-2 border-gold/70 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE] p-6 text-center space-y-4">
+    <div class="relative w-full max-w-sm bg-ebony border-2 border-gold/70 rounded-2xl sm:rounded-3xl shadow-2xl overflow-y-auto overscroll-contain max-h-[90vh] z-10 text-[#EDE8DE] p-5 sm:p-6 text-center space-y-4">
       <div class="w-12 h-12 rounded-2xl bg-slate border border-gold/50 flex items-center justify-center text-gold mx-auto shadow-inner">
         <i data-lucide="smartphone" class="w-6 h-6"></i>
       </div>
@@ -1967,34 +1994,36 @@
   </div>
 
   <!-- MODAL 5: MANAGE LOCATIONS -->
-  <div id="modal-manage-locations" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+  <div id="modal-manage-locations" class="fixed inset-0 z-50 hidden items-center justify-center p-2 sm:p-6 overflow-hidden">
     <div onclick="closeManageLocationsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md"></div>
-    <div class="relative w-full max-w-2xl bg-ebony border-2 border-gold/60 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE]">
-      <div class="h-2 w-full bg-gradient-to-r from-mahogany via-gold to-oxford"></div>
+    <div class="relative w-full max-w-2xl bg-ebony border-2 border-gold/60 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[94vh] sm:max-h-[85vh] text-[#EDE8DE]">
+      <div class="h-2 w-full bg-gradient-to-r from-mahogany via-gold to-oxford shrink-0"></div>
       
-      <div class="p-6 md:p-8">
-        <div class="flex items-center justify-between pb-4 border-b border-[#3d3835]">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-slate border border-moss flex items-center justify-center text-gold">
-              <i data-lucide="map-pin" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <h3 class="font-cinzel text-xl font-bold text-parchment">Manage Shelves & Locations</h3>
-              <p class="text-xs text-[#9E9382] font-playfair italic">Add, rename or remove physical room, floor and shelf placements</p>
-            </div>
+      <!-- Pinned Header -->
+      <div class="p-4 sm:p-6 border-b border-[#3d3835] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate border border-moss flex items-center justify-center text-gold shrink-0">
+            <i data-lucide="map-pin" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
-          <button onclick="closeManageLocationsModal()" class="text-[#9E9382] hover:text-parchment p-1 rounded-lg">
-            <i data-lucide="x" class="w-6 h-6"></i>
-          </button>
+          <div>
+            <h3 class="font-cinzel text-lg sm:text-xl font-bold text-parchment">Manage Shelves & Locations</h3>
+            <p class="text-[11px] sm:text-xs text-[#9E9382] font-playfair italic">Add, rename or remove physical room, floor and shelf placements</p>
+          </div>
         </div>
+        <button onclick="closeManageLocationsModal()" class="text-[#9E9382] hover:text-parchment p-1 rounded-lg cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
 
+      <!-- Single Scroll Body -->
+      <div class="p-4 sm:p-6 overflow-y-auto overscroll-contain flex-1 space-y-5">
         <!-- Add New Location Form -->
-        <div class="my-6 p-4 rounded-2xl bg-slate/60 border border-moss">
+        <div class="p-3.5 sm:p-4 rounded-2xl bg-slate/60 border border-moss">
           <label class="block text-xs font-semibold uppercase tracking-wider text-gold mb-2 flex items-center gap-1.5">
             <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-gold"></i>
             <span>Create New Shelf / Location</span>
           </label>
-          <form onsubmit="handleCreateLocationForm(event)" class="flex items-center gap-2.5">
+          <form onsubmit="handleCreateLocationForm(event)" class="flex items-center gap-2 sm:gap-2.5">
             <button 
               type="button" 
               id="new-location-icon-btn" 
@@ -2010,78 +2039,82 @@
             <input 
               type="text" 
               id="new-location-input" 
-              placeholder="e.g. Basement - Shelf 3, Bedroom - Nightstand, Attic Box 1..." 
+              placeholder="e.g. Living Room, Bedroom Shelf..." 
               required
-              class="flex-1 px-3.5 py-2.5 rounded-xl bg-ebony border border-moss text-parchment text-sm focus:outline-none focus:border-gold"
+              class="flex-1 px-3 py-2 rounded-xl bg-ebony border border-moss text-parchment text-xs sm:text-sm focus:outline-none focus:border-gold min-w-0"
             />
-            <button type="submit" class="px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-md shadow-gold/20 cursor-pointer shrink-0">
-              Add Location
+            <button type="submit" class="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-md shadow-gold/20 cursor-pointer shrink-0">
+              Add
             </button>
           </form>
         </div>
 
         <!-- List of Existing Locations -->
-        <div class="space-y-3">
+        <div class="space-y-2.5">
           <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] px-1">
             <span>Existing Shelves & Locations</span>
             <span id="locations-count-badge" class="text-gold-light"></span>
           </div>
 
-          <div id="manage-locations-list" class="max-h-[360px] overflow-y-auto space-y-2.5 pr-1"></div>
+          <div id="manage-locations-list" class="space-y-2.5"></div>
         </div>
+      </div>
 
-        <div class="mt-6 pt-4 border-t border-[#3d3835] flex items-center justify-end">
-          <button onclick="closeManageLocationsModal()" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment cursor-pointer">
-            Done
-          </button>
-        </div>
+      <!-- Pinned Footer -->
+      <div class="p-4 sm:p-6 border-t border-[#3d3835] flex items-center justify-end shrink-0 bg-ebony">
+        <button onclick="closeManageLocationsModal()" class="px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment cursor-pointer">
+          Done
+        </button>
       </div>
     </div>
   </div>
 
   <!-- MODAL: LOCATION ICON PICKER -->
-  <div id="modal-location-icon-picker" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+  <div id="modal-location-icon-picker" class="fixed inset-0 z-[60] hidden items-center justify-center p-2 sm:p-6 overflow-hidden">
     <div onclick="closeLocationIconPicker()" class="fixed inset-0 bg-black/85 backdrop-blur-md"></div>
-    <div class="relative w-full max-w-md bg-ebony border-2 border-gold/60 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#EDE8DE]">
-      <div class="h-1.5 w-full bg-gradient-to-r from-mahogany via-gold to-oxford"></div>
+    <div class="relative w-full max-w-md bg-ebony border-2 border-gold/60 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh] sm:max-h-[80vh] text-[#EDE8DE]">
+      <div class="h-1.5 w-full bg-gradient-to-r from-mahogany via-gold to-oxford shrink-0"></div>
       
-      <div class="p-6">
-        <div class="flex items-center justify-between pb-3 border-b border-[#3d3835]">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-slate border border-moss flex items-center justify-center text-gold">
-              <i id="icon-picker-modal-preview" data-lucide="map-pin" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <h3 class="font-cinzel text-lg font-bold text-parchment">Choose Shelf Icon</h3>
-              <p id="icon-picker-modal-subtitle" class="text-xs text-[#9E9382] font-playfair italic">Select an icon for this location</p>
-            </div>
+      <!-- Pinned Header -->
+      <div class="p-4 sm:p-5 border-b border-[#3d3835] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate border border-moss flex items-center justify-center text-gold shrink-0">
+            <i id="icon-picker-modal-preview" data-lucide="map-pin" class="w-4 h-4 sm:w-5 sm:h-5"></i>
           </div>
-          <button onclick="closeLocationIconPicker()" class="text-[#9E9382] hover:text-parchment p-1 rounded-lg">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
+          <div>
+            <h3 class="font-cinzel text-base sm:text-lg font-bold text-parchment">Choose Shelf Icon</h3>
+            <p id="icon-picker-modal-subtitle" class="text-[11px] sm:text-xs text-[#9E9382] font-playfair italic">Select an icon for this location</p>
+          </div>
         </div>
+        <button onclick="closeLocationIconPicker()" class="text-[#9E9382] hover:text-parchment p-1 rounded-lg cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
 
+      <!-- Single Scroll Body -->
+      <div class="p-4 sm:p-5 overflow-y-auto overscroll-contain flex-1 space-y-3">
         <!-- Search / Filter Icons -->
-        <div class="mt-4 mb-3">
+        <div>
           <input 
             type="text" 
             id="icon-picker-search" 
-            placeholder="Search icons (e.g. bed, desk, shelf, cloud, coffee)..." 
+            placeholder="Search icons (bed, desk, shelf, cloud)..." 
             oninput="filterLocationIcons(this.value)" 
             class="w-full px-3.5 py-2 rounded-xl bg-slate/80 border border-[#3d3835] text-xs text-parchment focus:outline-none focus:border-gold"
           />
         </div>
 
         <!-- Icons Grid -->
-        <div id="icon-picker-grid" class="grid grid-cols-4 gap-2.5 max-h-[280px] overflow-y-auto p-1 pr-2">
+        <div id="icon-picker-grid" class="grid grid-cols-4 gap-2.5 p-1 pr-1">
           <!-- Populated by JS -->
         </div>
+      </div>
 
-        <div class="mt-4 pt-3 border-t border-[#3d3835] flex items-center justify-end">
-          <button onclick="closeLocationIconPicker()" class="px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment cursor-pointer">
-            Close
-          </button>
-        </div>
+      <!-- Pinned Footer -->
+      <div class="p-3.5 sm:p-4 border-t border-[#3d3835] flex items-center justify-end shrink-0 bg-ebony">
+        <button onclick="closeLocationIconPicker()" class="px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment cursor-pointer">
+          Close
+        </button>
       </div>
     </div>
   </div>
@@ -2600,14 +2633,27 @@
       document.getElementById('tab-categories-view').classList.toggle('hidden', tab !== 'categories');
       document.getElementById('tab-locations-view').classList.toggle('hidden', tab !== 'locations');
 
-      // Update active nav styles
+      // Update active desktop nav styles
       const navBtns = ['nav-home', 'nav-categories', 'nav-favorites', 'nav-locations'];
       navBtns.forEach(id => {
         const btn = document.getElementById(id);
+        if (!btn) return;
         if (id === `nav-${tab}`) {
           btn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gold text-parchment shadow-md';
         } else {
           btn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all text-[#C7BCAC] hover:text-parchment hover:bg-ebony/60';
+        }
+      });
+
+      // Update mobile sub-bar nav styles
+      const mobileNavBtns = ['mobile-nav-home', 'mobile-nav-categories', 'mobile-nav-favorites', 'mobile-nav-locations'];
+      mobileNavBtns.forEach(id => {
+        const mBtn = document.getElementById(id);
+        if (!mBtn) return;
+        if (id === `mobile-nav-${tab}`) {
+          mBtn.className = 'flex flex-col items-center gap-0.5 text-[11px] font-bold text-gold py-1 px-3 rounded-lg transition-colors';
+        } else {
+          mBtn.className = 'flex flex-col items-center gap-0.5 text-[11px] font-medium text-[#9E9382] hover:text-parchment py-1 px-3 rounded-lg transition-colors';
         }
       });
 
@@ -2625,6 +2671,49 @@
       }
 
       renderAll();
+    }
+
+    // Lock body scrolling when any modal or reader is active to prevent background scrolling jank on mobile
+    function syncModalBodyLock() {
+      const modalIds = [
+        'modal-detail',
+        'modal-add',
+        'modal-ai-cover-picker',
+        'modal-advanced-search',
+        'modal-settings',
+        'modal-github-device-auth',
+        'modal-mobile-qr-sync',
+        'modal-manage-locations',
+        'modal-location-icon-picker',
+        'modal-reader'
+      ];
+      const hasOpenModal = modalIds.some(id => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains('hidden') && el.style.display !== 'none';
+      });
+      if (hasOpenModal) {
+        document.body.classList.add('modal-open');
+      } else {
+        document.body.classList.remove('modal-open');
+      }
+    }
+
+    // Attach automatic mutation observer so body lock syncs unconditionally
+    if (typeof MutationObserver !== 'undefined') {
+      const modalObserver = new MutationObserver(() => {
+        syncModalBodyLock();
+      });
+      window.addEventListener('DOMContentLoaded', () => {
+        [
+          'modal-detail', 'modal-add', 'modal-ai-cover-picker', 'modal-advanced-search',
+          'modal-settings', 'modal-github-device-auth', 'modal-mobile-qr-sync',
+          'modal-manage-locations', 'modal-location-icon-picker', 'modal-reader'
+        ].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) modalObserver.observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
+        });
+        syncModalBodyLock();
+      });
     }
 
     function setViewMode(mode) {
@@ -2899,7 +2988,7 @@
         return `
           <div 
             onclick="openDetailModal('${book.id}')" 
-            class="group/item flex-shrink-0 w-72 sm:w-80 bg-ebony/90 hover:bg-oxford/40 border border-[#3d3835] hover:border-gold/70 rounded-2xl p-3.5 transition-all duration-300 shadow-md hover:shadow-xl flex gap-3.5 items-center cursor-pointer select-none"
+            class="group/item flex-shrink-0 w-[82vw] max-w-[320px] sm:w-80 snap-start bg-ebony/90 hover:bg-oxford/40 border border-[#3d3835] hover:border-gold/70 rounded-2xl p-3 sm:p-3.5 transition-all duration-300 shadow-md hover:shadow-xl flex gap-3 sm:gap-3.5 items-center cursor-pointer select-none"
           >
             <!-- Cover with Progress Overlay -->
             <div class="relative w-16 sm:w-20 aspect-[2/3] shrink-0 rounded-xl overflow-hidden bg-slate border border-[#3d3835] group-hover/item:border-gold shadow">
@@ -3225,13 +3314,13 @@
 
       if (currentViewMode === 'shelf') {
         container.innerHTML = `
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-5 gap-y-10">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-x-5 md:gap-y-10">
             ${filtered.map(b => renderShelfCard(b)).join('')}
           </div>
         `;
       } else if (currentViewMode === 'detail') {
         container.innerHTML = `
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
             ${filtered.map(b => renderDetailCard(b)).join('')}
           </div>
         `;
@@ -3239,15 +3328,15 @@
         container.innerHTML = `
           <div class="overflow-x-auto rounded-2xl border border-[#3d3835] bg-slate/90 shadow-xl">
             <table class="w-full text-left text-xs md:text-sm text-[#EDE8DE]">
-              <thead class="bg-ebony text-[#9E9382] uppercase text-[11px] tracking-wider border-b border-[#3d3835]">
+              <thead class="bg-ebony text-[#9E9382] uppercase text-[10px] sm:text-[11px] tracking-wider border-b border-[#3d3835]">
                 <tr>
-                  <th class="px-4 py-3.5 w-10 text-center">★</th>
-                  <th class="px-4 py-3.5">Title</th>
-                  <th class="px-4 py-3.5">Author</th>
-                  <th class="px-4 py-3.5">Genre</th>
-                  <th class="px-4 py-3.5">Format & Shelf</th>
-                  <th class="px-4 py-3.5">Status</th>
-                  <th class="px-4 py-3.5 text-center">Rating</th>
+                  <th class="px-2 sm:px-4 py-3 sm:py-3.5 w-8 sm:w-10 text-center">★</th>
+                  <th class="px-2 sm:px-4 py-3 sm:py-3.5">Title</th>
+                  <th class="px-2 sm:px-4 py-3 sm:py-3.5">Author</th>
+                  <th class="px-2 sm:px-4 py-3 sm:py-3.5 hidden sm:table-cell">Genre</th>
+                  <th class="px-2 sm:px-4 py-3 sm:py-3.5 hidden md:table-cell">Format & Shelf</th>
+                  <th class="px-2 sm:px-4 py-3 sm:py-3.5">Status</th>
+                  <th class="px-2 sm:px-4 py-3 sm:py-3.5 text-center">Rating</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[#3d3835]/50">
@@ -3426,21 +3515,21 @@
       const progressPercent = getBookProgress(book);
       return `
         <tr onclick="openDetailModal('${book.id}')" class="hover:bg-oxford/25 transition-colors cursor-pointer">
-          <td class="px-4 py-3 text-center" onclick="event.stopPropagation(); toggleBookFav('${book.id}')">
-            <i data-lucide="heart" class="w-4 h-4 mx-auto ${book.isFavorite ? 'text-red-400 fill-current' : 'text-moss hover:text-red-300'}"></i>
+          <td class="px-2 sm:px-4 py-2.5 sm:py-3 text-center" onclick="event.stopPropagation(); toggleBookFav('${book.id}')">
+            <i data-lucide="heart" class="w-3.5 sm:w-4 h-3.5 sm:h-4 mx-auto ${book.isFavorite ? 'text-red-400 fill-current' : 'text-moss hover:text-red-300'}"></i>
           </td>
-          <td class="px-4 py-3">
-            <div class="font-cinzel font-bold text-parchment flex items-center gap-2">
-              <span>${escapeHtml(book.title)}</span>
-              ${progressPercent > 0 ? `<span class="text-[10px] font-mono font-bold text-gold px-1.5 py-0.2 rounded bg-gold/10 border border-gold/30">${progressPercent === 100 ? '100% ✓' : `${progressPercent}%`}</span>` : ''}
+          <td class="px-2 sm:px-4 py-2.5 sm:py-3">
+            <div class="font-cinzel font-bold text-parchment flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+              <span class="line-clamp-2">${escapeHtml(book.title)}</span>
+              ${progressPercent > 0 ? `<span class="text-[9px] sm:text-[10px] font-mono font-bold text-gold px-1 sm:px-1.5 py-0.2 rounded bg-gold/10 border border-gold/30 shrink-0">${progressPercent === 100 ? '100% ✓' : `${progressPercent}%`}</span>` : ''}
             </div>
-            ${book.titlePt && book.titlePt !== book.title ? `<div class="text-[11px] text-[#9E9382] font-playfair italic">${escapeHtml(book.titlePt)}</div>` : ''}
+            ${book.titlePt && book.titlePt !== book.title ? `<div class="text-[10px] sm:text-[11px] text-[#9E9382] font-playfair italic line-clamp-1">${escapeHtml(book.titlePt)}</div>` : ''}
           </td>
-          <td class="px-4 py-3 font-playfair italic text-[#B3A796]">${escapeHtml(book.authors.join(', '))}</td>
-          <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs bg-ebony text-[#9E9382]">${escapeHtml(book.categories[0] || '')}</span></td>
-          <td class="px-4 py-3 text-xs text-[#C8D1C4]">${escapeHtml(book.format || 'Physical')} ${book.location ? `• ${escapeHtml(book.location)}` : ''}</td>
-          <td class="px-4 py-3">${renderStatusBadge(book.status, true)}</td>
-          <td class="px-4 py-3 text-center text-xs font-bold text-amber-400">${book.rating > 0 ? `★ ${book.rating}` : '—'}</td>
+          <td class="px-2 sm:px-4 py-2.5 sm:py-3 font-playfair italic text-[#B3A796] text-xs sm:text-sm max-w-[120px] truncate">${escapeHtml(book.authors.join(', '))}</td>
+          <td class="px-2 sm:px-4 py-2.5 sm:py-3 hidden sm:table-cell"><span class="px-2 py-0.5 rounded text-xs bg-ebony text-[#9E9382]">${escapeHtml(book.categories[0] || '')}</span></td>
+          <td class="px-2 sm:px-4 py-2.5 sm:py-3 text-xs text-[#C8D1C4] hidden md:table-cell">${escapeHtml(book.format || 'Physical')} ${book.location ? `• ${escapeHtml(book.location)}` : ''}</td>
+          <td class="px-2 sm:px-4 py-2.5 sm:py-3">${renderStatusBadge(book.status, true)}</td>
+          <td class="px-2 sm:px-4 py-2.5 sm:py-3 text-center text-xs font-bold text-amber-400">${book.rating > 0 ? `★ ${book.rating}` : '—'}</td>
         </tr>
       `;
     }
@@ -3869,6 +3958,7 @@
       renderManageLocationsList();
       document.getElementById('modal-manage-locations').classList.remove('hidden');
       document.getElementById('modal-manage-locations').classList.add('flex');
+      syncModalBodyLock();
       lucide.createIcons();
       setTimeout(() => {
         const input = document.getElementById('new-location-input');
@@ -3879,6 +3969,7 @@
     function closeManageLocationsModal() {
       document.getElementById('modal-manage-locations').classList.add('hidden');
       document.getElementById('modal-manage-locations').classList.remove('flex');
+      syncModalBodyLock();
     }
 
     let draggedLocationIdx = null;
@@ -4487,12 +4578,14 @@
 
       document.getElementById('modal-detail').classList.remove('hidden');
       document.getElementById('modal-detail').classList.add('flex');
+      syncModalBodyLock();
       lucide.createIcons();
     }
 
     function closeDetailModal() {
       document.getElementById('modal-detail').classList.add('hidden');
       document.getElementById('modal-detail').classList.remove('flex');
+      syncModalBodyLock();
       selectedBook = null;
     }
 
@@ -4794,6 +4887,7 @@
 
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      syncModalBodyLock();
       lucide.createIcons();
 
       // Retrieve offline ePub from browser IndexedDB
@@ -4937,6 +5031,7 @@
       const modal = document.getElementById('modal-reader');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+      syncModalBodyLock();
       if (currentRendition) {
         try { currentRendition.destroy(); } catch (e) {}
       }
@@ -5182,6 +5277,7 @@
 
       document.getElementById('modal-add').classList.remove('hidden');
       document.getElementById('modal-add').classList.add('flex');
+      syncModalBodyLock();
       lucide.createIcons();
 
       setTimeout(() => {
@@ -5226,6 +5322,7 @@
 
       document.getElementById('modal-add').classList.remove('hidden');
       document.getElementById('modal-add').classList.add('flex');
+      syncModalBodyLock();
       lucide.createIcons();
     }
 
@@ -5234,6 +5331,7 @@
       stopAiCamera();
       document.getElementById('modal-add').classList.add('hidden');
       document.getElementById('modal-add').classList.remove('flex');
+      syncModalBodyLock();
       document.getElementById('api-candidates-container').classList.add('hidden');
       window.currentApiCandidates = [];
     }
@@ -6354,6 +6452,7 @@ Mandatory requirements:
       if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        syncModalBodyLock();
       }
 
       if (window.lucide) lucide.createIcons();
@@ -6367,6 +6466,7 @@ Mandatory requirements:
       if (modal) {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+        syncModalBodyLock();
       }
       currentCoverPickerBookIdx = null;
     }
@@ -7521,12 +7621,14 @@ Mandatory requirements:
 
       document.getElementById('modal-advanced-search').classList.remove('hidden');
       document.getElementById('modal-advanced-search').classList.add('flex');
+      syncModalBodyLock();
       lucide.createIcons();
     }
 
     function closeAdvancedSearchModal() {
       document.getElementById('modal-advanced-search').classList.add('hidden');
       document.getElementById('modal-advanced-search').classList.remove('flex');
+      syncModalBodyLock();
     }
 
     function applyAdvancedSearch() {
@@ -7551,6 +7653,7 @@ Mandatory requirements:
       const modal = document.getElementById('modal-settings');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      syncModalBodyLock();
       lucide.createIcons();
     }
 
@@ -7558,6 +7661,7 @@ Mandatory requirements:
       const modal = document.getElementById('modal-settings');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+      syncModalBodyLock();
     }
 
     function renderSettingsModalContent() {
@@ -8101,6 +8205,7 @@ Mandatory requirements:
           if (modal) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            syncModalBodyLock();
             lucide.createIcons();
           }
 
@@ -8188,6 +8293,7 @@ Mandatory requirements:
       if (modal) {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+        syncModalBodyLock();
       }
     }
 
@@ -8231,6 +8337,7 @@ Mandatory requirements:
       if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        syncModalBodyLock();
         lucide.createIcons();
       }
     }
@@ -8240,6 +8347,7 @@ Mandatory requirements:
       if (modal) {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+        syncModalBodyLock();
       }
     }
 
