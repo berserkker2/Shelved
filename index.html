@@ -5177,8 +5177,8 @@
 
     // Active Gemini Model dynamic resolution cache & discovered model list
     let cachedGeminiModel = localStorage.getItem('shelved_gemini_active_model_v1') || null;
-    // Invalidate invalid/audio/TTS cached models if stored previously
-    if (cachedGeminiModel && /tts|audio|speech|embed/i.test(cachedGeminiModel)) {
+    // Invalidate invalid/audio/TTS or deprecated models if stored previously
+    if (cachedGeminiModel && /tts|audio|speech|embed|gemini-2\.5-flash/i.test(cachedGeminiModel)) {
       cachedGeminiModel = null;
       try { localStorage.removeItem('shelved_gemini_active_model_v1'); } catch (e) {}
     }
@@ -5189,7 +5189,7 @@
         return discoveredGeminiModels;
       }
       if (!geminiApiKey) {
-        return ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite'];
+        return ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash'];
       }
 
       try {
@@ -5197,10 +5197,11 @@
         if (resp.ok) {
           const data = await resp.json();
           if (data.models && Array.isArray(data.models)) {
-            // Filter: MUST support generateContent, MUST NOT be TTS/audio/embed, and if supportedInputModalities is defined, MUST include 'image'
+            // Filter: MUST support generateContent, MUST NOT be TTS/audio/embed, MUST NOT be deprecated 2.5-flash
             const visionModels = data.models.filter(m => {
               const name = m.name || '';
               if (/tts|audio|speech|embed|realtime|moderation/i.test(name)) return false;
+              if (/gemini-2\.5-flash/i.test(name)) return false; // Explicitly deprecated by Google for new users
               
               const hasGenContent = Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent');
               if (!hasGenContent) return false;
@@ -5213,19 +5214,19 @@
 
             const rawNames = visionModels.map(m => m.name.replace(/^models\//, ''));
             
-            // Priority order for multimodal vision models (EXACT or clean prefix match, NO partial substring)
+            // Priority order for multimodal vision models (Google 3.x series first, then fallbacks)
             const priorityOrder = [
-              'gemini-2.5-flash',
+              'gemini-3.6-flash',
+              'gemini-3.8-flash',
+              'gemini-3.5-flash',
+              'gemini-flash-latest',
+              'gemini-3.6-pro',
+              'gemini-3.5-pro',
               'gemini-2.0-flash',
               'gemini-2.0-flash-001',
-              'gemini-2.0-pro-exp-02-05',
-              'gemini-2.5-pro',
-              'gemini-flash-latest',
-              'gemini-1.5-pro',
               'gemini-1.5-flash',
-              'gemini-2.0-flash-lite',
-              'gemini-2.0-flash-lite-001',
-              'gemini-2.5-flash-lite'
+              'gemini-1.5-pro',
+              'gemini-2.0-flash-lite'
             ];
 
             const sorted = [];
@@ -5234,7 +5235,7 @@
               if (match && !sorted.includes(match)) sorted.push(match);
             }
             for (const name of rawNames) {
-              if (!sorted.includes(name)) sorted.push(name);
+              if (!sorted.includes(name) && !/gemini-2\.5-flash/i.test(name)) sorted.push(name);
             }
 
             if (sorted.length > 0) {
@@ -5248,16 +5249,16 @@
         console.warn('[Gemini] ListModels query failed, using modern defaults:', e);
       }
 
-      discoveredGeminiModels = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro'];
+      discoveredGeminiModels = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash'];
       return discoveredGeminiModels;
     }
 
     async function getAvailableGeminiModel(forceRefresh = false) {
       const models = await discoverValidGeminiModels(forceRefresh);
-      if (cachedGeminiModel && models.includes(cachedGeminiModel) && !forceRefresh) {
+      if (cachedGeminiModel && models.includes(cachedGeminiModel) && !forceRefresh && !/gemini-2\.5-flash/i.test(cachedGeminiModel)) {
         return cachedGeminiModel;
       }
-      const chosen = models[0] || 'gemini-2.0-flash';
+      const chosen = models[0] || 'gemini-3.6-flash';
       cachedGeminiModel = chosen;
       localStorage.setItem('shelved_gemini_active_model_v1', chosen);
       return chosen;
@@ -5279,11 +5280,23 @@
         throw new Error('No Gemini API key configured.');
       }
 
+      // Ensure models are discovered if not yet done
+      if (discoveredGeminiModels.length === 0) {
+        try {
+          await discoverValidGeminiModels();
+        } catch (e) {}
+      }
+
       const candidateModels = [
+        cachedGeminiModel,
+        ...(discoveredGeminiModels || []),
+        'gemini-3.6-flash',
+        'gemini-3.8-flash',
+        'gemini-3.5-flash',
+        'gemini-flash-latest',
         'gemini-2.0-flash',
-        'gemini-2.5-flash',
-        cachedGeminiModel
-      ].filter(Boolean);
+        'gemini-1.5-flash'
+      ].filter(m => m && !/gemini-2\.5-flash/i.test(m));
       
       const uniqueCandidates = [...new Set(candidateModels)];
       let lastError = null;
@@ -5320,16 +5333,18 @@
             const isUnavailable = 
               resp.status === 404 || 
               resp.status === 400 ||
+              resp.status === 403 ||
               resp.status === 429 || 
               resp.status === 503 || 
               resp.status === 500 ||
               (data.error && (
                 data.error.code === 404 || 
                 data.error.code === 400 ||
+                data.error.code === 403 ||
                 data.error.code === 429 || 
                 data.error.code === 503 || 
                 data.error.code === 500 ||
-                /modality is not enabled|not supported|high demand|spike|overload|temporar|not found|resource_exhausted|unavailable|capacity|quota|rate limit/i.test(errorMsg)
+                /no longer available|is not available|deprecated|not available to new users|modality is not enabled|not supported|high demand|spike|overload|temporar|not found|resource_exhausted|unavailable|capacity|quota|rate limit/i.test(errorMsg)
               ));
 
             if (isUnavailable) {
@@ -5360,7 +5375,7 @@
             if (attempt === 0 && payload.tools && /tool|grounding|google_search/i.test(msg)) {
               continue;
             }
-            if (/modality is not enabled|not supported|high demand|spike|overload|temporar|not found|resource_exhausted|unavailable|capacity|quota|rate limit|404|400|429|503/i.test(msg)) {
+            if (/no longer available|is not available|deprecated|not available to new users|modality is not enabled|not supported|high demand|spike|overload|temporar|not found|resource_exhausted|unavailable|capacity|quota|rate limit|404|400|403|429|503/i.test(msg)) {
               break;
             } else {
               throw err;
@@ -5373,6 +5388,14 @@
     }
 
     async function testGeminiConnection() {
+      const input = document.getElementById('gemini-api-key-input');
+      if (input && input.value.trim()) {
+        geminiApiKey = input.value.trim();
+        localStorage.setItem('shelved_gemini_api_key_v1', geminiApiKey);
+        updateGeminiStatusBadge();
+        checkGeminiKeyWarning();
+      }
+
       if (!geminiApiKey) {
         alert('Please enter your Gemini API Key first.');
         return;
@@ -5763,9 +5786,10 @@ Carefully inspect the photograph and identify each distinct physical book visibl
 
 For EACH visible book:
 1. Exact Title of the book (do NOT wrap in quotes).
-2. Full Name of the Author directly associated with this specific book.
-3. Publisher or imprint name and logo visible on the spine or cover (e.g. Pan Macmillan, VIZ Media, Editora Ulisseia, Bertrand Editora, Corsair, Gollancz).
-4. Official 13-digit ISBN-13 corresponding strictly to this EXACT physical book edition and publisher.
+2. Original / English Title if translated (e.g. "The War of the Worlds" for "A Guerra dos Mundos", "Insomnia" for "Insónia").
+3. Full Name of the Author directly associated with this specific book.
+4. Publisher or imprint name and logo visible on the spine or cover (e.g. Pan Macmillan, VIZ Media, Editora Ulisseia, Bertrand Editora, Corsair, Gollancz).
+5. Official 13-digit ISBN-13 corresponding strictly to this EXACT physical book edition and publisher.
 
 CRITICAL INSTRUCTIONS FOR ACCURATE ISBN IDENTIFICATION:
 - You must identify the physical book's exact publisher/imprint seen on the spine or cover.
@@ -5779,6 +5803,7 @@ Respond STRICTLY with a valid JSON array of objects, with NO conversational prea
 [
   {
     "title": "Exact Title",
+    "originalTitle": "Original/English Title if translated",
     "author": "Author Name",
     "publisher": "Publisher Name",
     "isbn": "978..."
@@ -5976,8 +6001,10 @@ Mandatory requirements:
           const rawIsbn = b.isbn || b.isbn13 || b.isbn_13 || b.ISBN || b['ISBN-13'] || '';
           const rawAuthor = b.author || (Array.isArray(b.authors) ? b.authors.join(', ') : b.authors) || b.writer || '';
           const rawPublisher = b.publisher || b.imprint || b.editorial || '';
+          const rawOriginalTitle = b.originalTitle || b.titleEn || b.original_title || b.englishTitle || '';
           return {
             title: cleanBookField(b.title),
+            originalTitle: cleanBookField(rawOriginalTitle),
             author: cleanBookField(rawAuthor),
             publisher: cleanBookField(rawPublisher),
             isbn: String(rawIsbn).replace(/[^0-9X]/gi, '')
@@ -6011,6 +6038,7 @@ Mandatory requirements:
             const current = deduplicated[existingIndex];
             if (!current.isbn && book.isbn) current.isbn = book.isbn;
             if (!current.publisher && book.publisher) current.publisher = book.publisher;
+            if (!current.originalTitle && book.originalTitle) current.originalTitle = book.originalTitle;
             if (book.title.length > current.title.length && !book.title.includes('(')) current.title = book.title;
           }
         }
@@ -6020,6 +6048,7 @@ Mandatory requirements:
           return {
             id: `ai_${Date.now()}_${idx}`,
             title: b.title || 'Untitled',
+            originalTitle: b.originalTitle || '',
             titlePt: b.titlePt || '',
             author: b.author || 'Unknown Author',
             publisher: b.publisher || '',
@@ -6102,6 +6131,25 @@ Mandatory requirements:
                 } catch (resErr2) {}
               }
 
+              // 3b. If still no cover, query Google Books by original / English title (e.g. "The War of the Worlds" for "A Guerra dos Mundos", "Insomnia" for "Insónia")
+              if (!gotGoogleCover && (item.originalTitle || item.titlePt)) {
+                const altTitle = item.originalTitle || item.titlePt;
+                try {
+                  const altQuery = `intitle:${encodeURIComponent(altTitle)}${cleanAuthor ? `+inauthor:${encodeURIComponent(cleanAuthor)}` : ''}`;
+                  const resAlt = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${altQuery}&maxResults=1`, {}, 2200);
+                  if (resAlt && resAlt.ok) {
+                    const dAlt = await resAlt.json();
+                    if (dAlt.items && dAlt.items[0] && dAlt.items[0].volumeInfo) {
+                      const infoAlt = dAlt.items[0].volumeInfo;
+                      if (infoAlt.imageLinks && (infoAlt.imageLinks.thumbnail || infoAlt.imageLinks.smallThumbnail)) {
+                        item.coverUrl = (infoAlt.imageLinks.thumbnail || infoAlt.imageLinks.smallThumbnail).replace('http://', 'https://');
+                        gotGoogleCover = true;
+                      }
+                    }
+                  }
+                } catch (altErr) {}
+              }
+
               // 4. Only if item has NO ISBN, attempt to resolve ISBN from Google Books
               if (!item.isbn) {
                 try {
@@ -6177,6 +6225,17 @@ Mandatory requirements:
       }
     }
 
+    function editAiBookCoverUrl(idx) {
+      if (!detectedAiBooks[idx]) return;
+      const current = detectedAiBooks[idx].coverUrl || '';
+      const newUrl = prompt('Enter custom cover image URL (e.g. from Google Images or Goodreads):', current);
+      if (newUrl !== null) {
+        const trimmed = newUrl.trim();
+        detectedAiBooks[idx].coverUrl = trimmed;
+        renderAiReviewList();
+      }
+    }
+
     function renderAiReviewList() {
       const reviewSection = document.getElementById('ai-review-section');
       const listContainer = document.getElementById('ai-books-review-list');
@@ -6208,18 +6267,29 @@ Mandatory requirements:
               />
             </div>
 
-            <!-- Book Cover Thumbnail -->
+            <!-- Book Cover Thumbnail (Clickable to customize cover URL) -->
             <div class="shrink-0 pt-0.5">
-              ${b.coverUrl ? `
-                <img src="${escapeHtml(b.coverUrl)}" alt="Cover" class="w-11 h-16 object-cover rounded-lg shadow-md border border-[#3d3835]" onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
-                <div class="w-11 h-16 rounded-lg bg-ebony/70 border border-[#3d3835] items-center justify-center text-[#9E9382] hidden">
-                  <i data-lucide="book" class="w-5 h-5"></i>
+              <div 
+                onclick="editAiBookCoverUrl(${idx})" 
+                title="Click to set custom cover image URL" 
+                class="relative w-11 h-16 rounded-lg cursor-pointer group overflow-hidden border border-[#3d3835] hover:border-gold shadow-md transition-all"
+              >
+                ${b.coverUrl ? `
+                  <img src="${escapeHtml(b.coverUrl)}" alt="Cover" class="w-full h-full object-cover" onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" />
+                  <div class="w-full h-full bg-ebony/70 items-center justify-center text-[#9E9382] hidden">
+                    <i data-lucide="book" class="w-5 h-5"></i>
+                  </div>
+                ` : `
+                  <div class="w-full h-full bg-ebony/70 flex items-center justify-center text-[#9E9382]">
+                    <i data-lucide="book" class="w-5 h-5"></i>
+                  </div>
+                `}
+                <!-- Hover Edit Overlay -->
+                <div class="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-gold transition-opacity">
+                  <i data-lucide="image" class="w-4 h-4"></i>
+                  <span class="text-[8px] font-medium tracking-tight mt-0.5 text-parchment">Edit</span>
                 </div>
-              ` : `
-                <div class="w-11 h-16 rounded-lg bg-ebony/70 border border-[#3d3835] flex items-center justify-center text-[#9E9382]">
-                  <i data-lucide="book" class="w-5 h-5"></i>
-                </div>
-              `}
+              </div>
             </div>
 
             <!-- Book Information Form Fields -->
