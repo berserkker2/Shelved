@@ -42,11 +42,12 @@
     }
   </script>
 
-  <!-- Lucide Icons, Canvas Confetti, JSZip & ePub.js CDN -->
+  <!-- Lucide Icons, Canvas Confetti, JSZip, ePub.js & ZXing Barcode Reader CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
 
   <!-- Shelved Companion Database (Loads catalog offline & from GitHub) -->
   <script src="library-data.js"></script>
@@ -673,292 +674,576 @@
           </div>
           <div>
             <h2 id="modal-add-title" class="font-cinzel text-xl sm:text-2xl font-bold text-parchment">Add New Book to Library</h2>
-            <p class="text-xs text-[#9E9382] font-playfair italic">Auto-fetch metadata via Google Books API or fill manually</p>
+            <p class="text-xs text-[#9E9382] font-playfair italic">Search online, scan barcodes, or use AI photo recognition</p>
           </div>
         </div>
-        <button onclick="closeAddBookModal()" class="p-2 rounded-full bg-slate hover:bg-mahogany text-[#9E9382] hover:text-parchment">
+        <button onclick="closeAddBookModal()" class="p-2 rounded-full bg-slate hover:bg-mahogany text-[#9E9382] hover:text-parchment cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- ADD BOOK SOURCE TABS (Search, Barcode, AI Vision) -->
+      <div id="add-book-tabs-nav" class="px-6 sm:px-8 pt-3 flex items-center gap-2 border-b border-[#3d3835] bg-slate/40">
+        <button 
+          type="button" 
+          id="add-tab-search-btn" 
+          onclick="switchAddBookTab('search')" 
+          class="flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-gold text-gold bg-ebony/60 cursor-pointer"
+        >
+          <i data-lucide="search" class="w-4 h-4"></i>
+          <span>Search & Manual</span>
+        </button>
+
+        <button 
+          type="button" 
+          id="add-tab-barcode-btn" 
+          onclick="switchAddBookTab('barcode')" 
+          class="flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer"
+        >
+          <i data-lucide="scan-barcode" class="w-4 h-4"></i>
+          <span>Barcode Scanner</span>
+        </button>
+
+        <button 
+          type="button" 
+          id="add-tab-ai-btn" 
+          onclick="switchAddBookTab('ai')" 
+          class="flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer"
+        >
+          <i data-lucide="sparkles" class="w-4 h-4 text-gold"></i>
+          <span>AI Shelf & Cover Scan</span>
         </button>
       </div>
 
       <div class="p-6 sm:p-8 max-h-[75vh] overflow-y-auto space-y-6">
         
-        <!-- Live API Search Bar -->
-        <div id="api-search-section" class="bg-gradient-to-br from-slate to-ebony p-5 rounded-2xl border border-moss shadow-inner">
-          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold-light mb-3">
-            <i data-lucide="sparkles" class="w-4 h-4 text-gold"></i>
-            <span>Auto-Fetch Book Metadata (Search by Title, Author, or ISBN)</span>
-          </div>
+        <!-- PANEL 1: SEARCH & MANUAL ENTRY -->
+        <div id="add-panel-search" class="space-y-6">
+          <!-- Live API Search Bar -->
+          <div id="api-search-section" class="bg-gradient-to-br from-slate to-ebony p-5 rounded-2xl border border-moss shadow-inner">
+            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold-light mb-3">
+              <i data-lucide="sparkles" class="w-4 h-4 text-gold"></i>
+              <span>Auto-Fetch Book Metadata (Search by Title, Author, or ISBN)</span>
+            </div>
 
-          <div class="flex gap-2">
-            <div class="relative flex-1">
-              <input
-                type="text"
-                id="api-query-input"
-                oninput="debounceApiSearch(this.value)"
-                onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleSearchBookApi(); }"
-                placeholder="e.g. 'Dune', 'Ensaio sobre a Cegueira', 'The Hobbit', '9780143034902'..."
-                class="w-full pl-10 pr-10 py-3 rounded-xl bg-ebony border border-moss text-parchment placeholder-[#7d7467] text-sm focus:outline-none focus:border-gold"
-              />
-              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#9E9382]">
-                <i data-lucide="search" class="w-4 h-4"></i>
+            <div class="flex gap-2">
+              <div class="relative flex-1">
+                <input
+                  type="text"
+                  id="api-query-input"
+                  oninput="debounceApiSearch(this.value)"
+                  onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleSearchBookApi(); }"
+                  placeholder="e.g. 'Dune', 'Ensaio sobre a Cegueira', 'The Hobbit', '9780143034902'..."
+                  class="w-full pl-10 pr-10 py-3 rounded-xl bg-ebony border border-moss text-parchment placeholder-[#7d7467] text-sm focus:outline-none focus:border-gold"
+                />
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#9E9382]">
+                  <i data-lucide="search" class="w-4 h-4"></i>
+                </div>
+                <button 
+                  type="button" 
+                  id="api-clear-btn" 
+                  onclick="clearApiQuery()" 
+                  class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-[#9E9382] hover:text-parchment cursor-pointer"
+                >
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
               </div>
-              <button 
+              <button
                 type="button"
-                id="api-clear-btn" 
-                onclick="clearApiQuery()" 
-                class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-[#9E9382] hover:text-parchment cursor-pointer"
+                onclick="handleSearchBookApi()"
+                id="api-search-btn"
+                class="px-5 py-3 rounded-xl font-semibold text-xs uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony transition-all flex items-center gap-2 shrink-0 cursor-pointer"
               >
-                <i data-lucide="x" class="w-4 h-4"></i>
+                <span>Search Book</span>
               </button>
             </div>
-            <button
-              type="button"
-              onclick="handleSearchBookApi()"
-              id="api-search-btn"
-              class="px-5 py-3 rounded-xl font-semibold text-xs uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony transition-all flex items-center gap-2 shrink-0 cursor-pointer"
-            >
-              <span>Search Book</span>
-            </button>
+
+            <!-- API Candidate Results Grid -->
+            <div id="api-candidates-container" class="hidden mt-4">
+              <div class="flex items-center justify-between text-xs text-[#9E9382] mb-2 font-medium">
+                <span>Click any book to auto-fill all form fields below:</span>
+                <span id="api-status-badge" class="text-[11px] text-gold-light"></span>
+              </div>
+              <div id="api-candidates-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+            </div>
           </div>
 
-          <!-- API Candidate Results Grid -->
-          <div id="api-candidates-container" class="hidden mt-4">
-            <div class="flex items-center justify-between text-xs text-[#9E9382] mb-2 font-medium">
-              <span>Click any book to auto-fill all form fields below:</span>
-              <span id="api-status-badge" class="text-[11px] text-gold-light"></span>
+          <!-- Form Fields -->
+          <form id="book-form" onsubmit="handleSaveBookForm(event)" class="space-y-6">
+            <input type="hidden" id="form-book-id" value="" />
+            <input type="hidden" id="form-book-date" value="" />
+
+            <!-- SECTION 1: BOOK METADATA & DETAILS -->
+            <div class="space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-[#3d3835] text-gold-light">
+                <i data-lucide="book-open" class="w-4 h-4 text-gold"></i>
+                <span class="font-cinzel text-xs font-bold uppercase tracking-wider">Book Information & Details</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">
+                    Title (English / Original) <span class="text-red-400">*</span>
+                  </label>
+                  <input type="text" id="form-title" required placeholder="e.g. The Hobbit" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">
+                    Title in Portuguese (Título em Português)
+                  </label>
+                  <input type="text" id="form-titlePt" placeholder="e.g. O Hobbit / Ensaio sobre a Cegueira" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">
+                    Author(s) (comma separated) <span class="text-red-400">*</span>
+                  </label>
+                  <input type="text" id="form-authors" required placeholder="e.g. J.R.R. Tolkien" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 md:col-span-2">
+                  <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Year</label>
+                    <input type="number" id="form-year" placeholder="1937" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Publisher</label>
+                    <input type="text" id="form-publisher" placeholder="e.g. Presença, Caminho" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:col-span-2">
+                  <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Format</label>
+                    <select id="form-format" onchange="handleFormatChange(this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold cursor-pointer">
+                      <option value="Physical" selected>Physical</option>
+                      <option value="Digital">Digital</option>
+                      <option value="Physical & Digital">Physical & Digital (Both)</option>
+                      <option value="Audiobook">Audiobook</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Target Age Group</label>
+                    <select id="form-ageGroup" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold cursor-pointer">
+                      <option value="Kids">Kids / Children</option>
+                      <option value="Young Adult (YA)">Young Adult (YA)</option>
+                      <option value="Adult" selected>Adult</option>
+                      <option value="All Ages">All Ages</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Language</label>
+                    <select id="form-language" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold cursor-pointer">
+                      <option value="English" selected>English</option>
+                      <option value="Portuguese">Portuguese (Português)</option>
+                      <option value="Spanish">Spanish</option>
+                      <option value="French">French</option>
+                      <option value="German">German</option>
+                      <option value="Italian">Italian</option>
+                      <option value="Japanese">Japanese</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Digital Reader & ePub File / Link Upload Section -->
+                <div id="form-digital-link-container" class="hidden md:col-span-2 p-4 rounded-xl bg-oxford/40 border border-gold/30 space-y-3">
+                  <div class="flex items-center justify-between text-xs font-semibold text-gold-light">
+                    <span class="flex items-center gap-1.5">
+                      <i data-lucide="book-open-check" class="w-4 h-4 text-gold"></i>
+                      <span>Digital Reader: Web Reader URL or Local ePub File</span>
+                    </span>
+                    <span class="text-[10px] text-[#9E9382]">Supports ePub, Google Play Books, Kindle Cloud</span>
+                  </div>
+                  
+                  <div class="space-y-2">
+                    <input 
+                      type="url" 
+                      id="form-digitalUrl" 
+                      placeholder="https://play.google.com/books/reader?id=... or web reader link" 
+                      class="w-full px-3.5 py-2 rounded-xl bg-ebony border border-moss text-parchment text-xs focus:outline-none focus:border-gold font-mono" 
+                    />
+
+                    <div class="flex items-center gap-3">
+                      <span class="text-[11px] text-[#9E9382]">or select local file:</span>
+                      <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate hover:bg-ebony border border-moss text-gold hover:border-gold cursor-pointer transition-colors">
+                        <i data-lucide="file-up" class="w-3.5 h-3.5"></i>
+                        <span>Upload .ePub / .pdf</span>
+                        <input type="file" accept=".epub,.pdf" onchange="handleDigitalFileUpload(event)" class="hidden" />
+                      </label>
+                      <span id="form-digital-file-name" class="text-[11px] text-emerald-400 truncate max-w-xs font-mono"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">
+                    Categories / Genres (comma separated)
+                  </label>
+                  <input type="text" id="form-categories" placeholder="e.g. Sci-Fi, Adventure, Epic, Classics" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
+                </div>
+              </div>
             </div>
-            <div id="api-candidates-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+
+            <!-- SECTION 2: PHYSICAL PLACEMENT & READING STATUS -->
+            <div class="space-y-4">
+              <div class="flex items-center justify-between pb-3 border-b border-[#3d3835]">
+                <div class="flex items-center gap-2 text-gold">
+                  <i data-lucide="map-pin" class="w-4 h-4"></i>
+                  <span class="font-cinzel text-xs font-bold uppercase tracking-wider">Physical Placement & Reading Status</span>
+                </div>
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" id="form-isFavorite" class="w-4 h-4 rounded text-gold bg-slate border-moss" />
+                  <span class="text-xs font-medium text-parchment">Mark as Favorite (★)</span>
+                </label>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Location with Popup Dropdown -->
+                <div class="relative" id="form-location-wrapper">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5 flex items-center gap-1.5">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold"></i>
+                    <span>Location</span>
+                  </label>
+                  <div class="relative">
+                    <input 
+                      type="text" 
+                      id="form-location" 
+                      placeholder="e.g. Shelf 1, Basement..." 
+                      autocomplete="off"
+                      onfocus="openLocationDropdown()"
+                      onclick="openLocationDropdown()"
+                      oninput="filterLocationDropdown(this.value)"
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-ebony border border-moss text-parchment text-sm focus:outline-none focus:border-gold pr-8" 
+                    />
+                    <button 
+                      type="button" 
+                      onclick="toggleLocationDropdown()" 
+                      class="absolute right-2 top-1/2 -translate-y-1/2 text-[#9E9382] hover:text-gold cursor-pointer p-1"
+                      tabindex="-1"
+                    >
+                      <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- Popup Dropdown of Existing Locations -->
+                    <div 
+                      id="form-location-dropdown" 
+                      class="hidden absolute left-0 right-0 top-full mt-1.5 bg-[#1C1718] border border-gold/50 rounded-xl shadow-2xl z-50 max-h-56 overflow-y-auto py-1 divide-y divide-[#3d3835]/60"
+                    >
+                      <!-- Populated dynamically -->
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-[#9E9382] font-playfair italic mt-1">Physical shelf, room or floor</p>
+                </div>
+
+                <!-- Reading Status -->
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5 flex items-center gap-1.5">
+                    <i data-lucide="bookmark" class="w-3.5 h-3.5 text-gold"></i>
+                    <span>Reading Status</span>
+                  </label>
+                  <select id="form-status" class="w-full px-3.5 py-2.5 rounded-xl bg-ebony border border-moss text-parchment text-sm focus:outline-none focus:border-gold cursor-pointer">
+                    <option value="Want to Read">Want to Read</option>
+                    <option value="Currently Reading">Currently Reading</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Don't want to read">Don't want to read</option>
+                    <option value="Did Not Finish">Did Not Finish</option>
+                  </select>
+                </div>
+
+                <!-- Rating -->
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5 flex items-center gap-1.5">
+                    <i data-lucide="star" class="w-3.5 h-3.5 text-gold"></i>
+                    <span>Your Rating</span>
+                  </label>
+                  <select id="form-rating" class="w-full px-3.5 py-2.5 rounded-xl bg-ebony border border-moss text-parchment text-sm focus:outline-none focus:border-gold cursor-pointer">
+                    <option value="0">No Rating (—)</option>
+                    <option value="5">★★★★★ (5 - Masterpiece)</option>
+                    <option value="4">★★★★☆ (4 - Great)</option>
+                    <option value="3">★★★☆☆ (3 - Good)</option>
+                    <option value="2">★★☆☆☆ (2 - Fair)</option>
+                    <option value="1">★☆☆☆☆ (1 - Poor)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECTION 3: COVER, ISBN, DESCRIPTION -->
+            <div class="space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-[#3d3835] text-gold-light">
+                <i data-lucide="image" class="w-4 h-4 text-gold"></i>
+                <span class="font-cinzel text-xs font-bold uppercase tracking-wider">Cover Image & Additional Info</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Cover Image URL</label>
+                  <input type="url" id="form-coverUrl" placeholder="https://..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">ISBN / Code</label>
+                    <input type="text" id="form-isbn" placeholder="9780143034902" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Page Count</label>
+                    <input type="number" id="form-pageCount" placeholder="e.g. 412" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
+                  </div>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Synopsis / Description</label>
+                  <textarea id="form-description" rows="3" placeholder="Summary of the book..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-[#3d3835] flex items-center justify-end gap-3">
+              <button type="button" onclick="closeAddBookModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment bg-slate cursor-pointer">
+                Cancel
+              </button>
+              <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-gold to-gold-hover text-ebony shadow-lg shadow-gold/30 cursor-pointer">
+                Save Book
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- PANEL 2: BARCODE / ISBN SCANNER -->
+        <div id="add-panel-barcode" class="hidden space-y-6">
+          <div class="bg-gradient-to-br from-slate to-ebony p-5 rounded-2xl border border-moss shadow-inner space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold-light">
+                <i data-lucide="scan-barcode" class="w-4 h-4 text-gold"></i>
+                <span>Scan ISBN Barcode on Back Cover</span>
+              </div>
+              <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 font-semibold">
+                100% Local (No API Key Required)
+              </span>
+            </div>
+
+            <p class="text-xs text-[#C7BCAC] leading-relaxed">
+              Point your camera at the ISBN barcode on the back of any physical book, or upload a photo of the barcode.
+            </p>
+
+            <!-- Camera Viewport & Controls -->
+            <div class="space-y-3">
+              <div id="barcode-camera-container" class="relative hidden overflow-hidden rounded-2xl bg-black border-2 border-gold/50 shadow-2xl max-w-md mx-auto aspect-[4/3]">
+                <video id="barcode-video" class="w-full h-full object-cover" playsinline></video>
+                <!-- Targeting Reticle Overlay -->
+                <div class="absolute inset-0 pointer-events-none flex items-center justify-center p-6">
+                  <div class="w-full max-w-[280px] h-36 border-2 border-gold rounded-xl shadow-[0_0_15px_rgba(212,160,23,0.5)] relative overflow-hidden bg-gold/5">
+                    <div class="w-full h-0.5 bg-red-400 shadow-[0_0_8px_red] absolute top-1/2 -translate-y-1/2 animate-pulse"></div>
+                    <div class="absolute bottom-1 left-0 right-0 text-center text-[10px] text-parchment/80 font-mono">Align barcode inside frame</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Camera & File Buttons -->
+              <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button 
+                  type="button" 
+                  id="barcode-start-camera-btn" 
+                  onclick="startBarcodeCamera()" 
+                  class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-md transition-all cursor-pointer"
+                >
+                  <i data-lucide="camera" class="w-4 h-4"></i>
+                  <span>Start Camera Scan</span>
+                </button>
+                <button 
+                  type="button" 
+                  id="barcode-stop-camera-btn" 
+                  onclick="stopBarcodeCamera()" 
+                  class="hidden flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider bg-mahogany/40 hover:bg-mahogany/70 border border-[#7C4B1E] text-red-200 transition-all cursor-pointer"
+                >
+                  <i data-lucide="camera-off" class="w-4 h-4"></i>
+                  <span>Stop Camera</span>
+                </button>
+                <button 
+                  type="button" 
+                  id="barcode-switch-camera-btn" 
+                  onclick="switchBarcodeCamera()" 
+                  class="hidden flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate hover:bg-oxford border border-moss text-[#BACAE0] transition-all cursor-pointer"
+                  title="Switch between front and back cameras"
+                >
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                  <span>Flip Camera</span>
+                </button>
+
+                <div class="text-[#7d7467] text-xs font-semibold px-1">or</div>
+
+                <label class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment hover:border-gold transition-all cursor-pointer">
+                  <i data-lucide="image" class="w-4 h-4 text-gold"></i>
+                  <span>Upload Barcode Photo</span>
+                  <input type="file" accept="image/*" onchange="scanBarcodeImageFile(event)" class="hidden" />
+                </label>
+              </div>
+
+              <!-- Barcode Scan Feedback Status -->
+              <div id="barcode-status-feedback" class="text-center text-xs text-[#9E9382] font-mono min-h-[20px] pt-1"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Form Fields -->
-        <form id="book-form" onsubmit="handleSaveBookForm(event)" class="space-y-6">
-          <input type="hidden" id="form-book-id" value="" />
-          <input type="hidden" id="form-book-date" value="" />
-
-          <!-- SECTION 1: BOOK METADATA & DETAILS -->
-          <div class="space-y-4">
-            <div class="flex items-center gap-2 pb-2 border-b border-[#3d3835] text-gold-light">
-              <i data-lucide="book-open" class="w-4 h-4 text-gold"></i>
-              <span class="font-cinzel text-xs font-bold uppercase tracking-wider">Book Information & Details</span>
+        <!-- PANEL 3: AI SHELF & COVER VISION SCANNER -->
+        <div id="add-panel-ai" class="hidden space-y-6">
+          <div class="bg-gradient-to-br from-slate to-ebony p-5 sm:p-6 rounded-2xl border border-gold/40 shadow-xl space-y-4">
+            
+            <!-- Description & Feature Explanation -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#3d3835]">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-ebony border border-gold/40 flex items-center justify-center text-gold shadow-inner">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="font-cinzel text-sm sm:text-base font-bold text-parchment">AI Visual Book & Shelf Recognition</h3>
+                  <p class="text-[11px] text-[#B3A796]">Powered by Google Gemini AI Vision</p>
+                </div>
+              </div>
+              <div id="ai-key-required-warning" class="hidden text-[11px] px-3 py-1 rounded-xl bg-amber-950/60 border border-amber-500/40 text-amber-300 font-semibold flex items-center gap-1.5">
+                <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                <span>Gemini API Key Required</span>
+                <button type="button" onclick="closeAddBookModal(); openSettingsModal();" class="underline ml-1 text-gold-light hover:text-white cursor-pointer">Configure</button>
+              </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">
-                  Title (English / Original) <span class="text-red-400">*</span>
-                </label>
-                <input type="text" id="form-title" required placeholder="e.g. The Hobbit" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
+            <div class="p-3.5 rounded-xl bg-ebony/70 border border-moss/50 text-xs text-[#C7BCAC] space-y-1.5 leading-relaxed">
+              <div class="font-semibold text-gold-light flex items-center gap-1.5">
+                <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                <span>What can you scan?</span>
               </div>
-
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">
-                  Title in Portuguese (Título em Português)
-                </label>
-                <input type="text" id="form-titlePt" placeholder="e.g. O Hobbit / Ensaio sobre a Cegueira" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">
-                  Author(s) (comma separated) <span class="text-red-400">*</span>
-                </label>
-                <input type="text" id="form-authors" required placeholder="e.g. J.R.R. Tolkien" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
-              </div>
-
-              <div class="grid grid-cols-2 gap-3 md:col-span-2">
-                <div>
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Year</label>
-                  <input type="number" id="form-year" placeholder="1937" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Publisher</label>
-                  <input type="text" id="form-publisher" placeholder="e.g. Presença, Caminho" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:col-span-2">
-                <div>
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Format</label>
-                  <select id="form-format" onchange="handleFormatChange(this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold cursor-pointer">
-                    <option value="Physical" selected>Physical</option>
-                    <option value="Digital">Digital</option>
-                    <option value="Physical & Digital">Physical & Digital (Both)</option>
-                    <option value="Audiobook">Audiobook</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Target Age Group</label>
-                  <select id="form-ageGroup" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold cursor-pointer">
-                    <option value="Kids">Kids / Children</option>
-                    <option value="Young Adult (YA)">Young Adult (YA)</option>
-                    <option value="Adult" selected>Adult</option>
-                    <option value="All Ages">All Ages</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Language</label>
-                  <input 
-                    type="text" 
-                    list="language-list" 
-                    id="form-language" 
-                    value="English" 
-                    placeholder="English / Portuguese" 
-                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" 
-                  />
-                  <datalist id="language-list">
-                    <option value="English"></option>
-                    <option value="Portuguese"></option>
-                    <option value="Spanish"></option>
-                    <option value="French"></option>
-                    <option value="German"></option>
-                    <option value="Italian"></option>
-                    <option value="Japanese"></option>
-                    <option value="Bilingual"></option>
-                  </datalist>
-                </div>
-              </div>
-
-              <!-- Digital Link Container (Shown when format is Digital or Physical & Digital) -->
-              <div id="form-digital-link-container" class="hidden md:col-span-2">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5 flex items-center gap-1.5">
-                  <i data-lucide="external-link" class="w-3.5 h-3.5 text-gold"></i>
-                  <span>Online Reader Link (URL)</span>
-                </label>
-                <input 
-                  type="url" 
-                  id="form-digitalUrl" 
-                  placeholder="https://..." 
-                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" 
-                />
-                <p class="text-[10px] text-[#9E9382] font-playfair italic mt-1">
-                  External web reader link (opens in a new tab ↗)
-                </p>
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Categories / Genres (comma separated)</label>
-                <input type="text" id="form-categories" placeholder="e.g. Fantasy, Classics, Adventure" class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Cover Image URL (Web link)</label>
-                <input type="url" id="form-coverUrl" placeholder="https://..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold" />
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Synopsis / Description</label>
-                <textarea id="form-description" rows="3" placeholder="Book synopsis..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-parchment text-sm focus:outline-none focus:border-gold"></textarea>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3 md:col-span-2">
-                <div>
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">ISBN</label>
-                  <input type="text" id="form-isbn" placeholder="ISBN (optional)" class="w-full px-3 py-2 rounded-xl bg-slate border border-moss text-xs text-parchment" />
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5">Pages Count</label>
-                  <input type="number" id="form-pageCount" placeholder="Pages" class="w-full px-3 py-2 rounded-xl bg-slate border border-moss text-xs text-parchment" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 2: SEPARATE DEDICATED LOCATION & STATUS CARD -->
-          <div class="p-5 rounded-2xl bg-gradient-to-br from-slate via-ebony to-oxford/30 border border-moss shadow-inner space-y-4">
-            <div class="flex items-center justify-between pb-3 border-b border-[#3d3835]">
-              <div class="flex items-center gap-2 text-gold">
-                <i data-lucide="map-pin" class="w-4 h-4"></i>
-                <span class="font-cinzel text-xs font-bold uppercase tracking-wider">Physical Placement & Reading Status</span>
-              </div>
-              <label class="flex items-center gap-2 cursor-pointer select-none">
-                <input type="checkbox" id="form-isFavorite" class="w-4 h-4 rounded text-gold bg-slate border-moss" />
-                <span class="text-xs font-medium text-parchment">Mark as Favorite (★)</span>
-              </label>
+              <ul class="list-disc list-inside space-y-1 text-[11px] text-[#EDE8DE]/90 pl-1">
+                <li><strong>Single Cover or Spine:</strong> Photograph the front cover or spine of any book.</li>
+                <li><strong>Entire Bookshelf or Book Stacks:</strong> Capture multiple books at once to identify and import them in bulk!</li>
+                <li><strong>Back Cover or Title Page:</strong> Photograph barcodes, copyright pages, or publisher details.</li>
+              </ul>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <!-- Location with Popup Dropdown -->
-              <div class="relative" id="form-location-wrapper">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5 flex items-center gap-1.5">
-                  <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold"></i>
-                  <span>Location</span>
-                </label>
-                <div class="relative">
-                  <input 
-                    type="text" 
-                    id="form-location" 
-                    placeholder="e.g. Shelf 1, Basement..." 
-                    autocomplete="off"
-                    onfocus="openLocationDropdown()"
-                    onclick="openLocationDropdown()"
-                    oninput="filterLocationDropdown(this.value)"
-                    class="w-full px-3.5 py-2.5 rounded-xl bg-ebony border border-moss text-parchment text-sm focus:outline-none focus:border-gold pr-8" 
-                  />
+            <!-- AI Photo Input Controls (Camera Stream / Snapshot & File Upload) -->
+            <div id="ai-capture-section" class="space-y-4">
+              <!-- Live Video Viewport for Taking Snapshot -->
+              <div id="ai-camera-container" class="relative hidden overflow-hidden rounded-2xl bg-black border-2 border-gold/50 shadow-2xl max-w-lg mx-auto aspect-[4/3]">
+                <video id="ai-video" class="w-full h-full object-cover" playsinline></video>
+                <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-3 z-20">
                   <button 
                     type="button" 
-                    onclick="toggleLocationDropdown()" 
-                    class="absolute right-2 top-1/2 -translate-y-1/2 text-[#9E9382] hover:text-gold cursor-pointer p-1"
-                    tabindex="-1"
+                    onclick="captureAiSnapshot()" 
+                    class="flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-2xl shadow-gold/50 cursor-pointer"
                   >
-                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    <i data-lucide="camera" class="w-4 h-4"></i>
+                    <span>Take Photo 📸</span>
                   </button>
-
-                  <!-- Popup Dropdown of Existing Locations -->
-                  <div 
-                    id="form-location-dropdown" 
-                    class="hidden absolute left-0 right-0 top-full mt-1.5 bg-[#1C1718] border border-gold/50 rounded-xl shadow-2xl z-50 max-h-56 overflow-y-auto py-1 divide-y divide-[#3d3835]/60"
+                  <button 
+                    type="button" 
+                    onclick="stopAiCamera()" 
+                    class="p-2.5 rounded-full bg-black/70 hover:bg-mahogany text-parchment border border-white/20 transition-all cursor-pointer"
                   >
-                    <!-- Populated dynamically -->
-                  </div>
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                  </button>
                 </div>
-                <p class="text-[10px] text-[#9E9382] font-playfair italic mt-1">Physical shelf, room or floor</p>
               </div>
 
-              <!-- Reading Status -->
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5 flex items-center gap-1.5">
-                  <i data-lucide="bookmark" class="w-3.5 h-3.5 text-gold"></i>
-                  <span>Reading Status</span>
-                </label>
-                <select id="form-status" class="w-full px-3.5 py-2.5 rounded-xl bg-ebony border border-moss text-parchment text-sm focus:outline-none focus:border-gold cursor-pointer">
-                  <option value="Want to Read">Want to Read</option>
-                  <option value="Currently Reading">Currently Reading</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Don't want to read">Don't want to read</option>
-                  <option value="Did Not Finish">Did Not Finish</option>
-                </select>
-                <p class="text-[10px] text-[#9E9382] font-playfair italic mt-1">Your current progress</p>
+              <!-- Captured / Uploaded Image Preview Box -->
+              <div id="ai-preview-box" class="hidden relative max-w-md mx-auto rounded-2xl overflow-hidden border-2 border-gold/40 shadow-xl bg-black">
+                <img id="ai-preview-img" src="" alt="Captured book photo" class="w-full max-h-80 object-contain mx-auto" />
+                <button 
+                  type="button" 
+                  onclick="clearAiPreviewImage()" 
+                  class="absolute top-2 right-2 p-1.5 rounded-full bg-black/80 hover:bg-mahogany text-white border border-white/30 transition-all cursor-pointer"
+                  title="Remove image"
+                >
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
               </div>
 
-              <!-- Rating -->
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-[#C7BCAC] mb-1.5 flex items-center gap-1.5">
-                  <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400"></i>
-                  <span>Rating</span>
+              <!-- Action Trigger Buttons -->
+              <div class="flex flex-wrap items-center justify-center gap-3 pt-1">
+                <button 
+                  type="button" 
+                  id="ai-start-camera-btn" 
+                  onclick="startAiCamera()" 
+                  class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-gold/40 text-gold-light hover:border-gold transition-all cursor-pointer"
+                >
+                  <i data-lucide="camera" class="w-4 h-4"></i>
+                  <span>Camera Snap</span>
+                </button>
+
+                <label class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment hover:border-gold transition-all cursor-pointer">
+                  <i data-lucide="upload" class="w-4 h-4 text-gold"></i>
+                  <span>Upload Image</span>
+                  <input type="file" accept="image/*" onchange="loadAiImageFile(event)" class="hidden" />
                 </label>
-                <select id="form-rating" class="w-full px-3.5 py-2.5 rounded-xl bg-ebony border border-moss text-parchment text-sm focus:outline-none focus:border-gold cursor-pointer">
-                  <option value="0">Unrated</option>
-                  <option value="5">★★★★★ (5 Stars)</option>
-                  <option value="4">★★★★☆ (4 Stars)</option>
-                  <option value="3">★★★☆☆ (3 Stars)</option>
-                  <option value="2">★★☆☆☆ (2 Stars)</option>
-                  <option value="1">★☆☆☆☆ (1 Star)</option>
-                </select>
-                <p class="text-[10px] text-[#9E9382] font-playfair italic mt-1">Personal score</p>
+
+                <button 
+                  type="button" 
+                  id="ai-analyze-btn" 
+                  onclick="analyzeBooksWithGeminiVision()" 
+                  disabled
+                  class="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-lg shadow-gold/30 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer"
+                >
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                  <span>Analyze Books with AI ✨</span>
+                </button>
+              </div>
+
+              <!-- Loading Indicator -->
+              <div id="ai-loading-container" class="hidden py-8 text-center space-y-3">
+                <div class="w-10 h-10 border-3 border-gold border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <div class="font-cinzel text-sm font-bold text-parchment">Analyzing photo with Gemini AI Vision...</div>
+                <div class="text-xs text-[#9E9382] font-playfair italic">Detecting book covers, spines, titles, and ISBNs...</div>
               </div>
             </div>
-          </div>
 
-          <div class="pt-4 border-t border-[#3d3835] flex items-center justify-end gap-3">
-            <button type="button" onclick="closeAddBookModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment bg-slate cursor-pointer">
-              Cancel
-            </button>
-            <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-gold to-gold-hover text-ebony shadow-lg shadow-gold/30 cursor-pointer">
-              Save Book
-            </button>
+            <!-- CONFIRMATION & REVIEW LIST -->
+            <div id="ai-review-section" class="hidden pt-4 border-t border-[#3d3835] space-y-4">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-ebony/90 p-3 rounded-xl border border-gold/40">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                  <span id="ai-detected-count-label" class="text-xs font-bold text-parchment font-cinzel">Identified Books:</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="toggleAllAiCheckboxes()" id="ai-select-all-btn" class="text-[11px] font-semibold text-gold hover:underline cursor-pointer">
+                    Select All
+                  </button>
+                  <button type="button" onclick="resetAiScanner()" class="text-[11px] text-[#9E9382] hover:text-parchment ml-2 cursor-pointer">
+                    New Photo
+                  </button>
+                </div>
+              </div>
+
+              <p class="text-[11px] text-[#9E9382]">
+                Review and edit detected titles, authors, and ISBNs before importing to your library:
+              </p>
+
+              <!-- Dynamic Detected Books Rows -->
+              <div id="ai-books-review-list" class="space-y-3 max-h-[520px] overflow-y-auto pr-1"></div>
+
+              <!-- Batch Import Action Button -->
+              <div class="pt-3 flex items-center justify-end gap-3">
+                <button 
+                  type="button" 
+                  onclick="resetAiScanner()" 
+                  class="px-4 py-2.5 rounded-xl text-xs font-semibold text-[#9E9382] hover:text-parchment bg-slate cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  id="ai-import-confirmed-btn" 
+                  onclick="importConfirmedAiBooks()" 
+                  class="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-gold via-gold-hover to-gold text-ebony shadow-xl shadow-gold/30 hover:brightness-110 transition-all cursor-pointer"
+                >
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                  <span id="ai-import-btn-text">Import Confirmed Books</span>
+                </button>
+              </div>
+            </div>
+
           </div>
-        </form>
+        </div>
 
       </div>
     </div>
@@ -1384,7 +1669,65 @@
           </details>
         </div>
 
-        <!-- SECTION 3: LOCAL FILE & DATABASE BACKUPS -->
+        <!-- SECTION 3: GOOGLE GEMINI AI INTEGRATION (VISUAL BOOK RECOGNITION) -->
+        <div class="bg-slate/70 p-5 rounded-2xl border border-gold/40 space-y-4 shadow-lg">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-ebony border border-gold/40 flex items-center justify-center text-gold shadow-inner">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="font-cinzel text-base font-bold text-parchment">Google Gemini AI Vision</h3>
+                <p class="text-[11px] text-[#9E9382]">AI Recognition for Covers, Spines & Multi-Book Shelves</p>
+              </div>
+            </div>
+            <div id="gemini-status-badge" class="text-[11px] px-2.5 py-1 rounded-full font-semibold border bg-ebony text-[#9E9382] border-[#3d3835] flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-[#7d7467]" id="gemini-status-dot"></span>
+              <span id="gemini-status-text">Not Configured</span>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-ebony/80 border border-moss/50 space-y-3">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-xs font-semibold text-[#C7BCAC] flex items-center gap-1">
+                  <i data-lucide="key" class="w-3.5 h-3.5 text-gold"></i>
+                  <span>Gemini API Key</span>
+                </label>
+                <div class="flex items-center gap-3">
+                  <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-[11px] text-gold hover:underline flex items-center gap-1">
+                    <span>Get Free Key at Google AI Studio</span>
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                  </a>
+                  <button type="button" onclick="toggleGeminiKeyVisibility()" class="text-[10px] text-gold hover:underline">Show/Hide</button>
+                </div>
+              </div>
+              <input 
+                type="password" 
+                id="gemini-api-key-input" 
+                oninput="saveGeminiSettings()" 
+                placeholder="AIzaSy..." 
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate border border-moss text-xs text-parchment placeholder-[#7d7467] focus:outline-none focus:border-gold font-mono"
+              />
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-1">
+              <p class="text-[11px] text-[#9E9382] leading-relaxed">
+                Free tier gives 15 requests/min. Stored locally in your browser.
+              </p>
+              <button 
+                type="button" 
+                onclick="testGeminiConnection()" 
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate hover:bg-oxford border border-gold/40 text-gold-light shrink-0 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                <span>Test Key</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: LOCAL FILE & DATABASE BACKUPS -->
         <div class="space-y-4">
           <h3 class="font-cinzel text-base font-bold text-parchment flex items-center gap-2">
             <i data-lucide="hard-drive" class="w-4 h-4 text-gold"></i>
@@ -1974,6 +2317,7 @@
 
     function loadStorage() {
       loadGithubSettings();
+      initGeminiSettings();
       try {
         const savedBooks = localStorage.getItem('shelved_books_v1');
         if (savedBooks) {
@@ -4667,9 +5011,45 @@
       lucide.createIcons();
     }
 
+    // ADD / EDIT BOOK MODAL & SOURCE TABS
+    let currentAddBookTab = 'search';
+
+    function switchAddBookTab(tab) {
+      currentAddBookTab = tab;
+      
+      // Stop active video streams when switching tabs
+      stopBarcodeCamera();
+      stopAiCamera();
+
+      const tabs = ['search', 'barcode', 'ai'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`add-tab-${t}-btn`);
+        const panel = document.getElementById(`add-panel-${t}`);
+        if (btn) {
+          if (t === tab) {
+            btn.className = 'flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-gold text-gold bg-ebony/60 cursor-pointer';
+          } else {
+            btn.className = 'flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer';
+          }
+        }
+        if (panel) {
+          panel.classList.toggle('hidden', t !== tab);
+        }
+      });
+
+      if (tab === 'ai') {
+        checkGeminiKeyWarning();
+      }
+
+      lucide.createIcons();
+    }
+
     function openAddBookModal() {
       document.getElementById('modal-add-title').textContent = 'Add New Book to Library';
       document.getElementById('api-search-section').classList.remove('hidden');
+      const tabsNav = document.getElementById('add-book-tabs-nav');
+      if (tabsNav) tabsNav.classList.remove('hidden');
+
       document.getElementById('form-book-id').value = '';
       document.getElementById('form-book-date').value = '';
       document.getElementById('book-form').reset();
@@ -4681,6 +5061,9 @@
       setLocationFormValue('');
       document.getElementById('api-candidates-container').classList.add('hidden');
       window.currentApiCandidates = [];
+
+      switchAddBookTab('search');
+      resetAiScanner();
 
       document.getElementById('modal-add').classList.remove('hidden');
       document.getElementById('modal-add').classList.add('flex');
@@ -4698,6 +5081,11 @@
 
       document.getElementById('modal-add-title').textContent = 'Edit Book Details';
       document.getElementById('api-search-section').classList.add('hidden');
+      const tabsNav = document.getElementById('add-book-tabs-nav');
+      if (tabsNav) tabsNav.classList.add('hidden');
+
+      switchAddBookTab('search');
+
       document.getElementById('form-book-id').value = b.id;
       document.getElementById('form-book-date').value = b.dateAdded || '';
 
@@ -4727,10 +5115,1310 @@
     }
 
     function closeAddBookModal() {
+      stopBarcodeCamera();
+      stopAiCamera();
       document.getElementById('modal-add').classList.add('hidden');
       document.getElementById('modal-add').classList.remove('flex');
       document.getElementById('api-candidates-container').classList.add('hidden');
       window.currentApiCandidates = [];
+    }
+
+    // ==========================================
+    // 1. GOOGLE GEMINI SETTINGS & API KEY LOGIC
+    // ==========================================
+    let geminiApiKey = localStorage.getItem('shelved_gemini_api_key_v1') || '';
+
+    function initGeminiSettings() {
+      const input = document.getElementById('gemini-api-key-input');
+      if (input) input.value = geminiApiKey;
+      updateGeminiStatusBadge();
+      checkGeminiKeyWarning();
+    }
+
+    function saveGeminiSettings() {
+      const input = document.getElementById('gemini-api-key-input');
+      if (!input) return;
+      geminiApiKey = input.value.trim();
+      if (geminiApiKey) {
+        localStorage.setItem('shelved_gemini_api_key_v1', geminiApiKey);
+      } else {
+        localStorage.removeItem('shelved_gemini_api_key_v1');
+      }
+      updateGeminiStatusBadge();
+      checkGeminiKeyWarning();
+    }
+
+    function updateGeminiStatusBadge() {
+      const dot = document.getElementById('gemini-status-dot');
+      const text = document.getElementById('gemini-status-text');
+      if (dot && text) {
+        if (geminiApiKey) {
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          text.textContent = 'Active (Ready)';
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-[#7d7467]';
+          text.textContent = 'Not Configured';
+        }
+      }
+    }
+
+    function toggleGeminiKeyVisibility() {
+      const input = document.getElementById('gemini-api-key-input');
+      if (!input) return;
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function checkGeminiKeyWarning() {
+      const warning = document.getElementById('ai-key-required-warning');
+      if (warning) {
+        warning.classList.toggle('hidden', Boolean(geminiApiKey));
+      }
+    }
+
+    // Active Gemini Model dynamic resolution cache & discovered model list
+    let cachedGeminiModel = localStorage.getItem('shelved_gemini_active_model_v1') || null;
+    // Invalidate invalid/audio/TTS cached models if stored previously
+    if (cachedGeminiModel && /tts|audio|speech|embed/i.test(cachedGeminiModel)) {
+      cachedGeminiModel = null;
+      try { localStorage.removeItem('shelved_gemini_active_model_v1'); } catch (e) {}
+    }
+    let discoveredGeminiModels = [];
+
+    async function discoverValidGeminiModels(forceRefresh = false) {
+      if (discoveredGeminiModels.length > 0 && !forceRefresh) {
+        return discoveredGeminiModels;
+      }
+      if (!geminiApiKey) {
+        return ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite'];
+      }
+
+      try {
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.models && Array.isArray(data.models)) {
+            // Filter: MUST support generateContent, MUST NOT be TTS/audio/embed, and if supportedInputModalities is defined, MUST include 'image'
+            const visionModels = data.models.filter(m => {
+              const name = m.name || '';
+              if (/tts|audio|speech|embed|realtime|moderation/i.test(name)) return false;
+              
+              const hasGenContent = Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent');
+              if (!hasGenContent) return false;
+
+              if (Array.isArray(m.supportedInputModalities)) {
+                return m.supportedInputModalities.includes('image');
+              }
+              return true;
+            });
+
+            const rawNames = visionModels.map(m => m.name.replace(/^models\//, ''));
+            
+            // Priority order for multimodal vision models (EXACT or clean prefix match, NO partial substring)
+            const priorityOrder = [
+              'gemini-2.5-flash',
+              'gemini-2.0-flash',
+              'gemini-2.0-flash-001',
+              'gemini-2.0-pro-exp-02-05',
+              'gemini-2.5-pro',
+              'gemini-flash-latest',
+              'gemini-1.5-pro',
+              'gemini-1.5-flash',
+              'gemini-2.0-flash-lite',
+              'gemini-2.0-flash-lite-001',
+              'gemini-2.5-flash-lite'
+            ];
+
+            const sorted = [];
+            for (const pref of priorityOrder) {
+              const match = rawNames.find(n => n === pref);
+              if (match && !sorted.includes(match)) sorted.push(match);
+            }
+            for (const name of rawNames) {
+              if (!sorted.includes(name)) sorted.push(name);
+            }
+
+            if (sorted.length > 0) {
+              discoveredGeminiModels = sorted;
+              console.log('[Gemini] Real vision-capable models discovered:', discoveredGeminiModels);
+              return discoveredGeminiModels;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[Gemini] ListModels query failed, using modern defaults:', e);
+      }
+
+      discoveredGeminiModels = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-pro'];
+      return discoveredGeminiModels;
+    }
+
+    async function getAvailableGeminiModel(forceRefresh = false) {
+      const models = await discoverValidGeminiModels(forceRefresh);
+      if (cachedGeminiModel && models.includes(cachedGeminiModel) && !forceRefresh) {
+        return cachedGeminiModel;
+      }
+      const chosen = models[0] || 'gemini-2.0-flash';
+      cachedGeminiModel = chosen;
+      localStorage.setItem('shelved_gemini_active_model_v1', chosen);
+      return chosen;
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 25000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { ...options, signal: controller.signal });
+        return res;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function callGeminiGenerateContent(payload) {
+      if (!geminiApiKey) {
+        throw new Error('No Gemini API key configured.');
+      }
+
+      const models = await discoverValidGeminiModels(false);
+      const candidateModels = [
+        cachedGeminiModel,
+        ...models,
+        'gemini-2.0-flash',
+        'gemini-2.5-flash',
+        'gemini-2.0-flash-lite',
+        'gemini-2.5-pro'
+      ].filter(m => m && !/tts|audio|speech|embed/i.test(m));
+      
+      const uniqueCandidates = [...new Set(candidateModels)];
+      let lastError = null;
+
+      for (let i = 0; i < uniqueCandidates.length; i++) {
+        const cleanModel = uniqueCandidates[i].replace(/^models\//, '');
+        let currentPayload = payload;
+
+        for (let attempt = 0; attempt < (payload.tools ? 2 : 1); attempt++) {
+          if (attempt === 1) {
+            // Fallback attempt without tools if search grounding is rejected by model
+            const { tools, ...withoutTools } = payload;
+            currentPayload = withoutTools;
+          }
+
+          try {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${geminiApiKey}`;
+            
+            const resp = await fetchWithTimeout(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(currentPayload)
+            }, 30000);
+
+            const data = await resp.json();
+            const errorMsg = (data.error && (data.error.message || '')) || '';
+
+            // If tools not supported, immediately retry without tools
+            if (attempt === 0 && payload.tools && (resp.status === 400 || /tool|grounding|google_search/i.test(errorMsg))) {
+              console.warn(`[Gemini] Model ${cleanModel} rejected search tools. Retrying without tools...`);
+              continue;
+            }
+
+            const isUnavailable = 
+              resp.status === 404 || 
+              resp.status === 400 ||
+              resp.status === 429 || 
+              resp.status === 503 || 
+              resp.status === 500 ||
+              (data.error && (
+                data.error.code === 404 || 
+                data.error.code === 400 ||
+                data.error.code === 429 || 
+                data.error.code === 503 || 
+                data.error.code === 500 ||
+                /modality is not enabled|not supported|high demand|spike|overload|temporar|not found|resource_exhausted|unavailable|capacity|quota|rate limit/i.test(errorMsg)
+              ));
+
+            if (isUnavailable) {
+              console.warn(`[Gemini] Model ${cleanModel} unavailable for request (${errorMsg || resp.statusText}). Trying next model...`);
+              lastError = errorMsg || `Model ${cleanModel} is unavailable.`;
+              break;
+            }
+
+            if (data.error) {
+              throw new Error(data.error.message || 'Gemini API Error');
+            }
+
+            // Found a working model!
+            if (cachedGeminiModel !== cleanModel) {
+              cachedGeminiModel = cleanModel;
+              localStorage.setItem('shelved_gemini_active_model_v1', cleanModel);
+              console.log(`[Gemini] Active multimodal model set to: ${cleanModel}`);
+            }
+
+            return data;
+          } catch (err) {
+            lastError = err;
+            const msg = (err && err.message) || '';
+            if (err && err.name === 'AbortError') {
+              console.warn(`[Gemini] Model ${cleanModel} timed out after 30s. Trying next candidate...`);
+              break;
+            }
+            if (attempt === 0 && payload.tools && /tool|grounding|google_search/i.test(msg)) {
+              continue;
+            }
+            if (/modality is not enabled|not supported|high demand|spike|overload|temporar|not found|resource_exhausted|unavailable|capacity|quota|rate limit|404|400|429|503/i.test(msg)) {
+              break;
+            } else {
+              throw err;
+            }
+          }
+        }
+      }
+
+      throw new Error(lastError ? (lastError.message || lastError) : 'All Gemini models are temporarily busy. Please retry in a few seconds.');
+    }
+
+    async function testGeminiConnection() {
+      if (!geminiApiKey) {
+        alert('Please enter your Gemini API Key first.');
+        return;
+      }
+      showToast('Discovering available Gemini models...');
+      try {
+        const detected = await getAvailableGeminiModel(true);
+        const data = await callGeminiGenerateContent({
+          contents: [{ parts: [{ text: 'Reply with "OK"' }] }]
+        });
+        
+        if (data.candidates && data.candidates.length > 0) {
+          const modelName = cachedGeminiModel || detected;
+          showToast(`✅ Gemini connected! (Model: ${modelName})`);
+          alert(`✅ Gemini API Key is valid and working!\nActive Model: ${modelName}`);
+        } else {
+          alert('Could not verify Gemini key. Please check key permissions.');
+        }
+      } catch (err) {
+        console.error('Gemini test error:', err);
+        alert(`Gemini API Error: ${err.message || 'Connection failed'}`);
+      }
+    }
+
+    // ==========================================
+    // 2. BARCODE / ISBN SCANNER ENGINE (ZXing)
+    // ==========================================
+    let barcodeReader = null;
+    let barcodeSelectedDeviceId = null;
+    let barcodeDeviceList = [];
+
+    async function startBarcodeCamera() {
+      const videoContainer = document.getElementById('barcode-camera-container');
+      const startBtn = document.getElementById('barcode-start-camera-btn');
+      const stopBtn = document.getElementById('barcode-stop-camera-btn');
+      const flipBtn = document.getElementById('barcode-switch-camera-btn');
+      const feedback = document.getElementById('barcode-status-feedback');
+
+      if (!window.ZXing) {
+        if (feedback) feedback.textContent = 'Loading scanner library...';
+        await new Promise(r => setTimeout(r, 600));
+      }
+
+      try {
+        if (!barcodeReader && window.ZXing) {
+          barcodeReader = new ZXing.BrowserMultiFormatReader();
+        }
+
+        if (feedback) feedback.textContent = 'Starting camera stream...';
+        if (videoContainer) videoContainer.classList.remove('hidden');
+        if (startBtn) startBtn.classList.add('hidden');
+        if (stopBtn) stopBtn.classList.remove('hidden');
+
+        barcodeDeviceList = await barcodeReader.listVideoInputDevices();
+        if (flipBtn && barcodeDeviceList.length > 1) {
+          flipBtn.classList.remove('hidden');
+        }
+
+        // Prefer environment (back) camera on mobile phones
+        if (!barcodeSelectedDeviceId && barcodeDeviceList.length > 0) {
+          const rearCam = barcodeDeviceList.find(d => /back|rear|environment/i.test(d.label));
+          barcodeSelectedDeviceId = rearCam ? rearCam.deviceId : barcodeDeviceList[0].deviceId;
+        }
+
+        if (feedback) feedback.textContent = 'Camera active. Point at ISBN barcode...';
+
+        barcodeReader.decodeFromVideoDevice(barcodeSelectedDeviceId, 'barcode-video', (result, err) => {
+          if (result) {
+            const rawText = result.getText().trim();
+            const cleanIsbn = rawText.replace(/[^0-9X]/gi, '');
+            if (cleanIsbn.length >= 8) {
+              if (feedback) feedback.textContent = `✅ Detected Code: ${cleanIsbn}`;
+              showToast(`🎯 Barcode scanned: ${cleanIsbn}`);
+              stopBarcodeCamera();
+              
+              // Switch to Search tab & trigger auto-lookup
+              switchAddBookTab('search');
+              const queryInput = document.getElementById('api-query-input');
+              if (queryInput) {
+                queryInput.value = cleanIsbn;
+                handleSearchBookApi(cleanIsbn);
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Barcode camera error:', err);
+        if (feedback) feedback.textContent = '⚠️ Could not access camera. Please allow camera permissions or upload photo.';
+        if (videoContainer) videoContainer.classList.add('hidden');
+        if (startBtn) startBtn.classList.remove('hidden');
+        if (stopBtn) stopBtn.classList.add('hidden');
+      }
+    }
+
+    function stopBarcodeCamera() {
+      if (barcodeReader) {
+        try { barcodeReader.reset(); } catch (e) {}
+      }
+      const videoElem = document.getElementById('barcode-video');
+      if (videoElem && videoElem.srcObject) {
+        const tracks = videoElem.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
+        videoElem.srcObject = null;
+      }
+      const videoContainer = document.getElementById('barcode-camera-container');
+      const startBtn = document.getElementById('barcode-start-camera-btn');
+      const stopBtn = document.getElementById('barcode-stop-camera-btn');
+      const flipBtn = document.getElementById('barcode-switch-camera-btn');
+      const feedback = document.getElementById('barcode-status-feedback');
+
+      if (videoContainer) videoContainer.classList.add('hidden');
+      if (startBtn) startBtn.classList.remove('hidden');
+      if (stopBtn) stopBtn.classList.add('hidden');
+      if (flipBtn) flipBtn.classList.add('hidden');
+      if (feedback) feedback.textContent = '';
+    }
+
+    async function switchBarcodeCamera() {
+      if (barcodeDeviceList.length <= 1) return;
+      const curIdx = barcodeDeviceList.findIndex(d => d.deviceId === barcodeSelectedDeviceId);
+      const nextIdx = (curIdx + 1) % barcodeDeviceList.length;
+      barcodeSelectedDeviceId = barcodeDeviceList[nextIdx].deviceId;
+      stopBarcodeCamera();
+      await startBarcodeCamera();
+    }
+
+    async function scanBarcodeImageFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const feedback = document.getElementById('barcode-status-feedback');
+      if (feedback) feedback.textContent = 'Scanning image for barcode...';
+
+      if (!window.ZXing) {
+        await new Promise(r => setTimeout(r, 600));
+      }
+      if (!barcodeReader && window.ZXing) {
+        barcodeReader = new ZXing.BrowserMultiFormatReader();
+      }
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const dataUrl = e.target.result;
+        try {
+          const img = new Image();
+          img.src = dataUrl;
+          await new Promise(r => img.onload = r);
+          
+          const result = await barcodeReader.decodeFromImageElement(img);
+          if (result) {
+            const rawText = result.getText().trim();
+            const cleanIsbn = rawText.replace(/[^0-9X]/gi, '');
+            if (feedback) feedback.textContent = `✅ Found Barcode: ${cleanIsbn}`;
+            showToast(`🎯 Barcode scanned: ${cleanIsbn}`);
+            switchAddBookTab('search');
+            const queryInput = document.getElementById('api-query-input');
+            if (queryInput) {
+              queryInput.value = cleanIsbn;
+              handleSearchBookApi(cleanIsbn);
+            }
+          }
+        } catch (err) {
+          console.warn('Barcode not found in photo:', err);
+          if (feedback) feedback.textContent = '❌ No ISBN barcode detected in photo. Try the "AI Shelf & Cover Scan" tab!';
+          showToast('No barcode found. Try AI Photo scan for book covers/shelves!');
+        }
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    // ==========================================
+    // 3. AI VISION & BATCH CONFIRMATION LIST
+    // ==========================================
+    let aiCurrentStream = null;
+    let aiImageBase64Data = null;
+    let aiImageMimeType = 'image/jpeg';
+    let detectedAiBooks = [];
+
+    async function startAiCamera() {
+      const container = document.getElementById('ai-camera-container');
+      const startBtn = document.getElementById('ai-start-camera-btn');
+      const videoElem = document.getElementById('ai-video');
+      clearAiPreviewImage();
+
+      try {
+        aiCurrentStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+        });
+        if (videoElem) {
+          videoElem.srcObject = aiCurrentStream;
+          videoElem.play();
+        }
+        if (container) container.classList.remove('hidden');
+        if (startBtn) startBtn.classList.add('hidden');
+        lucide.createIcons();
+      } catch (err) {
+        console.error('AI Camera error:', err);
+        alert('Could not access camera. Please check permissions or use file upload.');
+      }
+    }
+
+    function stopAiCamera() {
+      if (aiCurrentStream) {
+        aiCurrentStream.getTracks().forEach(track => track.stop());
+        aiCurrentStream = null;
+      }
+      const videoElem = document.getElementById('ai-video');
+      if (videoElem) videoElem.srcObject = null;
+      const container = document.getElementById('ai-camera-container');
+      const startBtn = document.getElementById('ai-start-camera-btn');
+      if (container) container.classList.add('hidden');
+      if (startBtn) startBtn.classList.remove('hidden');
+    }
+
+    function captureAiSnapshot() {
+      const videoElem = document.getElementById('ai-video');
+      if (!videoElem) return;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = videoElem.videoWidth || 1280;
+      canvas.height = videoElem.videoHeight || 720;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+
+      stopAiCamera();
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+      setAiPreviewImage(dataUrl);
+    }
+
+    function loadAiImageFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      stopAiCamera();
+
+      // If image is <= 16MB, send original uncompressed file bytes for 100% crystal-clear spine & barcode fidelity (identical to gemini.google.com)
+      if (file.size <= 16 * 1024 * 1024) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setAiPreviewImage(e.target.result);
+        };
+        reader.readAsDataURL(file);
+        event.target.value = '';
+        return;
+      }
+
+      // Fallback only for huge files (> 16MB): high-resolution resize
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 3200;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, w, h);
+          const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.94);
+          setAiPreviewImage(resizedDataUrl);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function setAiPreviewImage(dataUrl) {
+      aiImageBase64Data = dataUrl.split(',')[1];
+      const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9\+\-\.]+);base64,/);
+      aiImageMimeType = (match && match[1]) ? match[1] : 'image/jpeg';
+
+      const previewBox = document.getElementById('ai-preview-box');
+      const previewImg = document.getElementById('ai-preview-img');
+      const analyzeBtn = document.getElementById('ai-analyze-btn');
+
+      if (previewImg) previewImg.src = dataUrl;
+      if (previewBox) previewBox.classList.remove('hidden');
+      if (analyzeBtn) analyzeBtn.disabled = false;
+      lucide.createIcons();
+    }
+
+    function clearAiPreviewImage() {
+      aiImageBase64Data = null;
+      aiImageMimeType = 'image/jpeg';
+      const previewBox = document.getElementById('ai-preview-box');
+      const previewImg = document.getElementById('ai-preview-img');
+      const analyzeBtn = document.getElementById('ai-analyze-btn');
+
+      if (previewImg) previewImg.src = '';
+      if (previewBox) previewBox.classList.add('hidden');
+      if (analyzeBtn) analyzeBtn.disabled = true;
+    }
+
+    function resetAiScanner() {
+      stopAiCamera();
+      clearAiPreviewImage();
+      detectedAiBooks = [];
+      const reviewSection = document.getElementById('ai-review-section');
+      const captureSection = document.getElementById('ai-capture-section');
+      const loading = document.getElementById('ai-loading-container');
+
+      if (reviewSection) reviewSection.classList.add('hidden');
+      if (captureSection) captureSection.classList.remove('hidden');
+      if (loading) loading.classList.add('hidden');
+    }
+
+    function isValidIsbn13(isbn) {
+      if (!isbn) return false;
+      const clean = String(isbn).replace(/[^0-9]/g, '');
+      if (clean.length !== 13) return false;
+      let sum = 0;
+      for (let i = 0; i < 12; i++) {
+        sum += parseInt(clean[i], 10) * (i % 2 === 0 ? 1 : 3);
+      }
+      const checkDigit = (10 - (sum % 10)) % 10;
+      return checkDigit === parseInt(clean[12], 10);
+    }
+
+    function isbn10to13(isbn10) {
+      const clean = String(isbn10).replace(/[^0-9X]/gi, '');
+      if (clean.length !== 10) return null;
+      const base = '978' + clean.slice(0, 9);
+      let sum = 0;
+      for (let i = 0; i < 12; i++) {
+        sum += parseInt(base[i], 10) * (i % 2 === 0 ? 1 : 3);
+      }
+      const checkDigit = (10 - (sum % 10)) % 10;
+      return base + checkDigit;
+    }
+
+    function cleanBookField(str) {
+      if (!str || typeof str !== 'string') return '';
+      let s = str.trim();
+      s = s.replace(/^```[a-z]*\s*/i, '').replace(/\s*```$/i, '').trim();
+      let prev = '';
+      while (s !== prev) {
+        prev = s;
+        s = s.replace(/^[\s\*\-\–—\:\."“'«`#]+/, '')
+             .replace(/[\s\*\-\–—\:\."”'»`]+$/, '')
+             .trim();
+      }
+      return s;
+    }
+
+    async function analyzeBooksWithGeminiVision() {
+      if (!geminiApiKey) {
+        alert('Please configure your Google Gemini API Key in Settings first.');
+        closeAddBookModal();
+        openSettingsModal();
+        return;
+      }
+      if (!aiImageBase64Data) {
+        alert('Please take a photo or upload an image first.');
+        return;
+      }
+
+      const captureSection = document.getElementById('ai-capture-section');
+      const loading = document.getElementById('ai-loading-container');
+      const reviewSection = document.getElementById('ai-review-section');
+
+      if (loading) loading.classList.remove('hidden');
+      const analyzeBtn = document.getElementById('ai-analyze-btn');
+      if (analyzeBtn) analyzeBtn.disabled = true;
+
+      const promptText = `You are an expert bibliographer and book recognition specialist.
+Carefully inspect the photograph and identify each distinct physical book visible (spines, front covers, or stacks), listed strictly in order from left to right.
+
+For EACH visible book:
+1. Exact Title of the book (do NOT wrap in quotes).
+2. Full Name of the Author directly associated with this specific book.
+3. Publisher or imprint name and logo visible on the spine or cover (e.g. Pan Macmillan, VIZ Media, Editora Ulisseia, Bertrand Editora, Corsair, Gollancz, Tor).
+4. Official 13-digit ISBN-13 corresponding strictly to this EXACT physical book edition and publisher.
+
+CRITICAL INSTRUCTIONS FOR ACCURATE ISBN IDENTIFICATION:
+- You must identify the physical book's exact publisher/imprint seen on the spine or cover.
+- Use Google Search with both the Title, Author, AND the specific Publisher on the spine (e.g. search "Childhood's End Arthur C Clarke Pan Macmillan ISBN-13", "A Guerra dos Mundos HG Wells Ulisseia ISBN-13", "Wake Elizabeth Knox Corsair ISBN-13", "Insónia Stephen King Bertrand ISBN-13", "Remina Junji Ito VIZ ISBN-13").
+- NEVER return digital, Kindle, ebook, or unrelated publisher ISBNs (for example, if the spine has the Pan Macmillan logo, return the physical Pan Macmillan ISBN 9780330514019, NOT an ebook/RosettaBooks ISBN).
+- Verify that every 13-digit ISBN is mathematically valid according to the standard mod-10 check digit algorithm.
+- Do not guess or invent digits. Each ISBN must start with 978 or 979.
+
+Respond STRICTLY with a valid JSON array of objects, with NO conversational preamble, NO markdown explanations, and NO trailing notes:
+[
+  {
+    "title": "Exact Title",
+    "author": "Author Name",
+    "publisher": "Publisher Name",
+    "isbn": "978..."
+  }
+]
+
+Mandatory requirements:
+- Include ONLY real physical books clearly visible in the image.
+- Do NOT duplicate any book. Each book must appear exactly once.
+- Ensure each author matches their own book.
+- Output valid JSON only.`;
+
+      try {
+        const payload = {
+          contents: [
+            {
+              parts: [
+                { text: promptText },
+                {
+                  inlineData: {
+                    mimeType: aiImageMimeType || 'image/jpeg',
+                    data: aiImageBase64Data
+                  }
+                }
+              ]
+            }
+          ],
+          tools: [
+            { google_search: {} }
+          ],
+          generationConfig: {
+            temperature: 0.1
+          }
+        };
+
+        const data = await callGeminiGenerateContent(payload);
+
+        const candidate = data.candidates && data.candidates[0];
+        const parts = (candidate && candidate.content && candidate.content.parts) || [];
+        let contentText = parts.map(p => p.text || '').filter(Boolean).join('\n').trim();
+
+        if (!contentText) {
+          if (loading) loading.classList.add('hidden');
+          if (analyzeBtn) analyzeBtn.disabled = false;
+          showToast('No response received from AI. Please try again.');
+          return;
+        }
+
+        console.log('[Gemini Vision Raw Response]:', contentText);
+
+        let parsedBooks = [];
+
+        // Strategy 1: Direct JSON parse
+        try {
+          const clean = contentText.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+          const res = JSON.parse(clean);
+          if (Array.isArray(res)) {
+            parsedBooks = res;
+          } else if (res && typeof res === 'object') {
+            for (const key of Object.keys(res)) {
+              if (Array.isArray(res[key])) {
+                parsedBooks = res[key];
+                break;
+              }
+            }
+          }
+        } catch (e1) {}
+
+        // Strategy 2: Bracket JSON extraction
+        if (parsedBooks.length === 0) {
+          const firstBracket = contentText.indexOf('[');
+          const lastBracket = contentText.lastIndexOf(']');
+          if (firstBracket !== -1 && lastBracket > firstBracket) {
+            try {
+              const sub = contentText.substring(firstBracket, lastBracket + 1);
+              const res = JSON.parse(sub);
+              if (Array.isArray(res) && res.length > 0) parsedBooks = res;
+            } catch (e2) {}
+          }
+        }
+
+        // Strategy 3: Multi-Pattern Block-Safe Text Fallback
+        if (parsedBooks.length === 0) {
+          const lines = contentText.split('\n').map(l => l.trim()).filter(Boolean);
+          let current = null;
+
+          function saveCurrent() {
+            if (current && current.title) {
+              current.title = cleanBookField(current.title);
+              current.author = cleanBookField(current.author);
+              current.publisher = cleanBookField(current.publisher);
+              if (current.title.length >= 2) {
+                parsedBooks.push({ ...current });
+              }
+            }
+            current = null;
+          }
+
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+
+            // Ignore conversational filler lines
+            if (/^(here|sure|i have|looking|based|the following|shelf|let\'s|these are|identifiquei|com base|aqui estão|abaixo|note|nota|observação)/i.test(line)) continue;
+
+            // Standalone Author line
+            const authorMatch = line.match(/^(?:[\d\.\*\-\–#]+\s*)?(?:author|autor)\s*:\s*(.+)$/i);
+            if (authorMatch) {
+              if (current) {
+                current.author = cleanBookField(authorMatch[1]);
+              }
+              continue;
+            }
+
+            // Standalone Publisher line
+            const pubMatch = line.match(/^(?:[\d\.\*\-\–#]+\s*)?(?:publisher|editora|imprint)\s*:\s*(.+)$/i);
+            if (pubMatch) {
+              if (current) {
+                current.publisher = cleanBookField(pubMatch[1]);
+              }
+              continue;
+            }
+
+            // Standalone ISBN line
+            const isbnMatch = line.match(/(?:ISBN(?:-13|-10)?[:\s]*)?([0-9Xx\-]{10,18})/i);
+            if (isbnMatch) {
+              const digits = isbnMatch[1].replace(/[^0-9X]/gi, '');
+              if (digits.length === 10 || digits.length === 13) {
+                if (current) {
+                  current.isbn = digits;
+                  continue;
+                }
+              }
+            }
+
+            // Pattern 3A: Explicit Title prefix
+            const titlePrefixMatch = line.match(/^(?:[\d\.\*\-\–#]+\s*)?(?:title|título|book|livro)\s*:\s*(.+)$/i);
+            if (titlePrefixMatch) {
+              saveCurrent();
+              current = { title: cleanBookField(titlePrefixMatch[1]), author: '', publisher: '', isbn: '' };
+              continue;
+            }
+
+            // Pattern 3B: "Title" by Author (Publisher) - ISBN: 978...
+            const byMatch = line.match(/^(?:[\d\.\*\-\–#]+\s*)?["“]?(.+?)["”]?\s+(?:by|por)\s+(.+?)(?:\s*\((.*?)\))?(?:\s*[\-\–—]\s*ISBN[:\s]*([0-9Xx\-]+))?$/i);
+            if (byMatch && !/^(editora|publisher|isbn|year|edição)/i.test(byMatch[1])) {
+              saveCurrent();
+              current = {
+                title: cleanBookField(byMatch[1]),
+                author: cleanBookField(byMatch[2]),
+                publisher: byMatch[3] ? cleanBookField(byMatch[3]) : '',
+                isbn: byMatch[4] ? byMatch[4].replace(/[^0-9X]/gi, '') : ''
+              };
+              saveCurrent();
+              continue;
+            }
+
+            // Pattern 3C: Title — Author (Publisher) with em-dash, en-dash, or hyphen
+            const dashParts = line.replace(/^[\d\.\*\-\–#\)\s]+/, '').split(/\s*(?:—|–|\s-\s)\s*/);
+            if (dashParts.length >= 2) {
+              const potentialTitle = cleanBookField(dashParts[0]);
+              let authorPart = dashParts[1];
+              let publisher = '';
+              const pMatch = authorPart.match(/\((.*?)\)/);
+              if (pMatch) {
+                publisher = cleanBookField(pMatch[1]);
+                authorPart = authorPart.replace(/\(.*?\)/, '');
+              }
+              authorPart = cleanBookField(authorPart);
+              if (potentialTitle.length > 1 && authorPart.length > 1 && !/^(editora|edição|isbn|author|title)/i.test(potentialTitle)) {
+                saveCurrent();
+                current = { title: potentialTitle, author: authorPart, publisher, isbn: '' };
+                continue;
+              }
+            }
+
+            // Pattern 3D: Numbered list item e.g. "1. Smashed: Junji Ito Story Collection" or "3. A Guerra dos Mundos"
+            const numberedMatch = line.match(/^(?:\d+[\.\)\-:]|\*\s*\d+[\.\)\-:]|\#\d+)\s*(.+)$/);
+            if (numberedMatch) {
+              saveCurrent();
+              let itemText = cleanBookField(numberedMatch[1]);
+              const parenMatch = itemText.match(/^(.+?)\s*\((.*?)\)$/);
+              if (parenMatch) {
+                current = { title: cleanBookField(parenMatch[1]), author: cleanBookField(parenMatch[2]), publisher: '', isbn: '' };
+              } else {
+                current = { title: itemText, author: '', publisher: '', isbn: '' };
+              }
+              continue;
+            }
+          }
+          saveCurrent();
+        }
+
+        // Clean and normalize all books
+        const normalizedBooks = (parsedBooks || []).map(b => {
+          const rawIsbn = b.isbn || b.isbn13 || b.isbn_13 || b.ISBN || b['ISBN-13'] || '';
+          const rawAuthor = b.author || (Array.isArray(b.authors) ? b.authors.join(', ') : b.authors) || b.writer || '';
+          const rawPublisher = b.publisher || b.imprint || b.editorial || '';
+          return {
+            title: cleanBookField(b.title),
+            author: cleanBookField(rawAuthor),
+            publisher: cleanBookField(rawPublisher),
+            isbn: String(rawIsbn).replace(/[^0-9X]/gi, '')
+          };
+        });
+
+        // Filter out placeholder / template tokens
+        const validBooks = normalizedBooks.filter(b => {
+          if (!b || !b.title) return false;
+          const t = b.title.trim().toLowerCase();
+          const a = (b.author || '').trim().toLowerCase();
+          if (t === 'title' || t === 'título' || t === 'book title' || t === 'título do livro' || t === 'exact title' || t === 'exact book title' || t === 'exemplo') return false;
+          if (a.includes('followed by') || a.includes('isbn-13') || a.includes('nomedoautor') || a.includes('author name') || a.includes('nome do autor')) return false;
+          if (t.startsWith('here are') || t.startsWith('sure') || t.startsWith('identifiquei') || t.startsWith('aqui estão')) return false;
+          return t.length >= 2;
+        });
+
+        // Deduplicate books by clean title and ISBN
+        const deduplicated = [];
+        for (const book of validBooks) {
+          const norm = book.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (!norm) continue;
+          const existingIndex = deduplicated.findIndex(b => {
+            const bNorm = b.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+            return (bNorm.length >= 4 && norm.length >= 4 && (bNorm.includes(norm) || norm.includes(bNorm))) || 
+                   (b.isbn && book.isbn && b.isbn.replace(/[^0-9X]/gi, '') === book.isbn.replace(/[^0-9X]/gi, ''));
+          });
+          if (existingIndex === -1) {
+            deduplicated.push({ ...book });
+          } else {
+            const current = deduplicated[existingIndex];
+            if (!current.isbn && book.isbn) current.isbn = book.isbn;
+            if (!current.publisher && book.publisher) current.publisher = book.publisher;
+            if (book.title.length > current.title.length && !book.title.includes('(')) current.title = book.title;
+          }
+        }
+
+        detectedAiBooks = deduplicated.map((b, idx) => {
+          const cleanIsbn = (b.isbn || '').replace(/[^0-9X]/gi, '');
+          return {
+            id: `ai_${Date.now()}_${idx}`,
+            title: b.title || 'Untitled',
+            titlePt: b.titlePt || '',
+            author: b.author || 'Unknown Author',
+            publisher: b.publisher || '',
+            isbn: cleanIsbn,
+            year: b.year || '',
+            coverUrl: '',
+            verified: isValidIsbn13(cleanIsbn),
+            selected: true
+          };
+        });
+
+        if (detectedAiBooks.length === 0) {
+          if (loading) loading.classList.add('hidden');
+          if (analyzeBtn) analyzeBtn.disabled = false;
+          showToast('No books could be clearly identified in this photo. Please try a closer or clearer shot.');
+          return;
+        }
+
+        // Fast Parallel Cover & Edition Enrichment (capped with 3.5-second safety timer)
+        const loadingText = document.querySelector('#ai-loading-container p') || document.querySelector('#ai-loading-container .font-cinzel');
+        if (loadingText) loadingText.textContent = `Retrieving official covers & verified editions (${detectedAiBooks.length} book(s))...`;
+
+        const safetyTimer = setTimeout(() => {
+          if (loading && !loading.classList.contains('hidden')) {
+            loading.classList.add('hidden');
+            if (analyzeBtn) analyzeBtn.disabled = false;
+            renderAiReviewList();
+          }
+        }, 3500);
+
+        try {
+          await Promise.allSettled(detectedAiBooks.map(async (item) => {
+            const cleanAuthor = (item.author && item.author !== 'Unknown Author') ? item.author : '';
+            const cleanPub = (item.publisher || '').replace(/[\(\)\/\,\.\-\–]/g, ' ').replace(/\s+/g, ' ').trim();
+            const pubWords = cleanPub.toLowerCase().split(' ').filter(w => w.length >= 3 && !/^(media|books|editora|publishing|publisher|press|group|house|editions?)$/i.test(w));
+
+            try {
+              let editionMismatch = false;
+
+              if (item.verified) {
+                item.coverUrl = `https://covers.openlibrary.org/b/isbn/${item.isbn}-M.jpg?default=false`;
+                try {
+                  const res = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(item.isbn)}&maxResults=1`, {}, 2200);
+                  if (res && res.ok) {
+                    const d = await res.json();
+                    if (d.items && d.items[0] && d.items[0].volumeInfo) {
+                      const info = d.items[0].volumeInfo;
+                      const volumePub = (info.publisher || '').toLowerCase();
+
+                      // Check if the ISBN returned belongs to an unrelated publisher/ebook while we have a clear physical publisher
+                      if (pubWords.length > 0 && volumePub && !pubWords.some(pw => volumePub.includes(pw))) {
+                        console.warn(`[AI Scanner] Edition mismatch for "${item.title}": ISBN publisher is "${info.publisher}" but spine publisher is "${item.publisher}".`);
+                        editionMismatch = true;
+                      } else {
+                        if (info.imageLinks && (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail)) {
+                          item.coverUrl = (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail).replace('http://', 'https://');
+                        }
+                        if ((!item.author || item.author === 'Unknown Author') && info.authors && info.authors.length > 0) {
+                          item.author = info.authors.join(', ');
+                        }
+                        if (!item.publisher && info.publisher) {
+                          item.publisher = info.publisher;
+                        }
+                      }
+                    }
+                  }
+                } catch (gbErr) {}
+              }
+
+              // If ISBN was unverified/missing, OR if an edition mismatch was detected (e.g. ebook vs physical publisher)
+              if (!item.verified || editionMismatch) {
+                let matchedVolume = null;
+                const primarySearchQuery = [item.title, cleanAuthor, pubWords[0] || ''].filter(Boolean).join(' ');
+
+                try {
+                  const res = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(primarySearchQuery)}&maxResults=5`, {}, 2200);
+                  if (res && res.ok) {
+                    const d = await res.json();
+                    if (d.items && d.items.length > 0) {
+                      matchedVolume = d.items.find(it => {
+                        const vi = it.volumeInfo || {};
+                        const p = (vi.publisher || '').toLowerCase();
+                        return pubWords.some(pw => p.includes(pw));
+                      }) || (editionMismatch ? null : d.items[0]);
+                    }
+                  }
+                } catch (resErr) {}
+
+                // Secondary search if primary query with publisher yielded nothing
+                if (!matchedVolume) {
+                  try {
+                    const fallbackQuery = [item.title, cleanAuthor].filter(Boolean).join(' ');
+                    const res2 = await fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(fallbackQuery)}&maxResults=5`, {}, 2200);
+                    if (res2 && res2.ok) {
+                      const d2 = await res2.json();
+                      if (d2.items && d2.items.length > 0) {
+                        matchedVolume = d2.items.find(it => {
+                          const vi = it.volumeInfo || {};
+                          const p = (vi.publisher || '').toLowerCase();
+                          return pubWords.some(pw => p.includes(pw));
+                        }) || (!editionMismatch ? d2.items[0] : null);
+                      }
+                    }
+                  } catch (resErr2) {}
+                }
+
+                if (matchedVolume && matchedVolume.volumeInfo) {
+                  const vi = matchedVolume.volumeInfo;
+                  if (vi.industryIdentifiers) {
+                    const id13 = vi.industryIdentifiers.find(ii => ii.type === 'ISBN_13');
+                    const id10 = vi.industryIdentifiers.find(ii => ii.type === 'ISBN_10');
+                    if (id13 && isValidIsbn13(id13.identifier)) {
+                      item.isbn = id13.identifier;
+                      item.verified = true;
+                    } else if (id10) {
+                      const converted = isbn10to13(id10.identifier);
+                      if (isValidIsbn13(converted)) {
+                        item.isbn = converted;
+                        item.verified = true;
+                      }
+                    }
+                  }
+                  if ((!item.author || item.author === 'Unknown Author') && vi.authors) {
+                    item.author = vi.authors.join(', ');
+                  }
+                  if (!item.publisher && vi.publisher) item.publisher = vi.publisher;
+                  if (vi.imageLinks && (vi.imageLinks.thumbnail || vi.imageLinks.smallThumbnail)) {
+                    item.coverUrl = (vi.imageLinks.thumbnail || vi.imageLinks.smallThumbnail).replace('http://', 'https://');
+                  }
+                }
+
+                if (!item.coverUrl && item.isbn) {
+                  item.coverUrl = `https://covers.openlibrary.org/b/isbn/${item.isbn}-M.jpg?default=false`;
+                }
+              }
+            } catch (verErr) {
+              console.warn('[AI Book Enrichment Notice]:', verErr);
+            }
+          }));
+        } finally {
+          clearTimeout(safetyTimer);
+        }
+
+        if (loading) loading.classList.add('hidden');
+        if (analyzeBtn) analyzeBtn.disabled = false;
+
+        showToast(`✨ Successfully identified ${detectedAiBooks.length} book(s)!`);
+        renderAiReviewList();
+
+      } catch (err) {
+        console.error('Gemini Vision error:', err);
+        if (loading) loading.classList.add('hidden');
+        if (analyzeBtn) analyzeBtn.disabled = false;
+        alert(`Error analyzing photo: ${err.message || err}`);
+      }
+    }
+
+    function updateAiBookIsbn(idx, val) {
+      if (!detectedAiBooks[idx]) return;
+      const clean = (val || '').replace(/[^0-9X]/gi, '');
+      detectedAiBooks[idx].isbn = clean;
+      detectedAiBooks[idx].verified = isValidIsbn13(clean);
+
+      const badgeElem = document.getElementById(`ai-book-badge-${idx}`);
+      const inputElem = document.getElementById(`ai-book-isbn-input-${idx}`);
+      if (badgeElem) {
+        if (isValidIsbn13(clean)) {
+          badgeElem.className = 'text-[9px] text-emerald-400 font-semibold flex items-center gap-0.5';
+          badgeElem.innerHTML = '✓ Valid ISBN';
+        } else if (clean) {
+          badgeElem.className = 'text-[9px] text-amber-400 font-medium';
+          badgeElem.innerHTML = 'Verify ISBN';
+        } else {
+          badgeElem.className = 'text-[9px] text-[#7d7467]';
+          badgeElem.innerHTML = 'No ISBN';
+        }
+      }
+      if (inputElem) {
+        if (isValidIsbn13(clean)) {
+          inputElem.className = 'w-full px-2.5 py-1.5 rounded-lg bg-ebony border border-emerald-500/40 text-emerald-300 text-xs font-mono focus:outline-none focus:border-gold transition-colors';
+        } else {
+          inputElem.className = 'w-full px-2.5 py-1.5 rounded-lg bg-ebony border border-moss text-gold text-xs font-mono focus:outline-none focus:border-gold transition-colors';
+        }
+      }
+    }
+
+    function renderAiReviewList() {
+      const reviewSection = document.getElementById('ai-review-section');
+      const listContainer = document.getElementById('ai-books-review-list');
+      const countLabel = document.getElementById('ai-detected-count-label');
+      const importBtnText = document.getElementById('ai-import-btn-text');
+
+      if (!reviewSection || !listContainer) return;
+      reviewSection.classList.remove('hidden');
+
+      const selectedCount = detectedAiBooks.filter(b => b.selected).length;
+      if (countLabel) {
+        countLabel.textContent = `Identified Books (${selectedCount} of ${detectedAiBooks.length} selected):`;
+      }
+      if (importBtnText) {
+        importBtnText.textContent = `Import ${selectedCount} Confirmed Book(s)`;
+      }
+
+      listContainer.innerHTML = detectedAiBooks.map((b, idx) => `
+        <div class="p-3.5 rounded-xl bg-slate/90 border ${b.selected ? 'border-gold/50 shadow-md ring-1 ring-gold/20' : 'border-[#3d3835] opacity-60'} transition-all">
+          <div class="flex items-start gap-3">
+            <!-- Checkbox -->
+            <div class="pt-2 shrink-0">
+              <input 
+                type="checkbox" 
+                id="ai-book-check-${idx}" 
+                ${b.selected ? 'checked' : ''} 
+                onchange="toggleAiBookSelect(${idx}, this.checked)" 
+                class="w-4 h-4 rounded text-gold bg-ebony border-moss cursor-pointer" 
+              />
+            </div>
+
+            <!-- Book Cover Thumbnail -->
+            <div class="shrink-0 pt-0.5">
+              ${b.coverUrl ? `
+                <img src="${escapeHtml(b.coverUrl)}" alt="Cover" class="w-11 h-16 object-cover rounded-lg shadow-md border border-[#3d3835]" onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+                <div class="w-11 h-16 rounded-lg bg-ebony/70 border border-[#3d3835] items-center justify-center text-[#9E9382] hidden">
+                  <i data-lucide="book" class="w-5 h-5"></i>
+                </div>
+              ` : `
+                <div class="w-11 h-16 rounded-lg bg-ebony/70 border border-[#3d3835] flex items-center justify-center text-[#9E9382]">
+                  <i data-lucide="book" class="w-5 h-5"></i>
+                </div>
+              `}
+            </div>
+
+            <!-- Book Information Form Fields -->
+            <div class="flex-1 min-w-0 space-y-2">
+              <!-- Top Row: Title + Publisher Badge -->
+              <div>
+                <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1">
+                  <span class="text-[11px] font-bold text-gold uppercase tracking-wider font-cinzel">Book #${idx + 1}</span>
+                  ${b.publisher ? `
+                    <span class="text-[10px] text-[#C7BCAC] bg-ebony/90 px-2 py-0.5 rounded-full border border-gold/30 font-medium tracking-wide">
+                      <span class="text-gold/70 mr-1">Publisher:</span>${escapeHtml(b.publisher)}
+                    </span>
+                  ` : ''}
+                </div>
+                <input 
+                  type="text" 
+                  value="${escapeHtml(b.title)}" 
+                  placeholder="Book Title"
+                  oninput="detectedAiBooks[${idx}].title = this.value" 
+                  class="w-full px-3 py-1.5 rounded-lg bg-ebony border border-moss text-xs sm:text-sm text-parchment font-semibold focus:outline-none focus:border-gold transition-colors" 
+                />
+              </div>
+
+              <!-- Bottom Row: Author (50%) & ISBN-13 (50%) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] uppercase font-bold text-[#9E9382] mb-0.5 tracking-wide">Author</label>
+                  <input 
+                    type="text" 
+                    value="${escapeHtml(b.author)}" 
+                    placeholder="Author Name"
+                    oninput="detectedAiBooks[${idx}].author = this.value" 
+                    class="w-full px-2.5 py-1.5 rounded-lg bg-ebony border border-moss text-xs text-[#C7BCAC] focus:outline-none focus:border-gold transition-colors" 
+                  />
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-0.5">
+                    <label class="block text-[10px] uppercase font-bold text-[#9E9382] tracking-wide">ISBN-13</label>
+                    <span id="ai-book-badge-${idx}">
+                      ${isValidIsbn13(b.isbn) 
+                        ? '<span class="text-[9px] text-emerald-400 font-semibold flex items-center gap-0.5">✓ Valid ISBN</span>' 
+                        : (b.isbn ? '<span class="text-[9px] text-amber-400 font-medium">Verify ISBN</span>' : '<span class="text-[9px] text-[#7d7467]">No ISBN</span>')
+                      }
+                    </span>
+                  </div>
+                  <input 
+                    type="text" 
+                    id="ai-book-isbn-input-${idx}"
+                    value="${escapeHtml(b.isbn || '')}" 
+                    placeholder="978..."
+                    maxlength="17"
+                    oninput="updateAiBookIsbn(${idx}, this.value)" 
+                    class="w-full px-2.5 py-1.5 rounded-lg bg-ebony border ${isValidIsbn13(b.isbn) ? 'border-emerald-500/40 text-emerald-300' : 'border-moss text-gold'} text-xs font-mono focus:outline-none focus:border-gold transition-colors" 
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Remove Button -->
+            <div class="shrink-0 pt-1">
+              <button 
+                type="button" 
+                onclick="removeAiBookRow(${idx})" 
+                class="p-2 rounded-lg text-[#9E9382] hover:text-red-400 hover:bg-ebony transition-colors cursor-pointer"
+                title="Remove book from list"
+              >
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function toggleAiBookSelect(idx, isChecked) {
+      if (detectedAiBooks[idx]) {
+        detectedAiBooks[idx].selected = isChecked;
+        renderAiReviewList();
+      }
+    }
+
+    function toggleAllAiCheckboxes() {
+      const allSelected = detectedAiBooks.every(b => b.selected);
+      detectedAiBooks.forEach(b => b.selected = !allSelected);
+      const btn = document.getElementById('ai-select-all-btn');
+      if (btn) btn.textContent = allSelected ? 'Select All' : 'Deselect All';
+      renderAiReviewList();
+    }
+
+    function removeAiBookRow(idx) {
+      detectedAiBooks.splice(idx, 1);
+      if (detectedAiBooks.length === 0) {
+        resetAiScanner();
+      } else {
+        renderAiReviewList();
+      }
+    }
+
+    async function importConfirmedAiBooks() {
+      const confirmed = detectedAiBooks.filter(b => b.selected);
+      if (confirmed.length === 0) {
+        alert('Please select at least one book to import.');
+        return;
+      }
+
+      const importBtn = document.getElementById('ai-import-confirmed-btn');
+      if (importBtn) {
+        importBtn.disabled = true;
+        importBtn.innerHTML = '<span class="animate-pulse">Importing books...</span>';
+      }
+
+      showToast(`📥 Adding ${confirmed.length} book(s) to your library...`);
+
+      let addedCount = 0;
+      for (const item of confirmed) {
+        let meta = null;
+        // If not already verified or missing cover, do a quick fetch
+        if (!item.verified || !item.coverUrl) {
+          const query = item.isbn ? `isbn:${item.isbn}` : `${item.title} ${item.author}`;
+          try {
+            const apiRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=1`);
+            const apiData = await apiRes.json();
+            if (apiData.items && apiData.items[0]) {
+              meta = apiData.items[0].volumeInfo;
+            }
+          } catch (e) {
+            console.warn('Metadata fetch notice for', item.title, e);
+          }
+        }
+
+        const newBook = {
+          id: `book_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          title: item.title || (meta && meta.title) || 'Untitled',
+          titlePt: item.titlePt || (meta && meta.title) || item.title,
+          authors: [item.author || ((meta && meta.authors) ? meta.authors.join(', ') : 'Unknown')],
+          year: (meta && meta.publishedDate ? parseInt(meta.publishedDate.substring(0, 4), 10) : (item.year ? parseInt(item.year, 10) : new Date().getFullYear())),
+          publisher: item.publisher || (meta && meta.publisher) || '',
+          format: 'Physical',
+          ageGroup: 'Adult',
+          language: (meta && meta.language) || 'English',
+          location: '',
+          categories: (meta && meta.categories) || ['General'],
+          status: 'Want to Read',
+          rating: 0,
+          readingProgress: 0,
+          currentPage: 0,
+          coverUrl: item.coverUrl || (meta && meta.imageLinks && (meta.imageLinks.thumbnail || meta.imageLinks.smallThumbnail) ? (meta.imageLinks.thumbnail || meta.imageLinks.smallThumbnail).replace('http://', 'https://') : ''),
+          description: (meta && meta.description) || '',
+          isFavorite: false,
+          isbn: item.isbn || (meta && meta.industryIdentifiers ? (meta.industryIdentifiers[0]?.identifier || '') : ''),
+          pageCount: (meta && meta.pageCount) || 0,
+          dateAdded: new Date().toISOString()
+        };
+
+        books.unshift(newBook);
+        addedCount++;
+      }
+
+      saveStorage();
+      renderAll();
+
+      if (typeof saveGithubSettingsAndSync === 'function') {
+        saveGithubSettingsAndSync('push');
+      }
+
+      confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 } });
+      showToast(`🎉 Successfully added ${addedCount} book(s) to your library!`);
+
+      closeAddBookModal();
+      resetAiScanner();
     }
 
     // Famous literary works & author archetype knowledge map
@@ -5452,6 +7140,7 @@
 
     function renderSettingsModalContent() {
       updateGithubSyncUI();
+      initGeminiSettings();
 
       // 1. Mode Buttons & Badges
       const btnInd = document.getElementById('mode-btn-individual');
