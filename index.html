@@ -66,7 +66,6 @@
     }
     body.modal-open {
       overflow: hidden !important;
-      touch-action: none;
     }
     ::-webkit-scrollbar {
       width: 8px;
@@ -129,10 +128,10 @@
     .book-spine-row {
       display: flex;
       align-items: flex-end;
-      gap: 3px;
+      gap: 3.5px;
       overflow-x: auto;
       padding: 16px 8px 0 8px;
-      min-height: 265px;
+      min-height: 280px;
       scrollbar-width: thin;
       -webkit-overflow-scrolling: touch;
     }
@@ -144,16 +143,22 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 4px;
+      padding: 0 0 6px 0;
       border-radius: 4px 4px 0 0;
-      transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease;
       user-select: none;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.6), inset 1.5px 0 2px rgba(255,255,255,0.14), inset -2px 0 3px rgba(0,0,0,0.45);
+      /* Natural book contact shadows without artificial digital contour lines */
+      box-shadow: 
+        -2.5px 0 5px -1px rgba(0,0,0,0.55), 
+        2.5px 0 5px -1px rgba(0,0,0,0.55), 
+        0 8px 16px -2px rgba(0,0,0,0.85);
     }
     .book-spine-card:hover {
-      transform: translateY(-16px) scale(1.02);
-      z-index: 20;
-      box-shadow: 0 18px 28px rgba(0,0,0,0.85), 0 0 14px rgba(212,160,23,0.6);
+      transform: translateY(-18px) scale(1.03);
+      z-index: 30;
+      box-shadow: 
+        0 22px 34px rgba(0,0,0,0.92), 
+        0 0 14px rgba(212,160,23,0.35);
     }
     .book-spine-text {
       writing-mode: vertical-rl;
@@ -162,12 +167,93 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-height: 175px;
+      max-height: 225px;
       width: 100%;
+    }
+    .book-spine-gold-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #FFF8DC 0%, #E8C15A 35%, #B38622 75%, #F5D77F 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.92));
+      transition: filter 0.2s;
+    }
+    .book-spine-card:hover .book-spine-gold-title {
+      filter: drop-shadow(0 0 6px rgba(255,215,0,0.75)) drop-shadow(0 1px 2px rgba(0,0,0,0.9));
+    }
+    .book-spine-silver-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #FFFFFF 0%, #D8DFE8 40%, #8E9BAE 80%, #F0F4F8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.92));
+      transition: filter 0.2s;
+    }
+    .book-spine-card:hover .book-spine-silver-title {
+      filter: drop-shadow(0 0 6px rgba(200,220,255,0.75)) drop-shadow(0 1px 2px rgba(0,0,0,0.9));
+    }
+    .book-spine-rose-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #FFF0E6 0%, #E0A885 40%, #9C603D 80%, #F5C6A8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.92));
+      transition: filter 0.2s;
+    }
+    .book-spine-card:hover .book-spine-rose-title {
+      filter: drop-shadow(0 0 6px rgba(255,180,140,0.75)) drop-shadow(0 1px 2px rgba(0,0,0,0.9));
+    }
+    .book-spine-raised-band {
+      width: 100%;
+      height: 4px;
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.6) 100%);
+      box-shadow: 0 1.5px 2px rgba(0,0,0,0.5);
+      margin: 2px 0;
+      flex-shrink: 0;
+    }
+    .book-spine-raised-band::before, .book-spine-raised-band::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+    }
+    .book-spine-raised-band::before {
+      top: -1.5px;
+      background: var(--band-gilt, rgba(212,175,55,0.65));
+      box-shadow: 0 0 2px rgba(212,175,55,0.3);
+    }
+    .book-spine-raised-band::after {
+      bottom: -1.5px;
+      background: var(--band-gilt, rgba(212,175,55,0.65));
+      box-shadow: 0 0 2px rgba(212,175,55,0.3);
+    }
+    .book-spine-library-tag {
+      background: #F4EAD4;
+      color: #241810;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-weight: 700;
+      font-size: 7.5px;
+      padding: 1px 3px;
+      border-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+      border: 1px dashed rgba(80,50,20,0.4);
+      letter-spacing: 0.05em;
+      line-height: 1;
     }
   </style>
 </head>
@@ -2995,10 +3081,7 @@
             <div class="relative w-16 sm:w-20 aspect-[2/3] shrink-0 rounded-xl overflow-hidden bg-slate border border-[#3d3835] group-hover/item:border-gold shadow">
               ${book.coverUrl 
                 ? `<img src="${book.coverUrl}" alt="${escapeHtml(book.title)}" class="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" />`
-                : `<div class="w-full h-full p-1.5 flex flex-col justify-between bg-gradient-to-b from-oxford to-ebony text-center">
-                     <i data-lucide="book-open" class="w-4 h-4 text-gold mx-auto"></i>
-                     <span class="text-[9px] font-cinzel line-clamp-2 text-parchment">${escapeHtml(book.title)}</span>
-                   </div>`
+                : renderBookCoverFallback(book, true)
               }
               <div class="absolute bottom-0 left-0 right-0 h-1.5 bg-black/80">
                 <div class="h-full bg-gradient-to-r from-gold to-amber-300" style="width: ${progressPercent}%;"></div>
@@ -3369,11 +3452,7 @@
           <div class="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-slate border-2 border-[#3d3835] group-hover:border-gold transition-all duration-300 book-shadow">
             ${book.coverUrl 
               ? `<img src="${book.coverUrl}" alt="${escapeHtml(book.title)}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />`
-              : `<div class="w-full h-full p-4 flex flex-col justify-between bg-gradient-to-b from-oxford via-ebony to-mahogany">
-                   <span class="text-[10px] uppercase tracking-widest text-gold font-semibold">${escapeHtml(book.categories[0] || 'Book')}</span>
-                   <h4 class="font-cinzel text-xs font-bold text-parchment line-clamp-3">${escapeHtml(book.title)}</h4>
-                   <p class="text-[11px] text-[#B3A796] font-playfair italic line-clamp-1">${escapeHtml(book.authors.join(', '))}</p>
-                 </div>`
+              : renderBookCoverFallback(book)
             }
             <div class="absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-black/60 via-white/10 to-transparent pointer-events-none"></div>
             
@@ -3428,10 +3507,7 @@
           <div class="relative w-full sm:w-32 md:w-36 aspect-[2/3] shrink-0 rounded-xl overflow-hidden bg-ebony border border-moss shadow-md self-center sm:self-start">
             ${book.coverUrl 
               ? `<img src="${book.coverUrl}" alt="${escapeHtml(book.title)}" class="w-full h-full object-cover" />`
-              : `<div class="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gradient-to-b from-oxford to-ebony">
-                   <i data-lucide="book-open" class="w-8 h-8 text-gold mb-2"></i>
-                   <span class="text-[11px] font-cinzel font-bold text-parchment line-clamp-3">${escapeHtml(book.title)}</span>
-                 </div>`
+              : renderBookCoverFallback(book)
             }
             <button onclick="event.stopPropagation(); toggleBookFav('${book.id}')" class="absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md ${book.isFavorite ? 'bg-mahogany text-red-300 border border-[#7C4B1E]' : 'bg-black/60 text-white/80'}">
               <i data-lucide="heart" class="w-3.5 h-3.5 ${book.isFavorite ? 'fill-current' : ''}"></i>
@@ -3759,74 +3835,229 @@
       }
     }
 
-    function getBookSpineTheme(book, index) {
-      const themes = [
-        { bg: 'linear-gradient(180deg, #5C1D1D 0%, #380E0E 100%)', border: '#7C2D2D', accent: '#F3E5AB', rib: '#D4AF37' }, // Burgundy/Crimson
-        { bg: 'linear-gradient(180deg, #1C3B30 0%, #0F231D 100%)', border: '#2D594B', accent: '#E8F5E9', rib: '#A3D9C9' }, // Emerald/Forest
-        { bg: 'linear-gradient(180deg, #1A2B42 0%, #0D192B 100%)', border: '#2C4466', accent: '#E3F2FD', rib: '#90CAF9' }, // Oxford Navy
-        { bg: 'linear-gradient(180deg, #4A3319 0%, #2E1E0E 100%)', border: '#6B4A24', accent: '#FFF8E1', rib: '#FFE082' }, // Vintage Leather/Amber
-        { bg: 'linear-gradient(180deg, #32203C 0%, #1D1124 100%)', border: '#4E385D', accent: '#F3E5F5', rib: '#CE93D8' }, // Royal Plum
-        { bg: 'linear-gradient(180deg, #242424 0%, #141414 100%)', border: '#404040', accent: '#FAFAFA', rib: '#D4AF37' }, // Ebony/Gold
-        { bg: 'linear-gradient(180deg, #3E241E 0%, #241411 100%)', border: '#5D4037', accent: '#EFEBE9', rib: '#BCAAA4' }, // Deep Mahogany
-        { bg: 'linear-gradient(180deg, #1B3838 0%, #0E2222 100%)', border: '#2E5A5A', accent: '#E0F2F1', rib: '#80CBC4' }  // Dark Teal
-      ];
+    const svgSpineTextures = {
+      cloth: "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22%3E%3Crect width=%2216%22 height=%2216%22 fill=%22none%22/%3E%3Crect x=%220%22 y=%220%22 width=%228%22 height=%228%22 fill=%22rgba(255,255,255,0.18)%22/%3E%3Crect x=%228%22 y=%228%22 width=%228%22 height=%228%22 fill=%22rgba(255,255,255,0.18)%22/%3E%3Crect x=%228%22 y=%220%22 width=%228%22 height=%228%22 fill=%22rgba(0,0,0,0.22)%22/%3E%3Crect x=%220%22 y=%228%22 width=%228%22 height=%228%22 fill=%22rgba(0,0,0,0.22)%22/%3E%3Cline x1=%220%22 y1=%224%22 x2=%2216%22 y2=%224%22 stroke=%22rgba(255,220,130,0.28)%22 stroke-width=%221.2%22/%3E%3Cline x1=%220%22 y1=%2212%22 x2=%2216%22 y2=%2212%22 stroke=%22rgba(255,220,130,0.22)%22 stroke-width=%221.2%22/%3E%3Cline x1=%224%22 y1=%220%22 x2=%224%22 y2=%2216%22 stroke=%22rgba(0,0,0,0.24)%22 stroke-width=%221.2%22/%3E%3Cline x1=%2212%22 y1=%220%22 x2=%2212%22 y2=%2216%22 stroke=%22rgba(0,0,0,0.24)%22 stroke-width=%221.2%22/%3E%3C/svg%3E",
+      leather: "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22%3E%3Cfilter id=%22l%22 x=%220%25%22 y=%220%25%22 width=%22100%25%22 height=%22100%25%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.6%22 numOctaves=%223%22 result=%22grain%22/%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 1  0 0 0 0 0.9  0 0 0 0 0.8  0 0 0 0.28 0%22 in=%22grain%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23l)%22/%3E%3C/svg%3E",
+      crackle: "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22%3E%3Cfilter id=%22c%22%3E%3CfeTurbulence type=%22turbulence%22 baseFrequency=%220.09%22 numOctaves=%224%22 result=%22noise%22/%3E%3CfeColorMatrix type=%22matrix%22 values=%221 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 6.5 -2.2%22 in=%22noise%22 result=%22cracks%22/%3E%3CfeColorMatrix type=%22matrix%22 values=%220 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.25 0%22 in=%22cracks%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23c)%22/%3E%3C/svg%3E",
+      marbled: "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22%3E%3Cpath d=%22M-10 15 Q 20 2, 50 18 T 100 15%22 fill=%22none%22 stroke=%22rgba(255,215,100,0.35)%22 stroke-width=%222%22/%3E%3Cpath d=%22M-10 35 Q 20 48, 50 32 T 100 35%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.18)%22 stroke-width=%221.5%22/%3E%3Cpath d=%22M-10 55 Q 20 42, 50 58 T 100 55%22 fill=%22none%22 stroke=%22rgba(0,0,0,0.28)%22 stroke-width=%222%22/%3E%3Cpath d=%22M-10 75 Q 20 88, 50 72 T 100 75%22 fill=%22none%22 stroke=%22rgba(255,215,100,0.25)%22 stroke-width=%221.8%22/%3E%3Ccircle cx=%2225%22 cy=%2225%22 r=%227%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.15)%22 stroke-width=%221.2%22/%3E%3Ccircle cx=%2265%22 cy=%2255%22 r=%229%22 fill=%22none%22 stroke=%22rgba(0,0,0,0.2)%22 stroke-width=%221.2%22/%3E%3C/svg%3E",
+      canvas: "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22none%22/%3E%3Cline x1=%220%22 y1=%222%22 x2=%2210%22 y2=%222%22 stroke=%22rgba(255,255,255,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%220%22 y1=%227%22 x2=%2210%22 y2=%227%22 stroke=%22rgba(0,0,0,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%222%22 y1=%220%22 x2=%222%22 y2=%2210%22 stroke=%22rgba(255,255,255,0.22)%22 stroke-width=%221%22/%3E%3Cline x1=%227%22 y1=%220%22 x2=%227%22 y2=%2210%22 stroke=%22rgba(0,0,0,0.22)%22 stroke-width=%221%22/%3E%3Ccircle cx=%224.5%22 cy=%224.5%22 r=%221.5%22 fill=%22rgba(255,220,120,0.25)%22/%3E%3C/svg%3E"
+    };
 
+    const antiquePalettes = [
+      { name: 'Moroccan Wine Crimson', top: '#9E1B32', bottom: '#5A0F1D', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Vintage Emerald Forest', top: '#1B7A43', bottom: '#0F4827', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Oxford Royal Navy', top: '#1C5396', bottom: '#0F315B', foil: 'silver', foilHex: '#E2E8F0' },
+      { name: 'Aged Saddle Cognac', top: '#A3581D', bottom: '#5E310E', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Victorian Mulberry Plum', top: '#862874', bottom: '#4C1242', foil: 'rose', foilHex: '#E8B498' },
+      { name: 'Burnt Terracotta Rust', top: '#B34724', bottom: '#692510', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Antique Verdigris Teal', top: '#167B80', bottom: '#0C4447', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Golden Mustard Buckram', top: '#AB7A18', bottom: '#63450B', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Antique Sage Green', top: '#467C63', bottom: '#264839', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Cobalt Archive Blue', top: '#235FA4', bottom: '#123761', foil: 'silver', foilHex: '#E2E8F0' },
+      { name: 'Aged Rosewood Claret', top: '#9E3347', bottom: '#591724', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Warm Amber Sepia', top: '#8A5232', bottom: '#4E2D1A', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Dusk Indigo Linen', top: '#3D4F88', bottom: '#202B4D', foil: 'silver', foilHex: '#E2E8F0' },
+      { name: 'Vintage Olive Bronze', top: '#6E751D', bottom: '#3E420E', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Antique Imperial Purple', top: '#6A2E8A', bottom: '#3A144E', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Copper Sienna', top: '#A34E24', bottom: '#5E2911', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Slate Teal Petrol', top: '#2C6475', bottom: '#163842', foil: 'silver', foilHex: '#E2E8F0' },
+      { name: 'Rich Venetian Scarlet', top: '#A82026', bottom: '#5C0D11', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Dark Roast Espresso', top: '#5A3D30', bottom: '#301F17', foil: 'gold', foilHex: '#D4AF37' },
+      { name: 'Weathered Deep Moss', top: '#2E6945', bottom: '#173B25', foil: 'gold', foilHex: '#D4AF37' }
+    ];
+
+    function getBookSpineTheme(book, index) {
       let hash = 0;
-      const str = (book.id || '') + (book.title || '') + (book.isbn || '');
+      const str = (book.id || '') + (book.title || '') + (book.isbn || '') + (index || '');
       for (let i = 0; i < str.length; i++) {
         hash = ((hash << 5) - hash) + str.charCodeAt(i);
         hash |= 0;
       }
-      const themeIndex = Math.abs(hash) % themes.length;
-      const theme = themes[themeIndex];
+      const absHash = Math.abs(hash);
+
+      const palette = antiquePalettes[absHash % antiquePalettes.length];
+      const textureKeys = ['cloth', 'leather', 'crackle', 'canvas', 'marbled'];
+      const textureKey = textureKeys[(absHash >> 2) % textureKeys.length];
+      const bandStyle = (absHash >> 4) % 4;
 
       const pages = book.pageCount || 320;
-      const width = Math.min(74, Math.max(44, Math.round(42 + (pages / 800) * 26)));
-      const height = 215 + (Math.abs(hash * 7) % 36);
+      const width = Math.min(76, Math.max(44, Math.round(44 + (pages / 750) * 26 + (absHash % 7) - 3)));
+      const height = 222 + (absHash % 42);
 
-      return { ...theme, width, height };
+      return {
+        ...palette,
+        textureKey,
+        textureUrl: svgSpineTextures[textureKey],
+        bandStyle,
+        width,
+        height,
+        absHash
+      };
+    }
+
+    function renderBookCoverFallback(book, compact = false) {
+      const theme = getBookSpineTheme(book, 0);
+      const foilGilt = theme.foilHex || '#D4AF37';
+      const authorsList = Array.isArray(book.authors) ? book.authors : (book.authors ? [book.authors] : []);
+      const authorStr = authorsList.join(', ');
+      const category = (book.categories && book.categories[0]) || 'Volume';
+
+      return `
+        <div class="w-full h-full p-2.5 sm:p-4 flex flex-col justify-between relative overflow-hidden select-none" style="
+          background-color: ${theme.bottom};
+          background-image: linear-gradient(145deg, rgba(255,255,255,0.14) 0%, rgba(0,0,0,0.35) 100%), url('${theme.textureUrl}'), linear-gradient(135deg, ${theme.top} 0%, ${theme.bottom} 100%);
+          background-blend-mode: normal, overlay, normal;
+          background-size: 100% 100%, ${theme.textureKey === 'cloth' || theme.textureKey === 'canvas' ? '14px 14px' : 'cover'}, 100% 100%;
+        ">
+          <!-- Book hinge shadow on spine edge -->
+          <div class="absolute inset-y-0 left-0 w-2.5 bg-gradient-to-r from-black/50 to-transparent pointer-events-none"></div>
+
+          <!-- Gilded Ornamental Frame -->
+          <div class="absolute inset-1.5 sm:inset-2.5 border border-[${foilGilt}] opacity-35 rounded-sm pointer-events-none"></div>
+          <div class="absolute inset-2 sm:inset-3.5 border border-[${foilGilt}] opacity-60 rounded-sm pointer-events-none"></div>
+
+          <!-- Top Category / Monogram -->
+          <div class="relative z-10 text-center">
+            <span class="text-[8px] sm:text-[9.5px] uppercase tracking-[0.2em] font-bold drop-shadow" style="color: ${foilGilt};">
+              ${escapeHtml(category)}
+            </span>
+          </div>
+
+          <!-- Center Title & Author in Gold Tooling -->
+          <div class="relative z-10 text-center my-auto px-1">
+            <h4 class="font-cinzel ${compact ? 'text-[9.5px]' : 'text-xs sm:text-sm'} font-bold leading-tight drop-shadow-md line-clamp-3" style="color: ${foilGilt};">
+              ${escapeHtml(book.title || '')}
+            </h4>
+            <div class="w-6 h-[1px] mx-auto my-1.5 opacity-60" style="background: ${foilGilt};"></div>
+            <p class="font-playfair italic ${compact ? 'text-[8px]' : 'text-[10px] sm:text-[11px]'} text-[#EBE0D0] drop-shadow line-clamp-1">
+              ${escapeHtml(authorStr)}
+            </p>
+          </div>
+
+          <!-- Bottom Gilded Emblem / Year -->
+          <div class="relative z-10 text-center">
+            <span class="text-[7.5px] sm:text-[9px] font-mono tracking-widest opacity-80" style="color: ${foilGilt};">
+              ${book.year || '✦ ✦ ✦'}
+            </span>
+          </div>
+        </div>
+      `;
     }
 
     function renderBookSpine(book, idx) {
       const theme = getBookSpineTheme(book, idx);
       const progressPercent = getBookProgress(book);
 
+      const titleClass = theme.foil === 'silver' ? 'book-spine-silver-title' : (theme.foil === 'rose' ? 'book-spine-rose-title' : 'book-spine-gold-title');
+      const foilGilt = theme.foilHex || '#D4AF37';
+
+      // Authentic cylindrical curvature lighting
+      const cylindricalGradient = 'linear-gradient(90deg, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.06) 18%, rgba(255,255,255,0.2) 38%, rgba(255,255,255,0.04) 64%, rgba(0,0,0,0.08) 84%, rgba(0,0,0,0.42) 100%)';
+      const baseGradient = `linear-gradient(180deg, ${theme.top} 0%, ${theme.bottom} 100%)`;
+
+      // Headband (woven silk ribbon peeking at top edge)
+      const headbandHtml = `
+        <div class="w-full h-[3px] shrink-0 rounded-t-sm overflow-hidden" style="background: repeating-linear-gradient(45deg, ${foilGilt}, ${foilGilt} 2px, ${theme.bottom} 2px, ${theme.bottom} 4px); opacity: 0.85;"></div>
+      `;
+
+      // Embossed horizontal bands / fillets (traditional double gold/blind lines)
+      const filletPair = `
+        <div class="w-full flex flex-col gap-[1.5px] px-2 my-1 shrink-0 opacity-80">
+          <div class="w-full h-[1px]" style="background: ${foilGilt}; opacity: 0.85;"></div>
+          <div class="w-full h-[1px]" style="background: rgba(0,0,0,0.45);"></div>
+        </div>
+      `;
+
+      // Top and bottom classical tooling
+      let topDecoration = '';
+      let bottomDecoration = '';
+
+      if (theme.bandStyle === 0) {
+        // Double fillet at top and bottom
+        topDecoration = filletPair;
+        bottomDecoration = filletPair;
+      } else if (theme.bandStyle === 1) {
+        // Raised 3D cord band with gold fillets
+        topDecoration = `
+          <div class="w-full px-1.5 pt-1 shrink-0">
+            <div class="book-spine-raised-band" style="--band-gilt: ${foilGilt};"></div>
+          </div>
+        `;
+        bottomDecoration = `
+          <div class="w-full px-1.5 pb-1 shrink-0">
+            <div class="book-spine-raised-band" style="--band-gilt: ${foilGilt};"></div>
+          </div>
+        `;
+      } else if (theme.bandStyle === 2) {
+        // Double cord top and bottom
+        topDecoration = `
+          <div class="w-full px-1.5 pt-1 shrink-0 flex flex-col gap-1">
+            <div class="book-spine-raised-band" style="--band-gilt: ${foilGilt};"></div>
+            <div class="book-spine-raised-band" style="--band-gilt: ${foilGilt};"></div>
+          </div>
+        `;
+        bottomDecoration = `
+          <div class="w-full px-1.5 pb-1 shrink-0 flex flex-col gap-1">
+            <div class="book-spine-raised-band" style="--band-gilt: ${foilGilt};"></div>
+            <div class="book-spine-raised-band" style="--band-gilt: ${foilGilt};"></div>
+          </div>
+        `;
+      } else {
+        // Library archive call number sticker at base
+        const callNum = `${((theme.absHash % 899) + 100).toFixed(0)}.${(theme.absHash % 9)}`;
+        topDecoration = filletPair;
+        bottomDecoration = `
+          <div class="w-full flex flex-col items-center gap-1 pb-1.5 px-1 shrink-0">
+            ${filletPair}
+            <span class="book-spine-library-tag select-none" title="Archive Classification: ${callNum}">${callNum}</span>
+          </div>
+        `;
+      }
+
+      // Reading progress indicator: small gilded wax seal at bottom
+      const progressBadge = progressPercent > 0 ? `
+        <div class="w-2.5 h-2.5 rounded-full mt-1 shrink-0 shadow-md ${progressPercent === 100 ? 'bg-emerald-400 ring-1 ring-emerald-300' : 'bg-gold ring-1 ring-amber-300'}" title="${progressPercent}% Read"></div>
+      ` : '';
+
+      const authorsList = Array.isArray(book.authors) ? book.authors : (book.authors ? [book.authors] : []);
+      const authorsStr = authorsList.join(', ');
+      const firstAuthor = authorsList[0] || '';
+
       return `
         <div 
           onclick="openDetailModal('${book.id}')"
           class="book-spine-card group"
-          title="${escapeHtml(book.title)} by ${escapeHtml(book.authors.join(', '))}"
+          title="${escapeHtml(book.title || '')} by ${escapeHtml(authorsStr)}"
           style="
             width: ${theme.width}px;
             height: ${theme.height}px;
-            background: ${theme.bg};
-            border-left: 1px solid ${theme.border};
-            border-right: 1px solid ${theme.border};
+            background-color: ${theme.bottom};
+            background-image: ${cylindricalGradient}, url('${theme.textureUrl}'), ${baseGradient};
+            background-blend-mode: normal, overlay, normal;
+            background-size: 100% 100%, ${theme.textureKey === 'cloth' || theme.textureKey === 'canvas' ? '14px 14px' : 'cover'}, 100% 100%;
+            --band-gilt: ${foilGilt};
           "
         >
-          <!-- Top Embossed Ribs -->
-          <div class="w-full flex flex-col gap-1 items-center px-0.5 pt-1.5 shrink-0">
-            <div class="w-full h-[2px] rounded-full" style="background: ${theme.rib}; opacity: 0.85;"></div>
-            <div class="w-full h-[1px] rounded-full" style="background: ${theme.rib}; opacity: 0.45;"></div>
+          <!-- Top Woven Headband & Fine Gold Fillets -->
+          <div class="w-full flex flex-col items-center shrink-0">
+            ${headbandHtml}
+            ${topDecoration}
           </div>
 
-          <!-- Vertical Spine Text: Title (larger) & Author (smaller) -->
-          <div class="book-spine-text my-auto select-none px-0.5">
-            <span class="font-cinzel text-xs md:text-[12.5px] font-bold text-parchment tracking-wider uppercase group-hover:text-gold transition-colors leading-tight">
-              ${escapeHtml(book.title)}
+          <!-- Vertical Spine Text: Title (larger) & Author (smaller) - No Box, Maximum Vertical Space -->
+          <div class="book-spine-text my-auto select-none px-1">
+            <span class="${titleClass} text-xs md:text-[12.5px] font-bold leading-tight select-none">
+              ${escapeHtml(book.title || '')}
             </span>
-            <span class="text-[9.5px] md:text-[10.5px] font-playfair italic text-[#C7BCAC] opacity-85">
-              ${escapeHtml(book.authors[0] || '')}
+            <span class="text-[9px] md:text-[9.5px] font-medium text-[#CFC2AD] tracking-wider select-none opacity-90">
+              ${escapeHtml(firstAuthor)}
             </span>
           </div>
 
-          <!-- Bottom Embossed Ribs & Progress Indicator -->
-          <div class="w-full flex flex-col gap-1 items-center px-0.5 pb-1.5 shrink-0">
-            <div class="w-full h-[1px] rounded-full" style="background: ${theme.rib}; opacity: 0.45;"></div>
-            <div class="w-full h-[2px] rounded-full" style="background: ${theme.rib}; opacity: 0.85;"></div>
-            ${progressPercent > 0 ? `
-              <div class="w-2.5 h-2.5 rounded-full mt-1.5 ${progressPercent === 100 ? 'bg-emerald-400' : 'bg-gold'} shadow" title="${progressPercent}% Read"></div>
-            ` : ''}
+          <!-- Bottom Embossed Fillets or Archive Badge -->
+          <div class="w-full flex flex-col items-center shrink-0">
+            ${bottomDecoration}
+            ${progressBadge}
           </div>
         </div>
       `;
@@ -3930,7 +4161,7 @@
                   ${lBooks.map(b => `
                     <div onclick="openDetailModal('${b.id}')" class="group cursor-pointer flex flex-col items-center text-center transition-transform hover:-translate-y-1">
                       <div class="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-ebony border border-[#3d3835] group-hover:border-gold shadow-md">
-                        ${b.coverUrl ? `<img src="${b.coverUrl}" class="w-full h-full object-cover" />` : `<div class="p-1 text-[8px] font-cinzel">${escapeHtml(b.title)}</div>`}
+                        ${b.coverUrl ? `<img src="${b.coverUrl}" class="w-full h-full object-cover" />` : renderBookCoverFallback(b, true)}
                       </div>
                       <h5 class="mt-1 sm:mt-2 text-[10px] sm:text-xs font-semibold text-parchment group-hover:text-gold line-clamp-1 w-full font-cinzel">${escapeHtml(b.title)}</h5>
                     </div>
@@ -3956,11 +4187,20 @@
 
     // LOCATION MANAGEMENT LOGIC
     function openManageLocationsModal() {
-      renderManageLocationsList();
-      document.getElementById('modal-manage-locations').classList.remove('hidden');
-      document.getElementById('modal-manage-locations').classList.add('flex');
+      const modal = document.getElementById('modal-manage-locations');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
       syncModalBodyLock();
-      lucide.createIcons();
+      try {
+        renderManageLocationsList();
+      } catch (err) {
+        console.error('Error rendering manage locations list:', err);
+      }
+      try {
+        lucide.createIcons();
+      } catch (e) {}
       setTimeout(() => {
         const input = document.getElementById('new-location-input');
         if (input) input.focus();
@@ -4383,10 +4623,7 @@
             <div class="group/cover relative aspect-[2/3] w-48 md:w-full rounded-2xl overflow-hidden bg-slate border-4 border-[#3d3835] shadow-2xl select-none">
               ${book.coverUrl 
                 ? `<img src="${book.coverUrl}" alt="${escapeHtml(book.title)}" class="w-full h-full object-cover group-hover/cover:scale-105 transition-transform duration-500" />`
-                : `<div class="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-oxford to-ebony text-center">
-                     <i data-lucide="book-open" class="w-12 h-12 text-gold mb-3"></i>
-                     <span class="font-cinzel font-bold text-sm text-parchment">${escapeHtml(book.title)}</span>
-                   </div>`
+                : renderBookCoverFallback(book)
               }
 
               <!-- Clean Resting Progress Bar on Cover (Hidden on hover) -->
@@ -7717,12 +7954,20 @@ Mandatory requirements:
 
     // SETTINGS, LIBRARY MODE & MEMBERS MODAL
     function openSettingsModal() {
-      renderSettingsModalContent();
       const modal = document.getElementById('modal-settings');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
       syncModalBodyLock();
-      lucide.createIcons();
+      try {
+        renderSettingsModalContent();
+      } catch (err) {
+        console.error('Error rendering settings modal content:', err);
+      }
+      try {
+        lucide.createIcons();
+      } catch (e) {}
     }
 
     function closeSettingsModal() {
