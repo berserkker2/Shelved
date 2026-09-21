@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shelved</title>
 
-  <!-- Google Fonts: EB Garamond, Lora & Plus Jakarta Sans (Authentic Book Typography) -->
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans (Modern & Stylish Typography) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -31,11 +31,12 @@
             cream: '#E8DFC8',
           },
           fontFamily: {
-            cinzel: ['"EB Garamond"', 'Lora', 'Georgia', 'serif'],
-            playfair: ['Lora', '"EB Garamond"', 'Georgia', 'serif'],
-            garamond: ['"EB Garamond"', 'Lora', 'Georgia', 'serif'],
-            lora: ['Lora', '"EB Garamond"', 'Georgia', 'serif'],
-            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            cinzel: ['Outfit', '"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            playfair: ['"Plus Jakarta Sans"', 'Outfit', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            garamond: ['"Plus Jakarta Sans"', 'Outfit', 'sans-serif'],
+            lora: ['"Plus Jakarta Sans"', 'Outfit', 'sans-serif'],
+            outfit: ['Outfit', '"Plus Jakarta Sans"', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', 'Outfit', 'system-ui', '-apple-system', 'sans-serif'],
           }
         }
       }
@@ -596,57 +597,57 @@
     </section>
 
     <!-- VIEW TAB: LOCATIONS (ROOMS & SHELVES) -->
-    <section id="tab-locations-view" class="hidden space-y-12">
-      <div class="bg-gradient-to-r from-slate via-ebony to-mahogany/40 rounded-2xl p-6 md:p-8 border border-moss shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <section id="tab-locations-view" class="hidden space-y-4 sm:space-y-8 md:space-y-12">
+      <div class="bg-gradient-to-r from-slate via-ebony to-mahogany/40 rounded-xl sm:rounded-2xl p-2.5 sm:p-6 md:p-8 border border-moss shadow-2xl flex items-center justify-between gap-2.5 sm:gap-3">
         <div>
-          <h2 class="text-2xl md:text-3xl font-bold font-cinzel text-parchment">
+          <h2 class="text-lg sm:text-2xl md:text-3xl font-bold font-cinzel text-parchment">
             Locations
           </h2>
         </div>
 
-        <div class="flex items-center gap-3 flex-wrap">
-          <button onclick="openManageLocationsModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment hover:border-gold transition-all cursor-pointer">
-            <i data-lucide="edit-3" class="w-4 h-4 text-gold"></i>
-            <span>Manage Locations</span>
+        <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <button onclick="openManageLocationsModal()" class="flex items-center gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment hover:border-gold transition-all cursor-pointer whitespace-nowrap">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gold"></i>
+            <span>Manage<span class="hidden sm:inline"> Locations</span></span>
           </button>
-          <button onclick="promptAddNewLocation()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-md shadow-gold/20 transition-all cursor-pointer">
-            <i data-lucide="plus" class="w-4 h-4 stroke-[3]"></i>
-            <span>+ Add Location</span>
+          <button onclick="promptAddNewLocation()" class="flex items-center gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-md shadow-gold/20 transition-all cursor-pointer whitespace-nowrap">
+            <i data-lucide="plus" class="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]"></i>
+            <span>+ Add<span class="hidden sm:inline"> Location</span></span>
           </button>
         </div>
       </div>
 
       <!-- Physical Rooms & Shelves -->
       <div>
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-          <div class="flex items-center gap-2">
-            <i data-lucide="home" class="w-5 h-5 text-gold"></i>
-            <h3 class="font-cinzel text-xl font-bold text-parchment">Physical Rooms & Shelf Locations</h3>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 mb-2.5 sm:mb-4">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <i data-lucide="home" class="w-4 h-4 sm:w-5 sm:h-5 text-gold"></i>
+            <h3 class="font-cinzel text-sm sm:text-lg md:text-xl font-bold text-parchment">Physical Rooms & Shelf Locations</h3>
           </div>
 
           <!-- Location View Mode Toggle: Spines vs Covers -->
-          <div class="flex items-center bg-ebony p-1 rounded-xl border border-moss self-end sm:self-auto">
+          <div class="flex items-center bg-ebony p-0.5 sm:p-1 rounded-lg sm:rounded-xl border border-moss self-end sm:self-auto">
             <button 
               id="loc-view-spines-btn" 
               onclick="setLocationViewMode('spines')" 
               title="Bookshelf Spines View (Lombada)" 
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer bg-gold text-ebony font-bold shadow"
+              class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold transition-all cursor-pointer bg-gold text-ebony font-bold shadow"
             >
-              <i data-lucide="library" class="w-3.5 h-3.5"></i>
+              <i data-lucide="library" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
               <span>Spines View</span>
             </button>
             <button 
               id="loc-view-covers-btn" 
               onclick="setLocationViewMode('covers')" 
               title="Standard Cover Grid View" 
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9E9382] hover:text-parchment transition-all cursor-pointer"
+              class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold text-[#9E9382] hover:text-parchment transition-all cursor-pointer"
             >
-              <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+              <i data-lucide="layout-grid" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
               <span>Covers Grid</span>
             </button>
           </div>
         </div>
-        <div id="locations-shelves-container" class="space-y-6"></div>
+        <div id="locations-shelves-container" class="space-y-3 sm:space-y-6"></div>
       </div>
     </section>
 
@@ -693,55 +694,55 @@
     <div class="relative w-full max-w-4xl bg-ebony border-2 border-gold/70 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[94vh] sm:max-h-[88vh] text-[#EDE8DE]">
       <div class="h-2 sm:h-2.5 w-full bg-gradient-to-r from-mahogany via-gold to-oxford shrink-0"></div>
       
-      <div class="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-[#3d3835] flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-2.5 sm:gap-3">
-          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate border border-gold/40 flex items-center justify-center text-gold shrink-0">
-            <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+      <div class="p-2.5 sm:p-6 pb-2 sm:pb-4 border-b border-[#3d3835] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-slate border border-gold/40 flex items-center justify-center text-gold shrink-0">
+            <i data-lucide="book-open" class="w-3.5 h-3.5 sm:w-5 sm:h-5"></i>
           </div>
           <div>
-            <h2 id="modal-add-title" class="font-cinzel text-lg sm:text-2xl font-bold text-parchment">Add New Book to Library</h2>
-            <p class="text-[11px] sm:text-xs text-[#9E9382] font-playfair italic">Search online, scan barcodes, or use AI photo recognition</p>
+            <h2 id="modal-add-title" class="font-cinzel text-sm sm:text-2xl font-bold text-parchment leading-tight">Add New Book to Library</h2>
+            <p class="hidden sm:block text-[11px] sm:text-xs text-[#9E9382] font-playfair italic">Search online, scan barcodes, or use AI photo recognition</p>
           </div>
         </div>
-        <button onclick="closeAddBookModal()" class="p-2 rounded-full bg-slate hover:bg-mahogany text-[#9E9382] hover:text-parchment cursor-pointer">
-          <i data-lucide="x" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+        <button onclick="closeAddBookModal()" class="p-1.5 sm:p-2 rounded-full bg-slate hover:bg-mahogany text-[#9E9382] hover:text-parchment cursor-pointer">
+          <i data-lucide="x" class="w-3.5 h-3.5 sm:w-5 sm:h-5"></i>
         </button>
       </div>
 
       <!-- ADD BOOK SOURCE TABS (Search, Barcode, AI Vision) -->
-      <div id="add-book-tabs-nav" class="px-3 sm:px-8 pt-2 sm:pt-3 flex items-center gap-1.5 sm:gap-2 border-b border-[#3d3835] bg-slate/40 shrink-0 overflow-x-auto no-scrollbar flex-nowrap">
+      <div id="add-book-tabs-nav" class="px-2 sm:px-8 pt-1 sm:pt-3 flex items-center gap-1 sm:gap-2 border-b border-[#3d3835] bg-slate/40 shrink-0 overflow-x-auto no-scrollbar flex-nowrap">
         <button 
           type="button" 
           id="add-tab-search-btn" 
           onclick="switchAddBookTab('search')" 
-          class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-gold text-gold bg-ebony/60 cursor-pointer shrink-0"
+          class="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2.5 rounded-t-lg sm:rounded-t-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-gold text-gold bg-ebony/60 cursor-pointer shrink-0"
         >
-          <i data-lucide="search" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
-          <span>Search & Manual</span>
+          <i data-lucide="search" class="w-3 h-3 sm:w-4 sm:h-4"></i>
+          <span>Search<span class="hidden sm:inline"> & Manual</span></span>
         </button>
 
         <button 
           type="button" 
           id="add-tab-barcode-btn" 
           onclick="switchAddBookTab('barcode')" 
-          class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer shrink-0"
+          class="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2.5 rounded-t-lg sm:rounded-t-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer shrink-0"
         >
-          <i data-lucide="scan-barcode" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
-          <span>Barcode Scanner</span>
+          <i data-lucide="scan-barcode" class="w-3 h-3 sm:w-4 sm:h-4"></i>
+          <span>Barcode<span class="hidden sm:inline"> Scanner</span></span>
         </button>
 
         <button 
           type="button" 
           id="add-tab-ai-btn" 
           onclick="switchAddBookTab('ai')" 
-          class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer shrink-0"
+          class="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2.5 rounded-t-lg sm:rounded-t-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer shrink-0"
         >
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gold"></i>
-          <span>AI Shelf & Cover Scan</span>
+          <i data-lucide="sparkles" class="w-3 h-3 sm:w-4 sm:h-4 text-gold"></i>
+          <span>AI Scan<span class="hidden sm:inline"> (Shelf & Covers)</span></span>
         </button>
       </div>
 
-      <div class="p-4 sm:p-6 sm:p-8 overflow-y-auto overscroll-contain flex-1 space-y-6">
+      <div class="p-2.5 sm:p-6 sm:p-8 overflow-y-auto overscroll-contain flex-1 space-y-3.5 sm:space-y-6">
         
         <!-- PANEL 1: SEARCH & MANUAL ENTRY -->
         <div id="add-panel-search" class="space-y-6">
@@ -1039,29 +1040,29 @@
         </div>
 
         <!-- PANEL 2: BARCODE / ISBN SCANNER -->
-        <div id="add-panel-barcode" class="hidden space-y-6">
-          <div class="bg-gradient-to-br from-slate to-ebony p-5 rounded-2xl border border-moss shadow-inner space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold-light">
-                <i data-lucide="scan-barcode" class="w-4 h-4 text-gold"></i>
+        <div id="add-panel-barcode" class="hidden space-y-4 sm:space-y-6">
+          <div class="bg-gradient-to-br from-slate to-ebony p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-moss shadow-inner space-y-3 sm:space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-1.5">
+              <div class="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-gold-light">
+                <i data-lucide="scan-barcode" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gold"></i>
                 <span>Scan ISBN Barcode on Back Cover</span>
               </div>
-              <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 font-semibold">
-                100% Local (No API Key Required)
+              <span class="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 font-semibold">
+                100% Local (No API Key)
               </span>
             </div>
 
-            <p class="text-xs text-[#C7BCAC] leading-relaxed">
+            <p class="text-[11px] sm:text-xs text-[#C7BCAC] leading-relaxed">
               Point your camera at the ISBN barcode on the back of any physical book, or upload a photo of the barcode.
             </p>
 
             <!-- Camera Viewport & Controls -->
             <div class="space-y-3">
-              <div id="barcode-camera-container" class="relative hidden overflow-hidden rounded-2xl bg-black border-2 border-gold/50 shadow-2xl max-w-md mx-auto aspect-[4/3]">
-                <video id="barcode-video" class="w-full h-full object-cover" playsinline></video>
+              <div id="barcode-camera-container" class="relative hidden overflow-hidden rounded-2xl bg-black border-2 border-gold/50 shadow-2xl max-w-sm sm:max-w-md mx-auto aspect-[3/4] sm:aspect-[4/3] w-full">
+                <video id="barcode-video" class="w-full h-full object-contain bg-black" playsinline></video>
                 <!-- Targeting Reticle Overlay -->
-                <div class="absolute inset-0 pointer-events-none flex items-center justify-center p-6">
-                  <div class="w-full max-w-[280px] h-36 border-2 border-gold rounded-xl shadow-[0_0_15px_rgba(212,160,23,0.5)] relative overflow-hidden bg-gold/5">
+                <div class="absolute inset-0 pointer-events-none flex items-center justify-center p-4 sm:p-6">
+                  <div class="w-full max-w-[260px] sm:max-w-[280px] h-32 sm:h-36 border-2 border-gold rounded-xl shadow-[0_0_15px_rgba(212,160,23,0.5)] relative overflow-hidden bg-gold/5">
                     <div class="w-full h-0.5 bg-red-400 shadow-[0_0_8px_red] absolute top-1/2 -translate-y-1/2 animate-pulse"></div>
                     <div class="absolute bottom-1 left-0 right-0 text-center text-[10px] text-parchment/80 font-mono">Align barcode inside frame</div>
                   </div>
@@ -1069,40 +1070,40 @@
               </div>
 
               <!-- Camera & File Buttons -->
-              <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 pt-1 sm:pt-2">
                 <button 
                   type="button" 
                   id="barcode-start-camera-btn" 
                   onclick="startBarcodeCamera()" 
-                  class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-md transition-all cursor-pointer"
+                  class="flex items-center gap-1.5 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-md transition-all cursor-pointer"
                 >
-                  <i data-lucide="camera" class="w-4 h-4"></i>
-                  <span>Start Camera Scan</span>
+                  <i data-lucide="camera" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                  <span>Start Camera</span>
                 </button>
                 <button 
                   type="button" 
                   id="barcode-stop-camera-btn" 
                   onclick="stopBarcodeCamera()" 
-                  class="hidden flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider bg-mahogany/40 hover:bg-mahogany/70 border border-[#7C4B1E] text-red-200 transition-all cursor-pointer"
+                  class="hidden flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-semibold uppercase tracking-wider bg-mahogany/40 hover:bg-mahogany/70 border border-[#7C4B1E] text-red-200 transition-all cursor-pointer"
                 >
-                  <i data-lucide="camera-off" class="w-4 h-4"></i>
+                  <i data-lucide="camera-off" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                   <span>Stop Camera</span>
                 </button>
                 <button 
                   type="button" 
                   id="barcode-switch-camera-btn" 
                   onclick="switchBarcodeCamera()" 
-                  class="hidden flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate hover:bg-oxford border border-moss text-[#BACAE0] transition-all cursor-pointer"
+                  class="hidden flex items-center gap-1 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-semibold bg-slate hover:bg-oxford border border-moss text-[#BACAE0] transition-all cursor-pointer"
                   title="Switch between front and back cameras"
                 >
                   <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
                   <span>Flip Camera</span>
                 </button>
 
-                <div class="text-[#7d7467] text-xs font-semibold px-1">or</div>
+                <div class="text-[#7d7467] text-xs font-semibold px-1 hidden sm:block">or</div>
 
-                <label class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment hover:border-gold transition-all cursor-pointer">
-                  <i data-lucide="image" class="w-4 h-4 text-gold"></i>
+                <label class="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-semibold uppercase tracking-wider bg-slate hover:bg-oxford border border-moss text-parchment hover:border-gold transition-all cursor-pointer">
+                  <i data-lucide="image" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gold"></i>
                   <span>Upload Barcode Photo</span>
                   <input type="file" accept="image/*" onchange="scanBarcodeImageFile(event)" class="hidden" />
                 </label>
@@ -1115,28 +1116,28 @@
         </div>
 
         <!-- PANEL 3: AI SHELF & COVER VISION SCANNER -->
-        <div id="add-panel-ai" class="hidden space-y-6">
-          <div class="bg-gradient-to-br from-slate to-ebony p-5 sm:p-6 rounded-2xl border border-gold/40 shadow-xl space-y-4">
+        <div id="add-panel-ai" class="hidden space-y-4 sm:space-y-6">
+          <div class="bg-gradient-to-br from-slate to-ebony p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-gold/40 shadow-xl space-y-3 sm:space-y-4">
             
             <!-- Description & Feature Explanation -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#3d3835]">
-              <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-xl bg-ebony border border-gold/40 flex items-center justify-center text-gold shadow-inner">
-                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 pb-2.5 sm:pb-3 border-b border-[#3d3835]">
+              <div class="flex items-center gap-2 sm:gap-2.5">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-ebony border border-gold/40 flex items-center justify-center text-gold shadow-inner shrink-0">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                 </div>
                 <div>
-                  <h3 class="font-cinzel text-sm sm:text-base font-bold text-parchment">AI Visual Book & Shelf Recognition</h3>
-                  <p class="text-[11px] text-[#B3A796]">Powered by Google Gemini AI Vision</p>
+                  <h3 class="font-cinzel text-xs sm:text-base font-bold text-parchment leading-tight">AI Visual Book & Shelf Recognition</h3>
+                  <p class="text-[10px] sm:text-[11px] text-[#B3A796]">Powered by Google Gemini AI Vision</p>
                 </div>
               </div>
-              <div id="ai-key-required-warning" class="hidden text-[11px] px-3 py-1 rounded-xl bg-amber-950/60 border border-amber-500/40 text-amber-300 font-semibold flex items-center gap-1.5">
+              <div id="ai-key-required-warning" class="hidden text-[10px] sm:text-[11px] px-2.5 py-0.5 sm:py-1 rounded-xl bg-amber-950/60 border border-amber-500/40 text-amber-300 font-semibold flex items-center gap-1.5">
                 <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
                 <span>Gemini API Key Required</span>
                 <button type="button" onclick="closeAddBookModal(); openSettingsModal();" class="underline ml-1 text-gold-light hover:text-white cursor-pointer">Configure</button>
               </div>
             </div>
 
-            <div class="p-3.5 rounded-xl bg-ebony/70 border border-moss/50 text-xs text-[#C7BCAC] space-y-1.5 leading-relaxed">
+            <div class="p-2.5 sm:p-3.5 rounded-xl bg-ebony/70 border border-moss/50 text-[11px] sm:text-xs text-[#C7BCAC] space-y-1.5 leading-relaxed">
               <div class="font-semibold text-gold-light flex items-center gap-1.5">
                 <i data-lucide="info" class="w-3.5 h-3.5"></i>
                 <span>What can you scan?</span>
@@ -1151,13 +1152,13 @@
             <!-- AI Photo Input Controls (Camera Stream / Snapshot & File Upload) -->
             <div id="ai-capture-section" class="space-y-4">
               <!-- Live Video Viewport for Taking Snapshot -->
-              <div id="ai-camera-container" class="relative hidden overflow-hidden rounded-2xl bg-black border-2 border-gold/50 shadow-2xl max-w-lg mx-auto aspect-[4/3]">
-                <video id="ai-video" class="w-full h-full object-cover" playsinline></video>
-                <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-3 z-20">
+              <div id="ai-camera-container" class="relative hidden overflow-hidden rounded-2xl bg-black border-2 border-gold/50 shadow-2xl max-w-sm sm:max-w-md mx-auto aspect-[3/4] sm:aspect-[4/3] w-full">
+                <video id="ai-video" class="w-full h-full object-contain bg-black" playsinline></video>
+                <div class="absolute bottom-3 sm:bottom-4 left-0 right-0 flex justify-center gap-2 sm:gap-3 z-20 px-3">
                   <button 
                     type="button" 
                     onclick="captureAiSnapshot()" 
-                    class="flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-2xl shadow-gold/50 cursor-pointer"
+                    class="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gold hover:bg-gold-hover text-ebony shadow-2xl shadow-gold/50 cursor-pointer"
                   >
                     <i data-lucide="camera" class="w-4 h-4"></i>
                     <span>Take Photo 📸</span>
@@ -1165,7 +1166,7 @@
                   <button 
                     type="button" 
                     onclick="stopAiCamera()" 
-                    class="p-2.5 rounded-full bg-black/70 hover:bg-mahogany text-parchment border border-white/20 transition-all cursor-pointer"
+                    class="p-2 sm:p-2.5 rounded-full bg-black/70 hover:bg-mahogany text-parchment border border-white/20 transition-all cursor-pointer"
                   >
                     <i data-lucide="x" class="w-4 h-4"></i>
                   </button>
@@ -1173,8 +1174,8 @@
               </div>
 
               <!-- Captured / Uploaded Image Preview Box -->
-              <div id="ai-preview-box" class="hidden relative max-w-md mx-auto rounded-2xl overflow-hidden border-2 border-gold/40 shadow-xl bg-black">
-                <img id="ai-preview-img" src="" alt="Captured book photo" class="w-full max-h-80 object-contain mx-auto" />
+              <div id="ai-preview-box" class="hidden relative max-w-sm sm:max-w-md mx-auto rounded-2xl overflow-hidden border-2 border-gold/40 shadow-xl bg-black">
+                <img id="ai-preview-img" src="" alt="Captured book photo" class="w-full max-h-[60vh] sm:max-h-[70vh] object-contain mx-auto" />
                 <button 
                   type="button" 
                   onclick="clearAiPreviewImage()" 
@@ -1224,17 +1225,17 @@
             </div>
 
             <!-- CONFIRMATION & REVIEW LIST -->
-            <div id="ai-review-section" class="hidden pt-4 border-t border-[#3d3835] space-y-4">
-              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-ebony/90 p-3 rounded-xl border border-gold/40">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-                  <span id="ai-detected-count-label" class="text-xs font-bold text-parchment font-cinzel">Identified Books:</span>
+            <div id="ai-review-section" class="hidden pt-3 sm:pt-4 border-t border-[#3d3835] space-y-2.5 sm:space-y-4">
+              <div class="flex items-center justify-between gap-2 bg-ebony/90 p-2 sm:p-3 rounded-xl border border-gold/40">
+                <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0"></i>
+                  <span id="ai-detected-count-label" class="text-[11px] sm:text-xs font-bold text-parchment font-cinzel truncate">Identified Books:</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="toggleAllAiCheckboxes()" id="ai-select-all-btn" class="text-[11px] font-semibold text-gold hover:underline cursor-pointer">
+                <div class="flex items-center gap-2 shrink-0">
+                  <button type="button" onclick="toggleAllAiCheckboxes()" id="ai-select-all-btn" class="text-[10px] sm:text-[11px] font-semibold text-gold hover:underline cursor-pointer">
                     Select All
                   </button>
-                  <button type="button" onclick="resetAiScanner()" class="text-[11px] text-[#9E9382] hover:text-parchment ml-2 cursor-pointer">
+                  <button type="button" onclick="resetAiScanner()" class="text-[10px] sm:text-[11px] text-[#9E9382] hover:text-parchment ml-1 cursor-pointer">
                     New Photo
                   </button>
                 </div>
@@ -3864,41 +3865,41 @@
         const hasBooks = lBooks.length > 0;
 
         return `
-          <div class="bg-slate/70 rounded-2xl p-5 md:p-6 border border-[#3d3835] shadow-lg">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-[#3d3835]">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-ebony border border-moss flex items-center justify-center text-gold shrink-0">
-                  <i data-lucide="${getLocationIcon(location)}" class="w-4 h-4"></i>
+          <div class="bg-slate/70 rounded-xl sm:rounded-2xl p-2.5 sm:p-5 md:p-6 border border-[#3d3835] shadow-lg">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 pb-2 sm:pb-4 mb-2 sm:mb-4 border-b border-[#3d3835]">
+              <div class="flex items-center gap-2 sm:gap-3">
+                <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-ebony border border-moss flex items-center justify-center text-gold shrink-0">
+                  <i data-lucide="${getLocationIcon(location)}" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                 </div>
                 <div>
-                  <div class="flex items-center gap-2">
-                    <h4 class="font-cinzel text-lg font-bold text-parchment">${escapeHtml(location)}</h4>
-                    <span class="text-[11px] px-2 py-0.2 rounded-full ${hasBooks ? 'bg-oxford text-[#BACAE0]' : 'bg-ebony text-[#9E9382]'} border border-[#3d3835]">
+                  <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <h4 class="font-cinzel text-sm sm:text-base md:text-lg font-bold text-parchment leading-tight">${escapeHtml(location)}</h4>
+                    <span class="text-[10px] sm:text-[11px] px-1.5 sm:px-2 py-0.5 rounded-full ${hasBooks ? 'bg-oxford text-[#BACAE0]' : 'bg-ebony text-[#9E9382]'} border border-[#3d3835] leading-none">
                       ${lBooks.length} book(s)
                     </span>
                   </div>
-                  <p class="text-xs text-[#9E9382] font-playfair italic">
+                  <p class="text-[10px] sm:text-xs text-[#9E9382] font-playfair italic leading-tight mt-0.5">
                     ${isOnlineShelf ? 'Digital, Web reader & Cloud library (Google Play, Kindle, ePub)' : (hasBooks ? 'Physical placement in this library' : 'Empty location')}
                   </p>
                 </div>
               </div>
 
               <!-- Shelf Action Buttons -->
-              <div class="flex items-center gap-2 self-end sm:self-center">
+              <div class="flex items-center gap-1 sm:gap-2 self-start sm:self-center mt-0.5 sm:mt-0 flex-wrap">
                 ${hasBooks ? `
-                  <button onclick="filters.location='${escapeJs(location)}'; setTab('home');" class="text-xs font-semibold text-gold hover:underline cursor-pointer mr-2">
+                  <button onclick="filters.location='${escapeJs(location)}'; setTab('home');" class="text-[10px] sm:text-xs font-semibold text-gold hover:underline cursor-pointer mr-1">
                     Filter books →
                   </button>
                 ` : ''}
-                <button onclick="openAddBookModalWithLocation('${escapeJs(location)}')" title="Add Book to this shelf" class="p-2 rounded-lg bg-slate hover:bg-ebony border border-moss text-gold text-xs font-semibold flex items-center gap-1 cursor-pointer">
-                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <button onclick="openAddBookModalWithLocation('${escapeJs(location)}')" title="Add Book to this shelf" class="px-2 py-1 rounded-md sm:rounded-lg bg-slate hover:bg-ebony border border-moss text-gold text-[10px] sm:text-xs font-semibold flex items-center gap-1 cursor-pointer">
+                  <i data-lucide="plus" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
                   <span>Add Book</span>
                 </button>
-                <button onclick="renameLocation('${escapeJs(location)}')" title="Rename Shelf" class="p-2 rounded-lg bg-slate hover:bg-ebony border border-[#3d3835] text-[#C7BCAC] hover:text-gold cursor-pointer">
-                  <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                <button onclick="renameLocation('${escapeJs(location)}')" title="Rename Shelf" class="p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-slate hover:bg-ebony border border-[#3d3835] text-[#C7BCAC] hover:text-gold cursor-pointer">
+                  <i data-lucide="edit-2" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
                 </button>
-                <button onclick="deleteLocation('${escapeJs(location)}')" title="Delete Shelf" class="p-2 rounded-lg bg-slate hover:bg-mahogany/40 border border-[#3d3835] text-red-400 hover:text-red-300 cursor-pointer">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <button onclick="deleteLocation('${escapeJs(location)}')" title="Delete Shelf" class="p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-slate hover:bg-mahogany/40 border border-[#3d3835] text-red-400 hover:text-red-300 cursor-pointer">
+                  <i data-lucide="trash-2" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
                 </button>
               </div>
             </div>
@@ -3906,7 +3907,7 @@
             ${hasBooks ? (
               locationViewMode === 'spines' ? `
                 <!-- Multi-Tier Bookshelf Spines View: Fills bottom shelves first and stacks upwards -->
-                <div class="space-y-6 pt-2">
+                <div class="space-y-3 sm:space-y-6 pt-1 sm:pt-2">
                   ${(() => {
                     const BOOKS_PER_SHELF = 14;
                     const tiers = [];
@@ -3918,33 +3919,33 @@
                         <div class="book-spine-row">
                           ${tierBooks.map((b, bIdx) => renderBookSpine(b, bIdx)).join('')}
                         </div>
-                        <div class="h-3.5 w-full wood-shelf rounded shadow-md border-t border-[#4a3325]"></div>
+                        <div class="h-2.5 sm:h-3.5 w-full wood-shelf rounded shadow-md border-t border-[#4a3325]"></div>
                       </div>
                     `).join('');
                   })()}
                 </div>
               ` : `
                 <!-- Standard Cover Grid View -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-4">
                   ${lBooks.map(b => `
                     <div onclick="openDetailModal('${b.id}')" class="group cursor-pointer flex flex-col items-center text-center transition-transform hover:-translate-y-1">
                       <div class="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-ebony border border-[#3d3835] group-hover:border-gold shadow-md">
                         ${b.coverUrl ? `<img src="${b.coverUrl}" class="w-full h-full object-cover" />` : `<div class="p-1 text-[8px] font-cinzel">${escapeHtml(b.title)}</div>`}
                       </div>
-                      <h5 class="mt-2 text-xs font-semibold text-parchment group-hover:text-gold line-clamp-1 w-full font-cinzel">${escapeHtml(b.title)}</h5>
+                      <h5 class="mt-1 sm:mt-2 text-[10px] sm:text-xs font-semibold text-parchment group-hover:text-gold line-clamp-1 w-full font-cinzel">${escapeHtml(b.title)}</h5>
                     </div>
                   `).join('')}
                 </div>
-                <div class="mt-4 h-2 w-full wood-shelf rounded-full"></div>
+                <div class="mt-2.5 sm:mt-4 h-2 w-full wood-shelf rounded-full"></div>
               `
             ) : `
-              <div class="py-6 text-center text-xs text-[#9E9382] font-playfair italic flex items-center justify-center gap-2">
+              <div class="py-3 sm:py-6 text-center text-[10px] sm:text-xs text-[#9E9382] font-playfair italic flex items-center justify-center gap-2 flex-wrap">
                 <span>No volumes are currently placed on this shelf.</span>
                 <button onclick="openAddBookModalWithLocation('${escapeJs(location)}')" class="text-gold font-sans font-semibold underline hover:text-gold-light cursor-pointer">
                   + Add Book here
                 </button>
               </div>
-              <div class="mt-4 h-2 w-full wood-shelf rounded-full"></div>
+              <div class="mt-2 sm:mt-4 h-1.5 sm:h-2 w-full wood-shelf rounded-full"></div>
             `}
           </div>
         `;
@@ -5237,9 +5238,9 @@
         const panel = document.getElementById(`add-panel-${t}`);
         if (btn) {
           if (t === tab) {
-            btn.className = 'flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-gold text-gold bg-ebony/60 cursor-pointer';
+            btn.className = 'flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2.5 rounded-t-lg sm:rounded-t-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-gold text-gold bg-ebony/60 cursor-pointer shrink-0';
           } else {
-            btn.className = 'flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer';
+            btn.className = 'flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2.5 rounded-t-lg sm:rounded-t-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#9E9382] hover:text-parchment transition-all border-b-2 border-transparent hover:bg-ebony/30 cursor-pointer shrink-0';
           }
         }
         if (panel) {
@@ -5626,7 +5627,7 @@
 
         if (feedback) feedback.textContent = 'Camera active. Point at ISBN barcode...';
 
-        barcodeReader.decodeFromVideoDevice(barcodeSelectedDeviceId, 'barcode-video', (result, err) => {
+        const handleBarcodeResult = (result, err) => {
           if (result) {
             const rawText = result.getText().trim();
             const cleanIsbn = rawText.replace(/[^0-9X]/gi, '');
@@ -5644,7 +5645,29 @@
               }
             }
           }
-        });
+        };
+
+        const barcodeConstraints = {
+          video: {
+            deviceId: barcodeSelectedDeviceId ? { exact: barcodeSelectedDeviceId } : undefined,
+            facingMode: barcodeSelectedDeviceId ? undefined : { ideal: 'environment' },
+            width: { ideal: 1920 },
+            height: { ideal: 2560 },
+            aspectRatio: { ideal: 0.75 }
+          },
+          audio: false
+        };
+
+        try {
+          if (typeof barcodeReader.decodeFromConstraints === 'function') {
+            await barcodeReader.decodeFromConstraints(barcodeConstraints, 'barcode-video', handleBarcodeResult);
+          } else {
+            barcodeReader.decodeFromVideoDevice(barcodeSelectedDeviceId, 'barcode-video', handleBarcodeResult);
+          }
+        } catch (cErr) {
+          console.warn('decodeFromConstraints failed, fallback to decodeFromVideoDevice:', cErr);
+          barcodeReader.decodeFromVideoDevice(barcodeSelectedDeviceId, 'barcode-video', handleBarcodeResult);
+        }
       } catch (err) {
         console.error('Barcode camera error:', err);
         if (feedback) feedback.textContent = '⚠️ Could not access camera. Please allow camera permissions or upload photo.';
@@ -5746,9 +5769,33 @@
       clearAiPreviewImage();
 
       try {
-        aiCurrentStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
-        });
+        let stream = null;
+        try {
+          // Request high-resolution portrait video stream (3:4 aspect ratio, full camera sensor height)
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: 'environment' },
+              width: { ideal: 2160 },
+              height: { ideal: 3840 },
+              aspectRatio: { ideal: 0.75 }
+            },
+            audio: false
+          });
+        } catch (err1) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { ideal: 'environment' },
+                aspectRatio: { ideal: 0.75 }
+              },
+              audio: false
+            });
+          } catch (err2) {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          }
+        }
+
+        aiCurrentStream = stream;
         if (videoElem) {
           videoElem.srcObject = aiCurrentStream;
           videoElem.play();
@@ -5779,15 +5826,21 @@
       const videoElem = document.getElementById('ai-video');
       if (!videoElem) return;
 
+      const vW = videoElem.videoWidth || 1920;
+      const vH = videoElem.videoHeight || 2560;
+
       const canvas = document.createElement('canvas');
-      canvas.width = videoElem.videoWidth || 1280;
-      canvas.height = videoElem.videoHeight || 720;
+      canvas.width = vW;
+      canvas.height = vH;
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(videoElem, 0, 0, vW, vH);
 
       stopAiCamera();
 
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+      // High-quality JPEG (0.92) to preserve sharp book titles, barcodes, and spines
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
       setAiPreviewImage(dataUrl);
     }
 
@@ -6732,111 +6785,126 @@ Mandatory requirements:
       }
 
       listContainer.innerHTML = detectedAiBooks.map((b, idx) => `
-        <div class="p-3.5 rounded-xl bg-slate/90 border ${b.selected ? 'border-gold/50 shadow-md ring-1 ring-gold/20' : 'border-[#3d3835] opacity-60'} transition-all">
-          <div class="flex items-start gap-3">
-            <!-- Checkbox -->
-            <div class="pt-2 shrink-0">
+        <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate/90 border ${b.selected ? 'border-gold/50 shadow-md ring-1 ring-gold/20' : 'border-[#3d3835] opacity-60'} transition-all space-y-2.5">
+          <!-- Top Row: Checkbox, Cover, Book Number & Remove button (Placed ABOVE input boxes) -->
+          <div class="flex items-center justify-between gap-2 pb-2 border-b border-[#3d3835]/60">
+            <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <!-- Checkbox -->
               <input 
                 type="checkbox" 
                 id="ai-book-check-${idx}" 
                 ${b.selected ? 'checked' : ''} 
                 onchange="toggleAiBookSelect(${idx}, this.checked)" 
-                class="w-4 h-4 rounded text-gold bg-ebony border-moss cursor-pointer" 
+                class="w-4 h-4 rounded text-gold bg-ebony border-moss cursor-pointer shrink-0" 
               />
-            </div>
 
-            <!-- Book Cover Thumbnail (Clickable to customize cover URL) -->
-            <div class="shrink-0 pt-0.5">
+              <!-- Book Cover Thumbnail (Clickable to customize cover URL) -->
               <div 
                 onclick="openAiCoverPicker(${idx})" 
                 title="Click to search or customize book cover" 
-                class="relative w-11 h-16 rounded-lg cursor-pointer group overflow-hidden border border-[#3d3835] hover:border-gold shadow-md transition-all"
+                class="relative w-9 h-12 sm:w-11 sm:h-16 rounded-md sm:rounded-lg cursor-pointer group overflow-hidden border border-[#3d3835] hover:border-gold shadow-md transition-all shrink-0"
               >
                 ${b.coverUrl ? `
                   <img src="${escapeHtml(b.coverUrl)}" alt="Cover" class="w-full h-full object-cover" onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" />
                   <div class="w-full h-full bg-ebony/70 items-center justify-center text-[#9E9382] hidden">
-                    <i data-lucide="book" class="w-5 h-5"></i>
+                    <i data-lucide="book" class="w-4 h-4"></i>
                   </div>
                 ` : `
                   <div class="w-full h-full bg-ebony/70 flex items-center justify-center text-[#9E9382]">
-                    <i data-lucide="book" class="w-5 h-5"></i>
+                    <i data-lucide="book" class="w-4 h-4"></i>
                   </div>
                 `}
-                <!-- Hover Edit Overlay -->
+                <!-- Hover / Tap Edit Overlay -->
                 <div class="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-gold transition-opacity">
-                  <i data-lucide="image" class="w-4 h-4"></i>
-                  <span class="text-[8px] font-medium tracking-tight mt-0.5 text-parchment">Edit</span>
+                  <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                  <span class="text-[7px] sm:text-[8px] font-medium tracking-tight mt-0.5 text-parchment">Edit</span>
                 </div>
               </div>
-            </div>
 
-            <!-- Book Information Form Fields -->
-            <div class="flex-1 min-w-0 space-y-2">
-              <!-- Top Row: Title + Publisher Badge -->
-              <div>
-                <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1">
+              <!-- Book Index & Change Cover Shortcut -->
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
                   <span class="text-[11px] font-bold text-gold uppercase tracking-wider font-cinzel">Book #${idx + 1}</span>
-                  ${b.publisher ? `
-                    <span class="text-[10px] text-[#C7BCAC] bg-ebony/90 px-2 py-0.5 rounded-full border border-gold/30 font-medium tracking-wide">
-                      <span class="text-gold/70 mr-1">Publisher:</span>${escapeHtml(b.publisher)}
-                    </span>
-                  ` : ''}
+                  <button type="button" onclick="openAiCoverPicker(${idx})" class="text-[10px] text-gold-light hover:underline font-medium flex items-center gap-0.5 cursor-pointer">
+                    <i data-lucide="edit-2" class="w-2.5 h-2.5"></i>
+                    <span>Change Cover</span>
+                  </button>
                 </div>
-                <input 
-                  type="text" 
-                  value="${escapeHtml(b.title)}" 
-                  placeholder="Book Title"
-                  oninput="detectedAiBooks[${idx}].title = this.value" 
-                  class="w-full px-3 py-1.5 rounded-lg bg-ebony border border-moss text-xs sm:text-sm text-parchment font-semibold focus:outline-none focus:border-gold transition-colors" 
-                />
-              </div>
-
-              <!-- Bottom Row: Author (50%) & ISBN-13 (50%) -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-[10px] uppercase font-bold text-[#9E9382] mb-0.5 tracking-wide">Author</label>
-                  <input 
-                    type="text" 
-                    value="${escapeHtml(b.author)}" 
-                    placeholder="Author Name"
-                    oninput="detectedAiBooks[${idx}].author = this.value" 
-                    class="w-full px-2.5 py-1.5 rounded-lg bg-ebony border border-moss text-xs text-[#C7BCAC] focus:outline-none focus:border-gold transition-colors" 
-                  />
-                </div>
-
-                <div>
-                  <div class="flex items-center justify-between mb-0.5">
-                    <label class="block text-[10px] uppercase font-bold text-[#9E9382] tracking-wide">ISBN-13</label>
-                    <span id="ai-book-badge-${idx}">
-                      ${isValidIsbn13(b.isbn) 
-                        ? '<span class="text-[9px] text-emerald-400 font-semibold flex items-center gap-0.5">✓ Valid ISBN</span>' 
-                        : (b.isbn ? '<span class="text-[9px] text-amber-400 font-medium">Verify ISBN</span>' : '<span class="text-[9px] text-[#7d7467]">No ISBN</span>')
-                      }
-                    </span>
-                  </div>
-                  <input 
-                    type="text" 
-                    id="ai-book-isbn-input-${idx}"
-                    value="${escapeHtml(b.isbn || '')}" 
-                    placeholder="978..."
-                    maxlength="17"
-                    oninput="updateAiBookIsbn(${idx}, this.value)" 
-                    class="w-full px-2.5 py-1.5 rounded-lg bg-ebony border ${isValidIsbn13(b.isbn) ? 'border-emerald-500/40 text-emerald-300' : 'border-moss text-gold'} text-xs font-mono focus:outline-none focus:border-gold transition-colors" 
-                  />
-                </div>
+                ${b.originalTitle && b.originalTitle !== b.title ? `<div class="text-[10px] text-[#9E9382] truncate italic font-playfair max-w-[140px] sm:max-w-xs">${escapeHtml(b.originalTitle)}</div>` : ''}
               </div>
             </div>
 
             <!-- Remove Button -->
-            <div class="shrink-0 pt-1">
+            <div class="shrink-0 flex items-center gap-1">
               <button 
                 type="button" 
                 onclick="removeAiBookRow(${idx})" 
-                class="p-2 rounded-lg text-[#9E9382] hover:text-red-400 hover:bg-ebony transition-colors cursor-pointer"
+                class="p-1.5 sm:p-2 rounded-lg text-[#9E9382] hover:text-red-400 hover:bg-ebony transition-colors cursor-pointer"
                 title="Remove book from list"
               >
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
+            </div>
+          </div>
+
+          <!-- Full Width Input Fields (No longer squeezed by cover or remove button) -->
+          <div class="w-full space-y-2">
+            <!-- Book Title Input -->
+            <div>
+              <label class="block text-[10px] uppercase font-bold text-[#9E9382] mb-0.5 tracking-wide">Title</label>
+              <input 
+                type="text" 
+                value="${escapeHtml(b.title)}" 
+                placeholder="Book Title"
+                oninput="detectedAiBooks[${idx}].title = this.value" 
+                class="w-full px-2.5 sm:px-3 py-1.5 rounded-lg bg-ebony border border-moss text-xs sm:text-sm text-parchment font-semibold focus:outline-none focus:border-gold transition-colors" 
+              />
+            </div>
+
+            <!-- Publisher, Author & ISBN-13 (Responsive 3-Column / 1-Column Grid) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label class="block text-[10px] uppercase font-bold text-[#9E9382] mb-0.5 tracking-wide">Author</label>
+                <input 
+                  type="text" 
+                  value="${escapeHtml(b.author)}" 
+                  placeholder="Author Name"
+                  oninput="detectedAiBooks[${idx}].author = this.value" 
+                  class="w-full px-2.5 py-1.5 rounded-lg bg-ebony border border-moss text-xs text-[#C7BCAC] focus:outline-none focus:border-gold transition-colors" 
+                />
+              </div>
+
+              <div>
+                <label class="block text-[10px] uppercase font-bold text-[#9E9382] mb-0.5 tracking-wide">Publisher</label>
+                <input 
+                  type="text" 
+                  value="${escapeHtml(b.publisher || '')}" 
+                  placeholder="Publisher (optional)"
+                  oninput="detectedAiBooks[${idx}].publisher = this.value" 
+                  class="w-full px-2.5 py-1.5 rounded-lg bg-ebony border border-moss text-xs text-[#C7BCAC] focus:outline-none focus:border-gold transition-colors" 
+                />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-0.5">
+                  <label class="block text-[10px] uppercase font-bold text-[#9E9382] tracking-wide">ISBN-13</label>
+                  <span id="ai-book-badge-${idx}">
+                    ${isValidIsbn13(b.isbn) 
+                      ? '<span class="text-[9px] text-emerald-400 font-semibold flex items-center gap-0.5">✓ Valid ISBN</span>' 
+                      : (b.isbn ? '<span class="text-[9px] text-amber-400 font-medium">Verify ISBN</span>' : '<span class="text-[9px] text-[#7d7467]">No ISBN</span>')
+                    }
+                  </span>
+                </div>
+                <input 
+                  type="text" 
+                  id="ai-book-isbn-input-${idx}"
+                  value="${escapeHtml(b.isbn || '')}" 
+                  placeholder="978..."
+                  maxlength="17"
+                  oninput="updateAiBookIsbn(${idx}, this.value)" 
+                  class="w-full px-2.5 py-1.5 rounded-lg bg-ebony border ${isValidIsbn13(b.isbn) ? 'border-emerald-500/40 text-emerald-300' : 'border-moss text-gold'} text-xs font-mono focus:outline-none focus:border-gold transition-colors" 
+                />
+              </div>
             </div>
           </div>
         </div>
